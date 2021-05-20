@@ -15,7 +15,7 @@ setuptools.setup(
     version="0.0.0-3",
     author="ControlNet",
     author_email="smczx@hotmail.com",
-    description="A small package for TensorFlow2 utils",
+    description="A small package for PyTorch utils",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ControlNet/tensorneko",
