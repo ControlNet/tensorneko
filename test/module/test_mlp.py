@@ -19,8 +19,8 @@ class TestMLP(unittest.TestCase):
         self.assertEqual(str(mlp.layers[2].linear), str(Linear(neurons[2], neurons[3], bias=False)))
         # checking forward computation graph
         x = torch.rand(batch, neurons[0])  # four 128-dim vectors
-        pt_res = mlp(x)
-        neko_res = (F() >> mlp.layers[0].linear >> mlp.layers[1].linear >> mlp.layers[2].linear)(x)
+        neko_res = mlp(x)
+        pt_res = (F() >> mlp.layers[0].linear >> mlp.layers[1].linear >> mlp.layers[2].linear)(x)
         for i in range(batch):
             self.assertAlmostEqual(pt_res[i], neko_res[i])
 
@@ -34,8 +34,8 @@ class TestMLP(unittest.TestCase):
         self.assertEqual(str(mlp.layers[2].activation), str(None))
         # checking forward computation graph
         x = torch.rand(batch, neurons[0])  # four 128-dim vectors
-        pt_res = mlp(x)
-        neko_res = (
+        neko_res = mlp(x)
+        pt_res = (
             F() >>
             mlp.layers[0].linear >> mlp.layers[0].activation >>
             mlp.layers[1].linear >> mlp.layers[1].activation >>
@@ -59,8 +59,8 @@ class TestMLP(unittest.TestCase):
         self.assertEqual(str(mlp.layers[2].normalization), str(None))
         # checking forward computation graph
         x = torch.rand(batch, neurons[0])  # four 128-dim vectors
-        pt_res = mlp(x)
-        neko_res = (
+        neko_res = mlp(x)
+        pt_res = (
             F() >>
             mlp.layers[0].linear >> mlp.layers[0].normalization >> mlp.layers[0].activation >>
             mlp.layers[1].linear >> mlp.layers[1].normalization >> mlp.layers[1].activation >>
@@ -80,8 +80,8 @@ class TestMLP(unittest.TestCase):
         )
         # checking forward computation graph
         x = torch.rand(batch, neurons[0])  # four 128-dim vectors
-        pt_res = mlp(x)
-        neko_res = (
+        neko_res = mlp(x)
+        pt_res = (
             F() >>
             mlp.layers[0].linear >> mlp.layers[0].activation >> mlp.layers[0].normalization >>
             mlp.layers[1].linear >> mlp.layers[1].activation >> mlp.layers[1].normalization >>
