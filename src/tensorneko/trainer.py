@@ -14,8 +14,7 @@ from pytorch_lightning.plugins import Plugin
 from pytorch_lightning.plugins.environments import ClusterEnvironment
 from pytorch_lightning.profiler import BaseProfiler
 
-from .callback import NilCallback
-from .callback.lr_reporter import LrReporter
+from .callback import NilCallback, LrLogger
 
 
 class Trainer(PLTrainer):
@@ -101,7 +100,7 @@ class Trainer(PLTrainer):
         else:
             cbs = callbacks + [checkpoint_cb_obj]
 
-        cbs.append(LrReporter())
+        cbs.append(LrLogger())
 
         super().__init__(logger is not None, checkpoint_cb_bool, cbs, default_root_dir, gradient_clip_val,
             gradient_clip_algorithm, process_position, num_nodes, num_processes, gpus, auto_select_gpus,
@@ -120,10 +119,10 @@ class Trainer(PLTrainer):
 
         self.logger_train = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
             version=os.path.join(log_name, "train"), log_graph=True
-        )
+        ) if self.has_no_logger is not None else None
         self.logger_val = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
             version=os.path.join(log_name, "val"), log_graph=False
-        )
+        ) if self.has_no_logger is not None else None
 
     @staticmethod
     def build(

@@ -1,5 +1,7 @@
 from pytorch_lightning import Callback, LightningModule, Trainer
 
+from .lr_logger import LrLogger
+
 
 class NilCallback(Callback):
     pass

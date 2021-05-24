@@ -1,7 +1,7 @@
 from pytorch_lightning import Callback, Trainer, LightningModule
 
 
-class LrReporter(Callback):
+class LrLogger(Callback):
 
     def on_train_epoch_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         for i, optimizer in enumerate(trainer.optimizers):

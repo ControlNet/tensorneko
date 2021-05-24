@@ -1,9 +1,11 @@
 from typing import Optional
 
+from fn import F
+from torch import Tensor
 from torch.nn import Linear as PtLinear
 from torch.nn import Module
 
-from tensorneko.util.type import ModuleFactory
+from ..util import ModuleFactory
 
 
 class Linear(Module):
@@ -29,17 +31,15 @@ class Linear(Module):
         else:
             self.normalization = None
 
-    def forward(self, x):
-        x = self.linear(x)
+    def forward(self, x: Tensor) -> Tensor:
+        f = F() >> self.linear
         if self.has_act and self.has_norm:
             if self.norm_after_act:
-                x = self.activation(x)
-                x = self.normalization(x)
+                f = f >> self.activation >> self.normalization
             else:
-                x = self.normalization(x)
-                x = self.activation(x)
+                f = f >> self.normalization >> self.activation
         elif self.has_act and not self.has_norm:
-            x = self.activation(x)
+            f = f >> self.activation
         elif not self.has_act and self.has_norm:
-            x = self.normalization(x)
-        return x
+            f = f >> self.normalization
+        return f(x)

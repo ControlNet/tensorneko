@@ -1,5 +1,7 @@
 from typing import Union, Sequence, Optional, Callable
 
+from fn import F
+from torch import Tensor
 from torch.nn import Conv2d as PtConv2d
 from torch.nn import Module
 
@@ -28,17 +30,15 @@ class Conv2d(Module):
             self.normalization = build_normalization()
             self.norm_after_act = normalization_after_activation
 
-    def forward(self, x):
-        x = self.conv2d(x)
+    def forward(self, x: Tensor) -> Tensor:
+        f = F() >> self.conv2d
         if self.has_act and self.has_norm:
             if self.norm_after_act:
-                x = self.activation(x)
-                x = self.normalization(x)
+                f = f >> self.activation >> self.normalization
             else:
-                x = self.normalization(x)
-                x = self.activation(x)
+                f = f >> self.normalization >> self.activation
         elif self.has_act and not self.has_norm:
-            x = self.activation(x)
+            f = f >> self.activation
         elif not self.has_act and self.has_norm:
-            x = self.normalization(x)
-        return x
+            f = f >> self.normalization
+        return f(x)

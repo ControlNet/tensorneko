@@ -1,10 +1,10 @@
 from typing import Optional, Union, Iterable, Sequence, Callable
 
+from torch import Tensor
 from torch.nn import Module, ModuleList
 
 from ..layer import Linear
-from ..util.func import generate_inf_seq
-from ..util.type import ModuleFactory
+from ..util import generate_inf_seq, ModuleFactory
 
 
 class MLP(Module):
@@ -31,7 +31,7 @@ class MLP(Module):
             ]
         )
 
-    def forward(self, x):
+    def forward(self, x: Tensor) -> Tensor:
         for layer in self.layers:
             x = layer(x)
         return x

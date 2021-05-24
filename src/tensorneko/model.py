@@ -5,7 +5,7 @@ import torch
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 
-from .util import reduce_dict_by
+from .util import summarize_dict_by
 
 
 class Model(LightningModule):
@@ -29,7 +29,7 @@ class Model(LightningModule):
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         history_item = {}
         for key in outputs[0].keys():
-            getter = reduce_dict_by(key, np.mean)
+            getter = summarize_dict_by(key, np.mean)
             value = getter(outputs)
             history_item[key] = value
             self.log(key, value, on_epoch=True, on_step=False, logger=True)
@@ -40,7 +40,7 @@ class Model(LightningModule):
             return
 
         for key in outputs[0].keys():
-            getter = reduce_dict_by(key, np.mean)
+            getter = summarize_dict_by(key, np.mean)
             value = getter(outputs)
             self.history[-1]["val_" + key] = value
             self.log(key, value, on_epoch=True, on_step=False)
