@@ -1,15 +1,18 @@
-from typing import Optional, Callable
+from typing import Optional
 
 from torch.nn import Linear as PtLinear
 from torch.nn import Module
 
+from tensorneko.util.type import ModuleFactory
+
 
 class Linear(Module):
+
     def __init__(self, in_features: int, out_features: int, bias: bool = True,
-                 build_activation: Optional[Callable[[], Module]] = None,
-                 build_normalization: Optional[Callable[[], Module]] = None,
-                 normalization_after_activation: bool = False
-                 ):
+        build_activation: Optional[ModuleFactory] = None,
+        build_normalization: Optional[ModuleFactory] = None,
+        normalization_after_activation: bool = False
+    ):
         super().__init__()
         self.linear = PtLinear(in_features, out_features, bias)
 
