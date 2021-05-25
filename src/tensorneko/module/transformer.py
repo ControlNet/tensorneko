@@ -1,12 +1,11 @@
 from typing import Iterator, Optional
 
-from fn import F, _
+from fn import F
 from torch import Tensor, zeros
 from torch.nn import Module, Parameter, LayerNorm, Sequential, Linear, MultiheadAttention, GELU, Identity, ModuleList
 
 from . import MLP, ResidualBlock
 from ..layer import PositionalEmbedding, Concatenate
-from ..module import ResidualModule
 from ..util import ModuleFactory, compose
 
 
@@ -68,8 +67,9 @@ class TransformerEncoderBlock(Module):
             tail_module=None
         )
 
-        self.feedforward_module = ResidualBlock(
-            Sequential(build_normalization(), MLP([d, int(d * mlp_ratio), d],
+        self.feedforward_module = ResidualBlock(Sequential(
+            build_normalization(),
+            MLP([d, int(d * mlp_ratio), d],
                 build_activation=build_mlp_activation, dropout_rate=linear_drop
             ))
         )
@@ -92,7 +92,7 @@ class TransformerEncoder(Module):
         build_block = F(TransformerEncoderBlock, input_shape, num_head, has_cls_token, linear_drop, attention_drop,
             build_normalization, mlp_ratio, build_mlp_activation
         )
-        self.blocks = ModuleList([build_block() for i in range(repeat)])
+        self.blocks = ModuleList([build_block() for _ in range(repeat)])
         self.repeat = repeat
 
     def forward(self, x: Tensor) -> Tensor:
