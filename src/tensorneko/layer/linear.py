@@ -2,7 +2,7 @@ from typing import Optional
 
 from fn import F
 from torch import Tensor
-from torch.nn import Linear as PtLinear
+from torch.nn import Linear as PtLinear, Dropout
 from torch.nn import Module
 
 from ..util import ModuleFactory
@@ -13,7 +13,8 @@ class Linear(Module):
     def __init__(self, in_features: int, out_features: int, bias: bool = True,
         build_activation: Optional[ModuleFactory] = None,
         build_normalization: Optional[ModuleFactory] = None,
-        normalization_after_activation: bool = False
+        normalization_after_activation: bool = False,
+        dropout_rate: float = 0.
     ):
         super().__init__()
         self.linear = PtLinear(in_features, out_features, bias)
@@ -31,6 +32,10 @@ class Linear(Module):
         else:
             self.normalization = None
 
+        self.has_dropout = dropout_rate > 0
+        if self.has_dropout:
+            self.dropout = Dropout(dropout_rate)
+
     def forward(self, x: Tensor) -> Tensor:
         f = F() >> self.linear
         if self.has_act and self.has_norm:
@@ -42,4 +47,6 @@ class Linear(Module):
             f = f >> self.activation
         elif not self.has_act and self.has_norm:
             f = f >> self.normalization
+        if self.has_dropout:
+            f = f >> self.dropout
         return f(x)

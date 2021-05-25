@@ -12,7 +12,7 @@ class MLP(Module):
     def __init__(self, neurons: Sequence[int], bias: bool = True,
         build_activation: Optional[Union[ModuleFactory, Iterable[ModuleFactory]]] = None,
         build_normalization: Optional[Union[ModuleFactory, Iterable[ModuleFactory]]] = None,
-        normalization_after_activation: bool = False
+        normalization_after_activation: bool = False, dropout_rate: float = 0.
     ):
         super().__init__()
         n_features = neurons[1:]
@@ -24,10 +24,10 @@ class MLP(Module):
 
         self.layers: ModuleList[Linear] = ModuleList(
             [Linear(neurons[i], neurons[i + 1], bias, build_activation[i], build_normalization[i],
-                normalization_after_activation
+                normalization_after_activation, dropout_rate
             ) for i in range(len(n_features) - 1)
             ] + [
-                Linear(neurons[-2], neurons[-1], bias)
+                Linear(neurons[-2], neurons[-1], bias, dropout_rate=dropout_rate)
             ]
         )
 
