@@ -2,7 +2,7 @@ name: Unittest
 on:
   push
 jobs:
-  build:
+  unittest:
     runs-on: ubuntu-20.04
 
     strategy:
