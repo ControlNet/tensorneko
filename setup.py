@@ -1,18 +1,18 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+with open("README.md", "r") as file:
+    long_description = file.read()
 
 
 requirements = []
-with open('requirements.txt', 'r') as fh:
-    for line in fh:
+with open('requirements.txt', 'r') as file:
+    for line in file:
         requirements.append(line.strip())
 
 
 setuptools.setup(
     name="tensorneko",
-    version="0.0.0-3",
+    version="0.0.1",
     author="ControlNet",
     author_email="smczx@hotmail.com",
     description="A small package for PyTorch utils",
