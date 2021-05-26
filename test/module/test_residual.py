@@ -20,16 +20,18 @@ class TestResidualBlock(unittest.TestCase):
         return 4
 
     def test_forward(self):
-        sub_module = Sequential(Linear(24, 48), ReLU(), Linear(48, 24))
-        tail_module = Linear(24, 12)
-        block = ResidualBlock(sub_module, tail_module)
+        build_sub_module = [F(Linear, 24, 48), ReLU, F(Linear, 48, 24)]
+        build_tail_module = [F(Linear, 24, 12)]
+        block = ResidualBlock(build_sub_module, build_tail_module)
         # init test input
         x = rand(self.batch, self.input_dim)
         # tensorneko forward
         neko_res = block(x)
         # pytorch forward
-        pt_res = tail_module(sub_module(x) + x)
-        return self.assertTrue((pt_res - neko_res).sum() < 1e-8)
+        pt_sub_module = block.sub_module
+        pt_tail_module = block.tail_module
+        pt_res = pt_tail_module(pt_sub_module(x) + x)
+        return self.assertTrue((pt_res - neko_res).mean().abs() < 1e-8)
 
 
 class TestResidualModule(unittest.TestCase):
@@ -50,15 +52,18 @@ class TestResidualModule(unittest.TestCase):
         return 4
 
     def test_repeat_modules_has_same_hparams(self):
-        neko_module = ResidualModule(F(Sequential, Linear(24, 48), ReLU(), Linear(48, 24)), self.repeat)
+        neko_module = ResidualModule(F(ResidualBlock, (F(Linear, 24, 48), ReLU, F(Linear, 48, 24))), self.repeat)
+        print(neko_module)
         # get str representation of first block
         first_block_hparams = str(neko_module.blocks[0])
         # compare other blocks to it
         for i in range(1, self.repeat):
             self.assertEqual(str(neko_module.blocks[i]), first_block_hparams)
+            # but the object is not the same one
+            self.assertTrue(neko_module.blocks[i].sub_module[0] is not neko_module.blocks[0].sub_module[0])
 
     def test_repeat_modules_has_same_forward(self):
-        module = ResidualModule(F(Sequential, Linear(24, 48), ReLU(), Linear(48, 24)), self.repeat)
+        module = ResidualModule(F(ResidualBlock, (F(Linear, 24, 48), ReLU, F(Linear, 48, 24))), self.repeat)
         # init test input
         x = rand(self.batch, self.input_dim)
         # tensorneko forward
@@ -68,4 +73,4 @@ class TestResidualModule(unittest.TestCase):
         for block in module.blocks:
             pt_res = block(pt_res)
         # compare
-        self.assertTrue((neko_res - pt_res).sum() < 1e-8)
+        self.assertTrue((neko_res - pt_res).mean().abs() < 1e-8)

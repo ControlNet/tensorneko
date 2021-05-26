@@ -1,6 +1,8 @@
+import os
 from typing import Callable, List, Dict, Iterable, Sequence, Union
 
 from fn import F, _, Stream
+from fn.op import identity
 from fn.uniform import reduce
 from torch.nn import ModuleList
 
@@ -20,3 +22,17 @@ def generate_inf_seq(items: Iterable) -> Stream:
 
 def compose(fs: Union[ModuleList, Sequence[Callable]]) -> F:
     return reduce(_ >> _, fs, F())
+
+
+# full path version of os.listdir
+def listdir(path):
+    files = filter(_ != ".DS_Store", os.listdir(path))
+    return list(map(F(os.path.join, path), files))
+
+
+def with_printed(x, func=identity):
+    print(func(x))
+    return x
+
+def with_printed_shape(x):
+    return F(with_printed, func=lambda tensor: tensor.shape())(x)

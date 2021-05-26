@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 import unittest
 from statistics import mean
@@ -6,6 +7,7 @@ from fn import _, F
 from fn.iters import take
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose
+from tensorneko.util.func import listdir
 
 
 class UtilFuncTest(unittest.TestCase):
@@ -60,3 +62,18 @@ class UtilFuncTest(unittest.TestCase):
 
             result = compose(fs)(x)
             self.assertEqual(result, expect)
+
+    def test_listdir(self):
+        path = "."
+        neko_res = listdir(path)
+        os_res = os.listdir(path)
+        os_res = list(map(lambda file: os.path.join(path, file), os_res))
+        print(neko_res)
+        for neko_path, os_path in zip(neko_res, os_res):
+            self.assertEqual(neko_path, os_path)
+
+    def test_with_printed(self):
+        pass #TODO
+
+    def test_with_printed_shape(self):
+        pass #TODO

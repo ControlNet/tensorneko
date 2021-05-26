@@ -63,13 +63,13 @@ class TransformerEncoderBlock(Module):
 
         # multihead attention module with residual connection and normalization
         self.attn_module = ResidualBlock(
-            sub_module=Sequential(build_normalization(), AttentionModule(d, self.num_head, attention_drop)),
-            tail_module=None
+            sub_module_layers=(build_normalization, F(AttentionModule, d, self.num_head, attention_drop)),
+            tail_module_layers=None
         )
 
-        self.feedforward_module = ResidualBlock(Sequential(
-            build_normalization(),
-            MLP([d, int(d * mlp_ratio), d],
+        self.feedforward_module = ResidualBlock((
+            build_normalization,
+            F(MLP, [d, int(d * mlp_ratio), d],
                 build_activation=build_mlp_activation, dropout_rate=linear_drop
             ))
         )

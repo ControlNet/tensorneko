@@ -6,3 +6,6 @@ lightning-bolts ~= 0.3.3
 numpy ~= 1.20.3
 fn ~= 0.4.3
 einops ~= 0.3.0
+av ~= 8.0.3
+matplotlib ~= 3.3.4
+clean-fid ~= 0.1.12
