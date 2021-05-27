@@ -1,4 +1,5 @@
-from typing import Iterable
+from pytorch_lightning.loggers import LightningLoggerBase
+from typing import Iterable, Optional
 
 import numpy as np
 import torch
@@ -13,11 +14,12 @@ class Model(LightningModule):
     def __init__(self, name: str, input_shape: Iterable[int], *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = name
+        self.input_shape = input_shape
         self.example_input_array = torch.rand([1, *input_shape])
         self.history = []
 
     @property
-    def logger(self):
+    def logger(self) -> Optional[LightningLoggerBase]:
         if not self.trainer:
             return None
         elif self.training:

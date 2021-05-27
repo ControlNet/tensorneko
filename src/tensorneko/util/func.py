@@ -48,7 +48,7 @@ def with_printed(x, func=identity):
 
 
 def with_printed_shape(x):
-    return F(with_printed, func=lambda tensor: tensor.shape())(x)
+    return F(with_printed, func=lambda tensor: tensor.shape)(x)
 
 
 def ifelse(predicate: Callable[[any], bool], func_true: Callable, func_false: Callable) -> Callable:

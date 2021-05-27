@@ -1,13 +1,16 @@
+import contextlib
 import os
-from dataclasses import dataclass
 import unittest
+from dataclasses import dataclass
+from io import StringIO
+from random import randint
 
 import torch
 from fn import _, F
 from fn.iters import take
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose
-from tensorneko.util.func import listdir
+from tensorneko.util.func import listdir, with_printed, with_printed_shape, ifelse
 
 
 class UtilFuncTest(unittest.TestCase):
@@ -74,10 +77,37 @@ class UtilFuncTest(unittest.TestCase):
             self.assertEqual(neko_path, os_path)
 
     def test_with_printed(self):
-        pass #TODO
+        str_io = StringIO()
+        with contextlib.redirect_stdout(str_io):
+            x = "abc"
+            append_str = _ + "123"
+            result = with_printed(x, append_str)
+            output = str_io.getvalue()
+        self.assertEqual(output, append_str(x) + "\n")
+        self.assertEqual(result, x)
 
     def test_with_printed_shape(self):
-        pass #TODO
+        shape = torch.Size((128, 128, 32))
+        x = torch.rand(shape)
+        str_io = StringIO()
+        with contextlib.redirect_stdout(str_io):
+            result = with_printed_shape(x)
+            output = str_io.getvalue()
+
+        self.assertEqual(output, x.shape.__repr__() + "\n")
+        self.assertTrue((result == x).all())
 
     def test_ifelse(self):
-        pass #TODO
+        # build functions for test
+        is_even = _ % 2 == 0
+        add_3 = _ + 3
+        power_2 = _ ** 2
+
+        # build composed functions for tensorneko and python3
+        neko_f = ifelse(is_even, add_3, power_2)
+        python_f = lambda x: x + 3 if x % 2== 0 else x ** 2
+
+        # compare
+        for i in range(30):
+            x = randint(-100, 100)
+            self.assertEqual(neko_f(x), python_f(x))
