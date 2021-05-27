@@ -12,7 +12,7 @@ with open('requirements.txt', 'r') as file:
 
 setuptools.setup(
     name="tensorneko",
-    version="0.0.1-hotfix1",
+    version="0.0.2",
     author="ControlNet",
     author_email="smczx@hotmail.com",
     description="A small package for PyTorch utils",
