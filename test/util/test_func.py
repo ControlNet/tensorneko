@@ -1,8 +1,8 @@
 import os
 from dataclasses import dataclass
 import unittest
-from statistics import mean
 
+import torch
 from fn import _, F
 from fn.iters import take
 
@@ -14,9 +14,9 @@ class UtilFuncTest(unittest.TestCase):
 
     def test_reduce_dict_by(self):
         x = [
-            {"a": 1, "b": 2, "c": 3},
-            {"a": 3, "b": 4, "c": 5},
-            {"a": 2.3, "b": -1, "c": 0}
+            {"a": 1, "b": 2, "c": torch.Tensor([3])},
+            {"a": 3, "b": 4, "c": torch.Tensor([5])},
+            {"a": 2.3, "b": -1, "c": torch.Tensor([0])}
         ]
         self.assertEqual(reduce_dict_by("a", _ + _)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
         self.assertEqual(reduce_dict_by("b", _ - _)(x), x[0]["b"] - x[1]["b"] - x[2]["b"])
@@ -24,12 +24,13 @@ class UtilFuncTest(unittest.TestCase):
 
     def test_summarize_dict_by(self):
         x = [
-            {"a": 1, "b": 2, "c": 3},
-            {"a": 3, "b": 4, "c": 5},
-            {"a": 2.3, "b": -1, "c": 0}
+            {"a": 1, "b": torch.Tensor([2]), "c": 3},
+            {"a": 3, "b": torch.Tensor([4]), "c": 5},
+            {"a": 2.3, "b": torch.Tensor([-1]), "c": 0}
         ]
+
         self.assertEqual(summarize_dict_by("a", sum)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
-        self.assertEqual(summarize_dict_by("b", mean)(x), (x[0]["b"] + x[1]["b"] + x[2]["b"]) / 3)
+        self.assertEqual(summarize_dict_by("b", torch.mean)(x), (x[0]["b"] + x[1]["b"] + x[2]["b"]) / 3)
         self.assertEqual(summarize_dict_by("c", F(map, str) >> "".join >> float)(x),
             (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"]
         )
@@ -76,4 +77,7 @@ class UtilFuncTest(unittest.TestCase):
         pass #TODO
 
     def test_with_printed_shape(self):
+        pass #TODO
+
+    def test_ifelse(self):
         pass #TODO

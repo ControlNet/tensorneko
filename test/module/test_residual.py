@@ -53,7 +53,6 @@ class TestResidualModule(unittest.TestCase):
 
     def test_repeat_modules_has_same_hparams(self):
         neko_module = ResidualModule(F(ResidualBlock, (F(Linear, 24, 48), ReLU, F(Linear, 48, 24))), self.repeat)
-        print(neko_module)
         # get str representation of first block
         first_block_hparams = str(neko_module.blocks[0])
         # compare other blocks to it
