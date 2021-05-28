@@ -48,11 +48,11 @@ class TestVersion(unittest.TestCase):
             return text
 
         try:
-            setup = read("setup.py")
+            version = read("version.txt")
         except FileNotFoundError:
-            setup = read("../setup.py")
+            version = read("../version.txt")
 
         # find the version string
-        version = re.findall(r"version=\"(.+?)\"", setup)[0]
+        version = re.findall(r"version=\"(.+?)\"", version)[0]
 
         self.assertTrue(regex.match(version) is not None)
