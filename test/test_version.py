@@ -52,7 +52,4 @@ class TestVersion(unittest.TestCase):
         except FileNotFoundError:
             version = read("../version.txt")
 
-        # find the version string
-        version = re.findall(r"version=\"(.+?)\"", version)[0]
-
         self.assertTrue(regex.match(version) is not None)
