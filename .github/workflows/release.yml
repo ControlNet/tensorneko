@@ -1,8 +1,8 @@
 name: Release
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - "main"
 jobs:
   release:
     runs-on: ubuntu-20.04
@@ -34,16 +34,14 @@ jobs:
 
       - name: Get the version
         id: get_version
-        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+        uses: battila7/get-version-action@v2
 
       - name: Release to GitHub Release
-        uses: ncipollo/release-action@v1.8.6
+        uses: marvinpinto/action-automatic-releases@latest
         with:
-          name: [${{ steps.get_version.outputs.VERSION }}] TensorNeko Release
-          commit: main
-          tag: ${{ steps.get_version.outputs.VERSION }}
-          body: Release tensorneko ${{ steps.get_version.outputs.VERSION }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: "dist/*"
-          draft: false
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ steps.get_version.outputs.version }}"
+          title: "[${{ steps.get_version.outputs.version }}] TensorNeko Release"
           prerelease: false
+          files: "dist/*"
+          draft: false
