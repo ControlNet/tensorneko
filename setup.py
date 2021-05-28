@@ -5,14 +5,17 @@ with open("README.md", "r") as file:
 
 
 requirements = []
-with open('requirements.txt', 'r') as file:
+with open("requirements.txt", "r") as file:
     for line in file:
         requirements.append(line.strip())
 
 
+with open("version.txt", "r") as file:
+    version = file.read()
+
 setuptools.setup(
     name="tensorneko",
-    version="0.0.3-rev1",
+    version=version,
     author="ControlNet",
     author_email="smczx@hotmail.com",
     description="A small package for PyTorch utils",
