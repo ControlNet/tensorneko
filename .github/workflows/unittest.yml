@@ -1,6 +1,8 @@
 name: Unittest
 on:
-  push
+  push:
+    tags-ignore:
+      - "*"
 jobs:
   unittest:
     runs-on: ubuntu-20.04
