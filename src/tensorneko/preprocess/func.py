@@ -3,7 +3,7 @@ from typing import Tuple
 import torch
 from einops import rearrange
 from fn import F, _
-from torch import Tensor, uint8
+from torch import Tensor, uint8, float32
 from cleanfid.resize import make_resizer
 
 
@@ -11,7 +11,7 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], filter_name: str = "bicu
     """
     Resizing a image to determined size
     Args:
-        tensor (Tensor): image tensor (H, W, C)
+        tensor (Tensor): image tensor (C, H, W)
         size (Tuple[int, int]): target size
         filter_name (str): resize method
 
@@ -25,7 +25,9 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], filter_name: str = "bicu
         >> (lambda x: x.to(uint8).numpy()) \
         >> resizer \
         >> torch.from_numpy \
-        >> F(rearrange, pattern="h w c -> c h w")
+        >> F(rearrange, pattern="h w c -> c h w") \
+        >> _ / 255 \
+        >> (lambda x: x.to(float32))
     return f(tensor)
 
 
@@ -33,7 +35,7 @@ def resize_video(tensor: Tensor, size: Tuple[int, int], filter_name: str = "bicu
     """
     Resizing a video to determined size
     Args:
-        tensor (Tensor): video tensor (T, H, W, C)
+        tensor (Tensor): video tensor (T, C, H, W)
         size (Tuple[int, int]): target size
         filter_name (str): resize method
 

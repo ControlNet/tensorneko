@@ -1,13 +1,16 @@
-from typing import Iterable
+# TODO: Need refactor
+from collections import Sequence
 
 from torch.nn import Module
+
+from ..layer.alae_layers import *
 
 
 class StyleGanGenerator(Module):
     """
     The StyleGAN generator.
     """
-    def __init__(self, latent_dim, resolutions: Iterable[int], channels: Iterable[int],
+    def __init__(self, latent_dim, resolutions: Sequence[int], channels: Sequence[int],
         starting_dims: int = 4,
     ):
         """
@@ -15,20 +18,19 @@ class StyleGanGenerator(Module):
         """
         super().__init__()
         self.latent_dim = latent_dim
-        assert style[0][0] == STARTING_DIM, f"First module should note upscale so first out_dim should be {STARTING_DIM}"
         self.to_rgb = nn.ModuleList([])
         self.conv_blocks = nn.ModuleList([])
 
         # Parse the module description given in "style"
-        for i in range(len(style)):
-            self.to_rgb.append(Lreq_Conv2d(style[i][1], 3, 1, 0))
+        for i in range(len(resolutions)):
+            self.to_rgb.append(Lreq_Conv2d(channels[i], 3, 1, 0))
             if i == 0:
-                self.conv_blocks.append(StyleGeneratorBlock(latent_dim, STARTING_CHANNELS, style[i][1],
-                                                            is_first_block=True))
+                self.conv_blocks.append(StyleGeneratorBlock(latent_dim, channels[0], channels[i + 1],
+                                                            is_first_block=True, starting_dims=starting_dims))
             else:
-                upscale = (style[i - 1][0] * 2 == style[i][0])
-                self.conv_blocks.append(StyleGeneratorBlock(latent_dim, style[i - 1][1], style[i][1],
-                                                            upscale=upscale))
+                upscale = (resolutions[i] * 2 == resolutions[i + 1])
+                self.conv_blocks.append(StyleGeneratorBlock(latent_dim, channels[i], channels[i + 1],
+                                                            upscale=upscale, starting_dims=starting_dims))
 
     def __str__(self):
         name = "Style-Generator:\n"
@@ -65,13 +67,13 @@ class StyleGanGenerator(Module):
 
 
 class StyleGeneratorBlock(Module):
-    def __init__(self, latent_dim, in_channels, out_channels, is_first_block=False, upscale=False):
+    def __init__(self, latent_dim, in_channels, out_channels, is_first_block=False, upscale=False, starting_dims=4):
         super().__init__()
         assert not (is_first_block and upscale), "You should not upscale if this is the first block in the generator"
         self.is_first_block = is_first_block
         self.upscale = upscale
         if is_first_block:
-            self.const_input = nn.Parameter(torch.randn(1, out_channels, STARTING_DIM, STARTING_DIM))
+            self.const_input = nn.Parameter(torch.randn(1, out_channels, starting_dims, starting_dims))
         else:
             self.blur = LearnablePreScaleBlur(out_channels)
             self.conv1 = Lreq_Conv2d(in_channels, out_channels, 3, padding=1)

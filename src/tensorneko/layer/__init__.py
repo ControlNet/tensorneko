@@ -1,9 +1,10 @@
 # import from modules
+from .concatenate import Concatenate
 from .conv2d import Conv2d
 from .linear import Linear
-from .concatenate import Concatenate
 from .patching import Patching, PatchEmbedding2d
 from .positional_embedding import PositionalEmbedding
+from .reshape import Reshape
 
 
 # import from other libraries
