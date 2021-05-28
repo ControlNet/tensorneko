@@ -34,7 +34,7 @@ jobs:
 
       - name: Get the version
         run: |
-          VER=$(cat VERSION)
+          VER=$(cat version.txt)
           echo "VERSION=$VER" >> $GITHUB_ENV
 
       - name: Release to GitHub Release
