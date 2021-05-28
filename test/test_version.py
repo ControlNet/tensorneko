@@ -42,8 +42,15 @@ class TestVersion(unittest.TestCase):
         )
 
         # read setup.py file
-        with open("../setup.py", "r", encoding="UTF-8") as file:
-            setup = file.read()
+        def read(file):
+            with open(file, "r", encoding="UTF-8") as input_file:
+                text = input_file.read()
+            return text
+
+        try:
+            setup = read("setup.py")
+        except FileNotFoundError:
+            setup = read("../setup.py")
 
         # find the version string
         version = re.findall(r"version=\"(.+?)\"", setup)[0]

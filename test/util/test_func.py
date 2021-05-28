@@ -1,20 +1,25 @@
-from dataclasses import dataclass
+import contextlib
+import os
 import unittest
-from statistics import mean
+from dataclasses import dataclass
+from io import StringIO
+from random import randint
 
+import torch
 from fn import _, F
 from fn.iters import take
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose
+from tensorneko.util.func import listdir, with_printed, with_printed_shape, ifelse
 
 
 class UtilFuncTest(unittest.TestCase):
 
     def test_reduce_dict_by(self):
         x = [
-            {"a": 1, "b": 2, "c": 3},
-            {"a": 3, "b": 4, "c": 5},
-            {"a": 2.3, "b": -1, "c": 0}
+            {"a": 1, "b": 2, "c": torch.Tensor([3])},
+            {"a": 3, "b": 4, "c": torch.Tensor([5])},
+            {"a": 2.3, "b": -1, "c": torch.Tensor([0])}
         ]
         self.assertEqual(reduce_dict_by("a", _ + _)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
         self.assertEqual(reduce_dict_by("b", _ - _)(x), x[0]["b"] - x[1]["b"] - x[2]["b"])
@@ -22,12 +27,13 @@ class UtilFuncTest(unittest.TestCase):
 
     def test_summarize_dict_by(self):
         x = [
-            {"a": 1, "b": 2, "c": 3},
-            {"a": 3, "b": 4, "c": 5},
-            {"a": 2.3, "b": -1, "c": 0}
+            {"a": 1, "b": torch.Tensor([2]), "c": 3},
+            {"a": 3, "b": torch.Tensor([4]), "c": 5},
+            {"a": 2.3, "b": torch.Tensor([-1]), "c": 0}
         ]
+
         self.assertEqual(summarize_dict_by("a", sum)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
-        self.assertEqual(summarize_dict_by("b", mean)(x), (x[0]["b"] + x[1]["b"] + x[2]["b"]) / 3)
+        self.assertEqual(summarize_dict_by("b", torch.mean)(x), (x[0]["b"] + x[1]["b"] + x[2]["b"]) / 3)
         self.assertEqual(summarize_dict_by("c", F(map, str) >> "".join >> float)(x),
             (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"]
         )
@@ -60,3 +66,48 @@ class UtilFuncTest(unittest.TestCase):
 
             result = compose(fs)(x)
             self.assertEqual(result, expect)
+
+    def test_listdir(self):
+        path = "."
+        neko_res = listdir(path)
+        os_res = os.listdir(path)
+        os_res = list(map(lambda file: os.path.join(path, file), os_res))
+        print(neko_res)
+        for neko_path, os_path in zip(neko_res, os_res):
+            self.assertEqual(neko_path, os_path)
+
+    def test_with_printed(self):
+        str_io = StringIO()
+        with contextlib.redirect_stdout(str_io):
+            x = "abc"
+            append_str = _ + "123"
+            result = with_printed(x, append_str)
+            output = str_io.getvalue()
+        self.assertEqual(output, append_str(x) + "\n")
+        self.assertEqual(result, x)
+
+    def test_with_printed_shape(self):
+        shape = torch.Size((128, 128, 32))
+        x = torch.rand(shape)
+        str_io = StringIO()
+        with contextlib.redirect_stdout(str_io):
+            result = with_printed_shape(x)
+            output = str_io.getvalue()
+
+        self.assertEqual(output, x.shape.__repr__() + "\n")
+        self.assertTrue((result == x).all())
+
+    def test_ifelse(self):
+        # build functions for test
+        is_even = _ % 2 == 0
+        add_3 = _ + 3
+        power_2 = _ ** 2
+
+        # build composed functions for tensorneko and python3
+        neko_f = ifelse(is_even, add_3, power_2)
+        python_f = lambda x: x + 3 if x % 2== 0 else x ** 2
+
+        # compare
+        for i in range(30):
+            x = randint(-100, 100)
+            self.assertEqual(neko_f(x), python_f(x))

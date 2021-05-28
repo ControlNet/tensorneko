@@ -1,4 +1,4 @@
-name: Pypi
+name: Release
 on:
   push:
     branches:
@@ -31,3 +31,18 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+
+      - name: Release to GitHub Release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.TENSORNEKO_SECRET_KEY }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: \[${{ steps.get_version.outputs.VERSION }}\] TensorNeko Release
+          body: Release tensorneko ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false

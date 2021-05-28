@@ -1,23 +1,28 @@
-from typing import Iterable
+from pytorch_lightning.loggers import LightningLoggerBase
+from typing import Iterable, Optional, Union
 
-import numpy as np
 import torch
 from pytorch_lightning import LightningModule
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 
-from .util import summarize_dict_by
+from .util import summarize_dict_by, Shape
 
 
 class Model(LightningModule):
 
-    def __init__(self, name: str, input_shape: Iterable[int], *args, **kwargs):
+    def __init__(self, name: str,
+        input_shape: Optional[Shape] = None, *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.name = name
-        self.example_input_array = torch.rand([1, *input_shape])
+        self.can_plot_graph = input_shape is not None
+        if self.can_plot_graph:
+            self.input_shape = input_shape
+            self.example_input_array = torch.rand([1, *input_shape])
         self.history = []
 
     @property
-    def logger(self):
+    def logger(self) -> Optional[LightningLoggerBase]:
         if not self.trainer:
             return None
         elif self.training:
