@@ -33,15 +33,16 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Get the version
-        id: get_version
-        uses: battila7/get-version-action@v2
+        run: |
+          VER=$(cat VERSION)
+          echo "VERSION=$VER" >> $GITHUB_ENV
 
       - name: Release to GitHub Release
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ steps.get_version.outputs.version }}"
-          title: "[${{ steps.get_version.outputs.version }}] TensorNeko Release"
+          automatic_release_tag: "${{ env.VERSION }}"
+          title: "[${{ env.VERSION }}] TensorNeko Release"
           prerelease: false
           files: "dist/*"
           draft: false
