@@ -5,6 +5,7 @@ from .linear import Linear
 from .patching import Patching, PatchEmbedding2d
 from .positional_embedding import PositionalEmbedding
 from .reshape import Reshape
+from .log import Log
 
 
 # import from other libraries
