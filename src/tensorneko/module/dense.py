@@ -1,14 +1,28 @@
+from typing import Iterable
+
 from torch import Tensor
 from torch.nn import Module, Sequential, ModuleList
-from typing import Iterable
 
 from ..layer import Concatenate
 from ..util import ModuleFactory
 
 
 class DenseBlock(Module):
+    """
+    The DenseBlock can be used to build a block with repeatable submodules with dense connections.
 
-    def __init__(self, sub_module_layers: Iterable[ModuleFactory], repeat=2):
+    Args:
+        sub_module_layers (Iterable[ModuleFactory]): A collection of module factory builder to build a "layer" in
+            DenseBlock.
+        repeat (int): Number of repeats for each layer in DenseBlock.
+
+    Attributes:
+        build_sub_module (Callable[[], Module]): The module factory function to build a submodule in DenseBlock
+        sub_modules (ModuleList): The ModuleList of all submodules
+        concatenates (ModuleList): The ModuleList of all Concatenate layers in DenseBlock
+    """
+
+    def __init__(self, sub_module_layers: Iterable[ModuleFactory], repeat: int = 2):
         super().__init__()
 
         def build_sub_module(i):
@@ -37,4 +51,3 @@ class DenseBlock(Module):
         xs.append(x)
         x = self.concatenates[-1](xs)
         return x
-
