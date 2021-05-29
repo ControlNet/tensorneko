@@ -2,6 +2,12 @@ from pytorch_lightning import Callback, LightningModule, Trainer
 
 from .lr_logger import LrLogger
 
+__all__ = [
+    "NilCallback",
+    "TestCallback",
+    "LrLogger"
+]
+
 
 class NilCallback(Callback):
     pass
