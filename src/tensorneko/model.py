@@ -1,8 +1,8 @@
-from pytorch_lightning.loggers import LightningLoggerBase
-from typing import Iterable, Optional, Union
+from typing import Optional
 
 import torch
 from pytorch_lightning import LightningModule
+from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 
 from .util import summarize_dict_by, Shape
