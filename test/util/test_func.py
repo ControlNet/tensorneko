@@ -10,7 +10,7 @@ from fn import _, F
 from fn.iters import take
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose
-from tensorneko.util.func import listdir, with_printed, with_printed_shape, ifelse
+from tensorneko.util.func import listdir, with_printed, with_printed_shape, ifelse, is_bad_num
 
 
 class UtilFuncTest(unittest.TestCase):
@@ -105,9 +105,17 @@ class UtilFuncTest(unittest.TestCase):
 
         # build composed functions for tensorneko and python3
         neko_f = ifelse(is_even, add_3, power_2)
-        python_f = lambda x: x + 3 if x % 2== 0 else x ** 2
+        python_f = lambda x: x + 3 if x % 2 == 0 else x ** 2
 
         # compare
         for i in range(30):
             x = randint(-100, 100)
             self.assertEqual(neko_f(x), python_f(x))
+
+    def test_is_bad_num(self):
+        # test input
+        inf_tensor = torch.log(torch.zeros(1, 16))
+        nan_tensor = torch.zeros(1, 16) / torch.zeros(1, 16)
+        # assert these are True
+        self.assertTrue(is_bad_num(inf_tensor).all())
+        self.assertTrue(is_bad_num(nan_tensor).all())
