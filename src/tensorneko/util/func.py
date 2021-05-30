@@ -63,3 +63,4 @@ def ifelse(predicate: Callable[[any], bool], func_true: Callable, func_false: Ca
 
 def is_bad_num(x: Tensor) -> Tensor:
     return torch.logical_or(torch.isnan(x), torch.isinf(x))
+
