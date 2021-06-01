@@ -2,7 +2,7 @@ from typing import Iterator, Optional
 
 from fn import F
 from torch import Tensor, zeros
-from torch.nn import Module, Parameter, LayerNorm, Sequential, Linear, MultiheadAttention, GELU, Identity, ModuleList
+from torch.nn import Module, Parameter, LayerNorm, Linear, MultiheadAttention, GELU, Identity, ModuleList
 
 from . import MLP, ResidualBlock
 from ..layer import PositionalEmbedding, Concatenate
