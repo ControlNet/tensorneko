@@ -1,5 +1,5 @@
 import os
-from typing import Callable, List, Dict, Iterable, Sequence, Union
+from typing import Callable, List, Dict, Iterable, Sequence, Union, Any
 
 import numpy
 import numpy as np
@@ -8,14 +8,14 @@ from fn import F, _, Stream
 from fn.op import identity
 from fn.uniform import reduce
 from torch import Tensor
-from torch.nn import ModuleList
+from torch.nn import ModuleList, Module
 
 
-def reduce_dict_by(key: str, op: Callable) -> Callable[[List[Dict[str, float]]], float]:
+def reduce_dict_by(key: str, op: Callable) -> Callable[[List[Dict[str, float]]], Any]:
     return F() >> (map, _[key]) >> list >> F(reduce, op)
 
 
-def summarize_dict_by(key: str, op: Callable) -> Callable[[List[Dict[str, float]]], float]:
+def summarize_dict_by(key: str, op: Callable) -> Callable[[List[Dict[str, float]]], Any]:
     return F() >> (map, _[key]) >> list >> ifelse(
         lambda xs: type(xs[0]) is Tensor,
         func_true=torch.vstack,
@@ -64,3 +64,6 @@ def ifelse(predicate: Callable[[any], bool], func_true: Callable, func_false: Ca
 def is_bad_num(x: Tensor) -> Tensor:
     return torch.logical_or(torch.isnan(x), torch.isinf(x))
 
+
+def count_parameters(model: Module):
+    return sum(p.numel() for p in model.parameters())
