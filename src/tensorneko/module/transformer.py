@@ -1,12 +1,13 @@
 from typing import Iterator, Optional
 
+import torch
 from fn import F
 from torch import Tensor, zeros
-from torch.nn import Module, Parameter, LayerNorm, Sequential, Linear, MultiheadAttention, GELU, Identity, ModuleList
+from torch.nn import Module, Parameter, LayerNorm, Linear, MultiheadAttention, GELU, Identity, ModuleList
 
 from . import MLP, ResidualBlock
 from ..layer import PositionalEmbedding, Concatenate
-from ..util import ModuleFactory, compose
+from ..util import ModuleFactory, compose, Rearrange
 
 
 class AttentionModule(Module):
@@ -29,10 +30,10 @@ class AttentionModule(Module):
         self.return_attention_weights = return_attention_weights
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> (map, lambda linear: linear(x)) >> list >> (lambda xs: self.attention(*xs))
+        f = F() >> (map, lambda linear: linear(x)) >> F(map, Rearrange("b t d -> t b d")) >> list \
+            >> (lambda xs: self.attention(*xs)) >> (lambda x: (Rearrange("b t d -> t b d")(x[0]), x[1]))
         x, weight = f([self.q_linear, self.k_linear, self.v_linear])
         return (x, weight) if self.return_attention_weights else x
-
 
 class TransformerEncoderBlock(Module):
 
@@ -50,8 +51,8 @@ class TransformerEncoderBlock(Module):
         self.has_cls_token = has_cls_token
         if self.has_cls_token:
             # prepare for class token
-            self.cls_token = Parameter(zeros(1, 1, d))
-            self.token_concat = Concatenate(dim=1)
+            self.cls_token = Parameter(zeros(1, d))
+            self.token_concat = Concatenate(dim=0)
             input_shape = (n + 1, d)
         self.pos_emb_layer = PositionalEmbedding(input_shape=input_shape, drop_rate=linear_drop)
 
@@ -77,9 +78,23 @@ class TransformerEncoderBlock(Module):
     def forward(self, x: Tensor) -> Tensor:
         f = F()
         if self.has_cls_token:
-            f = f >> (lambda tokens: self.token_concat([self.cls_token, tokens]))
+            f = f >> (map, lambda tokens: self.token_concat([self.cls_token, tokens])) >> list >> torch.stack
         f = f >> self.pos_emb_layer >> self.attn_module >> self.feedforward_module
         return f(x)
+
+    # def forward(self, batch: Tensor) -> Tensor:
+    #     # TODO: need to be replaced in PyTorch 1.9
+    #     xs = []
+    #     for i in range(batch.shape[0]):
+    #         if self.has_cls_token:
+    #             x = self.token_concat([self.cls_token, batch[i]])
+    #         else:
+    #             x = batch[i]
+    #         x = self.pos_emb_layer(x)
+    #         x = self.attn_module(x)
+    #         x = self.feedforward_module(x)
+    #         xs.append(x)
+    #     return torch.stack(xs)
 
 
 class TransformerEncoder(Module):

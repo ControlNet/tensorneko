@@ -102,6 +102,12 @@ class Trainer(PLTrainer):
 
         cbs.append(LrLogger())
 
+        self.log_every_n_steps = log_every_n_steps
+        self.log_on_epoch = log_every_n_steps == 0
+        self.log_on_step = log_every_n_steps > 0
+        if self.log_on_epoch:
+            log_every_n_steps = 1000000
+
         super().__init__(logger is not None, checkpoint_cb_bool, cbs, default_root_dir, gradient_clip_val,
             gradient_clip_algorithm, process_position, num_nodes, num_processes, gpus, auto_select_gpus,
             tpu_cores, log_gpu_memory, progress_bar_refresh_rate, overfit_batches, track_grad_norm,
@@ -123,10 +129,6 @@ class Trainer(PLTrainer):
         self.logger_val = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
             version=os.path.join(log_name, "val"), log_graph=False
         ) if self.has_no_logger is not None else None
-
-        self.log_every_n_steps = log_every_n_steps
-        self.log_on_epoch = log_every_n_steps == 0
-        self.log_on_step = log_every_n_steps > 0
 
     @staticmethod
     def build(
@@ -160,7 +162,7 @@ class Trainer(PLTrainer):
         limit_predict_batches: Union[int, float] = 1.0,
         val_check_interval: Union[int, float] = 1.0,
         flush_logs_every_n_steps: int = 100,
-        log_every_n_steps: int = 50,
+        log_every_n_steps: int = 0,
         accelerator: Optional[Union[str, Accelerator]] = None,
         sync_batchnorm: bool = False,
         precision: int = 32,

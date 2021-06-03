@@ -119,3 +119,7 @@ class UtilFuncTest(unittest.TestCase):
         # assert these are True
         self.assertTrue(is_bad_num(inf_tensor).all())
         self.assertTrue(is_bad_num(nan_tensor).all())
+
+
+    def test_string_getter(self):
+        pass  # TODO
