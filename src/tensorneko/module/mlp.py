@@ -27,7 +27,7 @@ class MLP(Module):
                 normalization_after_activation, dropout_rate
             ) for i in range(len(n_features) - 1)
             ] + [
-                Linear(neurons[-2], neurons[-1], bias, dropout_rate=dropout_rate)
+                Linear(neurons[-2], neurons[-1], bias)
             ]
         )
 

@@ -78,10 +78,10 @@ class Trainer(PLTrainer):
         multiple_trainloader_mode: str = 'max_size_cycle',
         stochastic_weight_avg: bool = False
     ):
-        log_name = f"{logger}_{int(time())}"
+        self.log_name = f"{logger}_{int(time())}"
         if type(checkpoint_callback) is bool and checkpoint_callback is True:
-            checkpoint_cb_obj = ModelCheckpoint(dirpath=os.path.join("logs", log_name, "checkpoints"), save_last=True,
-                filename="{epoch}-{val_loss:.3f}", monitor="val_loss", mode="min"
+            checkpoint_cb_obj = ModelCheckpoint(dirpath=os.path.join("logs", self.log_name, "checkpoints"),
+                save_last=True, filename="{epoch}-{val_loss:.3f}", monitor="val_loss", mode="min"
             )
             checkpoint_cb_bool = True
         elif type(checkpoint_callback) is ModelCheckpoint:
@@ -124,16 +124,16 @@ class Trainer(PLTrainer):
         self.has_no_logger = logger is None
 
         self.logger_train = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
-            version=os.path.join(log_name, "train"), log_graph=False  # TODO: Fix log_Graph
+            version=os.path.join(self.log_name, "train"), log_graph=False  # TODO: Fix log_Graph
         ) if self.has_no_logger is not None else None
         self.logger_val = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
-            version=os.path.join(log_name, "val"), log_graph=False
+            version=os.path.join(self.log_name, "val"), log_graph=False
         ) if self.has_no_logger is not None else None
 
     @staticmethod
     def build(
         logger: Optional[str],
-        checkpoint_callback: bool = True,
+        checkpoint_callback: Union[bool, Callback] = True,
         callbacks: Optional[Union[List[Callback], Callback]] = None,
         default_root_dir: Optional[str] = None,
         gradient_clip_val: float = 0.0,
