@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn import LeakyReLU, GELU, ELU, ReLU, CrossEntropyLoss, L1Loss, MSELoss, BCELoss
+from torch.nn import LeakyReLU, GELU, ELU, ReLU, CrossEntropyLoss, L1Loss, MSELoss, BCELoss, BCEWithLogitsLoss
 
 
 # Mish - "Mish: A Self Regularized Non-Monotonic Neural Activation Function"
@@ -31,7 +31,8 @@ class StringGetter:
         "CROSSENTROPYLOSS": CrossEntropyLoss,
         "L1LOSS": L1Loss,
         "MSELOSS": MSELoss,
-        "BCELOSS": BCELoss
+        "BCELOSS": BCELoss,
+        "BCEWITHLOGITSLOSS":BCEWithLogitsLoss
     }
 
     mapping = {

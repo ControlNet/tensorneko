@@ -26,12 +26,11 @@ class AttentionModule(Module):
         self.q_linear = Linear(embed_dim, self.kdim)
         self.k_linear = Linear(embed_dim, self.kdim)
         self.v_linear = Linear(embed_dim, self.vdim)
-        self.attention = MultiheadAttention(embed_dim, num_heads, dropout, bias, add_bias_kv, add_zero_attn, kdim, vdim)
+        self.attention = MultiheadAttention(embed_dim, num_heads, dropout, bias, add_bias_kv, add_zero_attn, kdim, vdim, batch_first=True)
         self.return_attention_weights = return_attention_weights
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> (map, lambda linear: linear(x)) >> F(map, Rearrange("b t d -> t b d")) >> list \
-            >> (lambda xs: self.attention(*xs)) >> (lambda x: (Rearrange("b t d -> t b d")(x[0]), x[1]))
+        f = F() >> (map, lambda linear: linear(x)) >> (lambda xs: self.attention(*xs))
         x, weight = f([self.q_linear, self.k_linear, self.v_linear])
         return (x, weight) if self.return_attention_weights else x
 

@@ -27,7 +27,7 @@ def summarize_dict_by(key: str, op: Callable) -> Callable[[List[Dict[str, float]
     ) >> op
 
 
-def generate_inf_seq(items: Iterable) -> Stream:
+def generate_inf_seq(items: Iterable[Any]) -> Stream:
     s = Stream()
     return s << items << map(_, s)
 
@@ -37,17 +37,17 @@ def compose(fs: Union[ModuleList, Sequence[Callable]]) -> F:
 
 
 # full path version of os.listdir
-def listdir(path):
+def listdir(path: str) -> List[str]:
     files = filter(_ != ".DS_Store", os.listdir(path))
     return list(map(F(os.path.join, path), files))
 
 
-def with_printed(x, func=identity):
+def with_printed(x: Any, func: Callable = identity) -> Any:
     print(func(x))
     return x
 
 
-def with_printed_shape(x):
+def with_printed_shape(x: Any) -> Any:
     return F(with_printed, func=lambda tensor: tensor.shape)(x)
 
 
@@ -65,5 +65,5 @@ def is_bad_num(x: Tensor) -> Tensor:
     return torch.logical_or(torch.isnan(x), torch.isinf(x))
 
 
-def count_parameters(model: Module):
+def count_parameters(model: Module) -> int:
     return sum(p.numel() for p in model.parameters())

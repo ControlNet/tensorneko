@@ -5,6 +5,7 @@ from tensorneko.io.video.video_data import VideoData
 
 
 class VideoReader:
+
     @staticmethod
     def of(path: str) -> VideoData:
         video, audio, info = read_video(path)
