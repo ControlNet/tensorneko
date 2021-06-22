@@ -9,5 +9,5 @@ class VideoReader:
     @staticmethod
     def of(path: str) -> VideoData:
         video, audio, info = read_video(path)
-        video = rearrange(video, "t h w c -> t c h w") / 255
+        video = video.permute(0, 3, 1, 2) / 255
         return VideoData(video, audio, info)
