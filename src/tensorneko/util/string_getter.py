@@ -51,5 +51,5 @@ class StringGetter:
         return self.mapping[name.upper()]
 
 
-activation_getter = StringGetter("activation")
-loss_getter = StringGetter("loss")
+get_activation = StringGetter("activation")
+get_loss = StringGetter("loss")

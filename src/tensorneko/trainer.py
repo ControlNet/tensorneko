@@ -51,7 +51,7 @@ class Trainer(PLTrainer):
         limit_predict_batches: Union[int, float] = 1.0,
         val_check_interval: Union[int, float] = 1.0,
         flush_logs_every_n_steps: int = 100,
-        log_every_n_steps: int = 0,
+        log_every_n_steps: int = 0,  # 0 means for log_every_epoch
         accelerator: Optional[Union[str, Accelerator]] = None,
         sync_batchnorm: bool = False,
         precision: int = 32,
