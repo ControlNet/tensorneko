@@ -13,6 +13,7 @@
 import os
 import sys
 import sphinx_rtd_theme
+import sphinx_paramlinks
 
 sys.path.insert(0, os.path.abspath('./../../src'))
 
@@ -23,7 +24,8 @@ copyright = '2021, ControlNet'
 author = 'ControlNet'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.4'
+with open("../../version.txt", "r", encoding="UTF-8") as f:
+    release = f.read()
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,7 +34,16 @@ release = '0.0.4'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.imgmath',
+    'sphinx.ext.autosectionlabel',
+    'sphinx_paramlinks'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -55,3 +66,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# -- User defined --
+
+napoleon_use_rtype = True
