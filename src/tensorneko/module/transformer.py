@@ -1,12 +1,13 @@
 from typing import Iterator, Optional
 
+import torch
 from fn import F
 from torch import Tensor, zeros
-from torch.nn import Module, Parameter, LayerNorm, Sequential, Linear, MultiheadAttention, GELU, Identity, ModuleList
+from torch.nn import Module, Parameter, LayerNorm, Linear, MultiheadAttention, GELU, Identity, ModuleList
 
 from . import MLP, ResidualBlock
 from ..layer import PositionalEmbedding, Concatenate
-from ..util import ModuleFactory, compose
+from ..util import ModuleFactory, compose, Rearrange, Shape
 
 
 class AttentionModule(Module):
@@ -25,21 +26,21 @@ class AttentionModule(Module):
         self.q_linear = Linear(embed_dim, self.kdim)
         self.k_linear = Linear(embed_dim, self.kdim)
         self.v_linear = Linear(embed_dim, self.vdim)
-        self.attention = MultiheadAttention(embed_dim, num_heads, dropout, bias, add_bias_kv, add_zero_attn, kdim, vdim)
+        self.attention = MultiheadAttention(embed_dim, num_heads, dropout, bias, add_bias_kv, add_zero_attn, kdim, vdim, batch_first=True)
         self.return_attention_weights = return_attention_weights
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> (map, lambda linear: linear(x)) >> list >> (lambda xs: self.attention(*xs))
+        f = F() >> (map, lambda linear: linear(x)) >> (lambda xs: self.attention(*xs))
         x, weight = f([self.q_linear, self.k_linear, self.v_linear])
         return (x, weight) if self.return_attention_weights else x
 
-
 class TransformerEncoderBlock(Module):
 
-    def __init__(self, input_shape: Iterator[int], num_head: int, has_cls_token: bool = False,
+    def __init__(self, input_shape: Shape, num_head: int, has_cls_token: bool = False,
+        has_pos_encoding: bool = True,
         linear_drop: float = 0.5, attention_drop: float = 0.5,
         build_normalization: Optional[ModuleFactory] = LayerNorm,
-        mlp_ratio: int = 4, build_mlp_activation: Optional[ModuleFactory] = GELU
+        mlp_ratio: float = 4.0, build_mlp_activation: Optional[ModuleFactory] = GELU
     ):
         super().__init__()
         # n: number of patches, d: embedding dimension
@@ -50,10 +51,12 @@ class TransformerEncoderBlock(Module):
         self.has_cls_token = has_cls_token
         if self.has_cls_token:
             # prepare for class token
-            self.cls_token = Parameter(zeros(1, 1, d))
-            self.token_concat = Concatenate(dim=1)
+            self.cls_token = Parameter(zeros(1, d))
+            self.token_concat = Concatenate(dim=0)
             input_shape = (n + 1, d)
-        self.pos_emb_layer = PositionalEmbedding(input_shape=input_shape, drop_rate=linear_drop)
+        self.has_pos_encoding = has_pos_encoding
+        if self.has_pos_encoding:
+            self.pos_emb_layer = PositionalEmbedding(input_shape=input_shape, drop_rate=linear_drop)
 
         # set normalization builder
         if build_normalization is LayerNorm:
@@ -61,7 +64,7 @@ class TransformerEncoderBlock(Module):
         elif build_normalization is None:
             build_normalization = Identity
 
-        # multihead attention module with residual connection and normalization
+        # multi-head attention module with residual connection and normalization
         self.attn_module = ResidualBlock(
             sub_module_layers=(build_normalization, F(AttentionModule, d, self.num_head, attention_drop)),
             tail_module_layers=None
@@ -77,22 +80,37 @@ class TransformerEncoderBlock(Module):
     def forward(self, x: Tensor) -> Tensor:
         f = F()
         if self.has_cls_token:
-            f = f >> (lambda tokens: self.token_concat([self.cls_token, tokens]))
-        f = f >> self.pos_emb_layer >> self.attn_module >> self.feedforward_module
+            f = f >> (map, lambda tokens: self.token_concat([self.cls_token, tokens])) >> list >> torch.stack
+        if self.has_pos_encoding:
+            f = f >> self.pos_emb_layer
+        f = f >> self.attn_module >> self.feedforward_module
         return f(x)
 
 
 class TransformerEncoder(Module):
 
-    def __init__(self, input_shape: Iterator[int], num_head: int, has_cls_token: bool = False, linear_drop: float = 0.5,
-        attention_drop: float = 0.5, build_normalization: Optional[ModuleFactory] = LayerNorm, mlp_ratio: int = 4,
-        build_mlp_activation: Optional[ModuleFactory] = GELU, repeat: int = 1
+    def __init__(self, input_shape: Shape, num_head: int, has_cls_token: bool = False, linear_drop: float = 0.5,
+        attention_drop: float = 0.5, build_normalization: Optional[ModuleFactory] = LayerNorm, mlp_ratio: float = 4.0,
+        build_mlp_activation: Optional[ModuleFactory] = GELU, pos_encoding: str = "all",
+        repeat: int = 1
     ):
         super().__init__()
-        build_block = F(TransformerEncoderBlock, input_shape, num_head, has_cls_token, linear_drop, attention_drop,
-            build_normalization, mlp_ratio, build_mlp_activation
-        )
-        self.blocks = ModuleList([build_block() for _ in range(repeat)])
+        if pos_encoding == "all":
+            has_pos_encoding = [True] * repeat
+        elif pos_encoding == "first":
+            has_cls_token = [True] + (repeat - 1) * [False]
+        else:
+            has_cls_token = [False] * repeat
+
+        def build_block(i):
+            return TransformerEncoderBlock(
+                input_shape, num_head, has_cls_token,
+                has_pos_encoding[i],
+                linear_drop, attention_drop,
+                build_normalization, mlp_ratio, build_mlp_activation
+            )
+
+        self.blocks = ModuleList([build_block(i) for i in range(repeat)])
         self.repeat = repeat
 
     def forward(self, x: Tensor) -> Tensor:

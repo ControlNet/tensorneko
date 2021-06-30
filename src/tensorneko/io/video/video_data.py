@@ -19,4 +19,3 @@ class VideoData:
         self.video = video
         self.audio = audio
         self.info = VideoInfo(**info)
-

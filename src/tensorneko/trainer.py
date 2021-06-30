@@ -51,7 +51,7 @@ class Trainer(PLTrainer):
         limit_predict_batches: Union[int, float] = 1.0,
         val_check_interval: Union[int, float] = 1.0,
         flush_logs_every_n_steps: int = 100,
-        log_every_n_steps: int = 0,
+        log_every_n_steps: int = 0,  # 0 means for log_every_epoch
         accelerator: Optional[Union[str, Accelerator]] = None,
         sync_batchnorm: bool = False,
         precision: int = 32,
@@ -78,10 +78,10 @@ class Trainer(PLTrainer):
         multiple_trainloader_mode: str = 'max_size_cycle',
         stochastic_weight_avg: bool = False
     ):
-        log_name = f"{logger}_{int(time())}"
+        self.log_name = f"{logger}_{int(time())}"
         if type(checkpoint_callback) is bool and checkpoint_callback is True:
-            checkpoint_cb_obj = ModelCheckpoint(dirpath=os.path.join("logs", log_name, "checkpoints"), save_last=True,
-                filename="{epoch}-{val_loss:.3f}", monitor="val_loss", mode="min"
+            checkpoint_cb_obj = ModelCheckpoint(dirpath=os.path.join("logs", self.log_name, "checkpoints"),
+                save_last=True, filename="{epoch}-{val_loss:.3f}", monitor="val_loss", mode="min"
             )
             checkpoint_cb_bool = True
         elif type(checkpoint_callback) is ModelCheckpoint:
@@ -102,6 +102,12 @@ class Trainer(PLTrainer):
 
         cbs.append(LrLogger())
 
+        self.log_every_n_steps = log_every_n_steps
+        self.log_on_epoch = log_every_n_steps == 0
+        self.log_on_step = log_every_n_steps > 0
+        if self.log_on_epoch:
+            log_every_n_steps = 1000000
+
         super().__init__(logger is not None, checkpoint_cb_bool, cbs, default_root_dir, gradient_clip_val,
             gradient_clip_algorithm, process_position, num_nodes, num_processes, gpus, auto_select_gpus,
             tpu_cores, log_gpu_memory, progress_bar_refresh_rate, overfit_batches, track_grad_norm,
@@ -118,20 +124,16 @@ class Trainer(PLTrainer):
         self.has_no_logger = logger is None
 
         self.logger_train = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
-            version=os.path.join(log_name, "train"), log_graph=False  # TODO: Fix log_Graph
+            version=os.path.join(self.log_name, "train"), log_graph=False  # TODO: Fix log_Graph
         ) if self.has_no_logger is not None else None
         self.logger_val = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
-            version=os.path.join(log_name, "val"), log_graph=False
+            version=os.path.join(self.log_name, "val"), log_graph=False
         ) if self.has_no_logger is not None else None
-
-        self.log_every_n_steps = log_every_n_steps
-        self.log_on_epoch = log_every_n_steps == 0
-        self.log_on_step = log_every_n_steps > 0
 
     @staticmethod
     def build(
         logger: Optional[str],
-        checkpoint_callback: bool = True,
+        checkpoint_callback: Union[bool, Callback] = True,
         callbacks: Optional[Union[List[Callback], Callback]] = None,
         default_root_dir: Optional[str] = None,
         gradient_clip_val: float = 0.0,
@@ -160,7 +162,7 @@ class Trainer(PLTrainer):
         limit_predict_batches: Union[int, float] = 1.0,
         val_check_interval: Union[int, float] = 1.0,
         flush_logs_every_n_steps: int = 100,
-        log_every_n_steps: int = 50,
+        log_every_n_steps: int = 0,
         accelerator: Optional[Union[str, Accelerator]] = None,
         sync_batchnorm: bool = False,
         precision: int = 32,

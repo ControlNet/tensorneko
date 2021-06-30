@@ -4,7 +4,7 @@ from torch import Tensor
 from torch.nn import Module, ModuleList
 
 from ..layer import Linear
-from ..util import generate_inf_seq, ModuleFactory
+from ..util import generate_inf_seq, ModuleFactory, compose
 
 
 class MLP(Module):
@@ -27,11 +27,10 @@ class MLP(Module):
                 normalization_after_activation, dropout_rate
             ) for i in range(len(n_features) - 1)
             ] + [
-                Linear(neurons[-2], neurons[-1], bias, dropout_rate=dropout_rate)
+                Linear(neurons[-2], neurons[-1], bias)
             ]
         )
 
     def forward(self, x: Tensor) -> Tensor:
-        for layer in self.layers:
-            x = layer(x)
-        return x
+        f = compose(self.layers)
+        return f(x)

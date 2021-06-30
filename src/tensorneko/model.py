@@ -1,14 +1,16 @@
+from abc import ABC, abstractmethod
 from typing import Optional
 
 import torch
 from pytorch_lightning import LightningModule
 from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
+from torch import Tensor
 
 from .util import summarize_dict_by, Shape
 
 
-class Model(LightningModule):
+class Model(LightningModule, ABC):
 
     def __init__(self, name: str,
         input_shape: Optional[Shape] = None, *args, **kwargs
@@ -29,6 +31,22 @@ class Model(LightningModule):
             return self.trainer.logger_train
         else:
             return self.trainer.logger_val
+
+    @abstractmethod
+    def training_step(self, *args, **kwargs) -> STEP_OUTPUT:
+        ...
+
+    @abstractmethod
+    def validation_step(self, *args, **kwargs) -> Optional[STEP_OUTPUT]:
+        ...
+
+    @abstractmethod
+    def predict_step(self, batch: Tensor, batch_idx: int, dataloader_idx: Optional[int] = None) -> Tensor:
+        ...
+
+    @abstractmethod
+    def configure_optimizers(self):
+        ...
 
     # history logger
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
