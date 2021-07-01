@@ -1,20 +1,9 @@
-from pytorch_lightning import Callback, LightningModule, Trainer
-
+from .display_metrics_callback import DisplayMetricsCallback
 from .lr_logger import LrLogger
+from .nil_callback import NilCallback
 
 __all__ = [
+    "LrLogger",
     "NilCallback",
-    "DisplayMetricsCallback",
-    "LrLogger"
+    "DisplayMetricsCallback"
 ]
-
-
-class NilCallback(Callback):
-    """A Nil Callback doing nothing in training."""
-    pass
-
-
-class DisplayMetricsCallback(Callback):
-    """A test callback to display the callback metrics."""
-    def on_validation_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
-        print(trainer.logger_connector.callback_metrics)

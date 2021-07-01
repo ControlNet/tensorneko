@@ -1,5 +1,5 @@
 # TODO: Need refactor
-from collections import Sequence
+from typing import Sequence
 
 from torch.nn import Module
 

@@ -14,7 +14,6 @@ from .reshape import Reshape
 
 __all__ = [
     "Attention",
-
     "Concatenate",
     "Conv2d",
     "Linear",

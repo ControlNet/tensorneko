@@ -1,6 +1,4 @@
-from .reader import Reader
-
-read = Reader()
+from .read import read
 
 __all__ = [
     "read"

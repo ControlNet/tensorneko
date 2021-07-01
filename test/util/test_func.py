@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from io import StringIO
 from random import randint
 
+import numpy as np
 import torch
 from fn import _, F
 from fn.iters import take
@@ -27,9 +28,9 @@ class UtilFuncTest(unittest.TestCase):
 
     def test_summarize_dict_by(self):
         x = [
-            {"a": 1, "b": torch.Tensor([2]), "c": 3},
-            {"a": 3, "b": torch.Tensor([4]), "c": 5},
-            {"a": 2.3, "b": torch.Tensor([-1]), "c": 0}
+            {"a": 1, "b": torch.Tensor([2]), "c": 3, "d": np.array([1.5])},
+            {"a": 3, "b": torch.Tensor([4]), "c": 5, "d": np.array([2.5])},
+            {"a": 2.3, "b": torch.Tensor([-1]), "c": 0, "d": np.array([-1.0])}
         ]
 
         self.assertEqual(summarize_dict_by("a", sum)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
@@ -37,6 +38,7 @@ class UtilFuncTest(unittest.TestCase):
         self.assertEqual(summarize_dict_by("c", F(map, str) >> "".join >> float)(x),
             (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"]
         )
+        self.assertEqual(summarize_dict_by("d", F(np.sum, axis=0))(x), x[0]["d"] + x[1]["d"] + x[2]["d"])
 
     def test_generate_inf_seq(self):
         length = 20
