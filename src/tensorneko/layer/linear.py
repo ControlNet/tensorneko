@@ -9,6 +9,46 @@ from ..util import ModuleFactory
 
 
 class Linear(Module):
+    """
+    An enhanced Linear version of :class:`torch.nn.Linear` with combining activation, normalization and dropout.
+
+    Args:
+        in_features (``int``): size of each input sample
+
+        out_features  (``int``): size of each output sample
+
+        bias (``bool``, optional): If set to ``False``, the layer will not learn an additive bias. Default: ``True``
+
+        build_activation (``() -> torch.nn.Module``): An activation module builder to be used in the Conv2d layer.
+
+        build_normalization (``() -> torch.nn.Module``): An normalization module builder to be used in the layer.
+
+        normalization_after_activation (``bool``, optional): Set True then applying normalization after activation.
+            Default ``False``.
+
+        dropout_rate (``float``, optional): The dropout rate for this linear layer. 0 means no dropout applied.
+            Default ``0``.
+
+    Attributes:
+        linear (:class:`~torch.nn.Linear`): The PyTorch Linear object in this layer.
+
+        activation: (:class:`~torch.nn.Module`): The PyTorch activation module in the layer.
+
+        normalization: (:class:`~torch.nn.Module`): The PyTorch normalization module in the layer.
+
+        dropout: (:class:`~torch.nn.Dropout`): The PyTorch Dropout object in this layer.
+
+    Examples::
+
+        linear = tensorneko.layer.Linear(
+            in_features=16384,
+            out_features=1024,
+            build_activation=torch.nn.LeakyReLU,
+            build_normalization=lambda: torch.nn.BatchNorm1d(1024),
+            dropout_rate=0.5
+        )
+
+    """
 
     def __init__(self, in_features: int, out_features: int, bias: bool = True,
         build_activation: Optional[ModuleFactory] = None,
