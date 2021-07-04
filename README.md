@@ -1,5 +1,21 @@
 <h1 style="text-align: center">TensorNeko</h1> 
 
+<div align="center">
+    <img src="https://img.shields.io/github/stars/ControlNet/tensorneko?style=flat-square">
+    <img src="https://img.shields.io/github/forks/ControlNet/tensorneko?style=flat-square">
+    <img src="https://img.shields.io/github/issues/ControlNet/tensorneko?style=flat-square">
+    <img src="https://img.shields.io/pypi/v/tensorneko?style=flat-square">
+    <img src="https://img.shields.io/pypi/pyversions/tensorneko?style=flat-square">
+    <img src="https://img.shields.io/pypi/wheel/tensorneko?style=flat-square">
+    <img src="https://img.shields.io/github/license/ControlNet/tensorneko?style=flat-square">
+</div>
+
+<div align="center">
+    <img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/dev?label=dev%20unittest&style=flat-square">
+    <img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/main?label=main%20unittest&style=flat-square">
+    <img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Release/main?label=release&style=flat-square">
+</div>
+
 Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lightning.
 
 ## Install
