@@ -32,7 +32,7 @@ Build an MLP with linear layers. The activation and normalization will be placed
 
 ```python
 import tensorneko as neko
-import torch
+import torch.nn
 
 mlp = neko.module.MLP(
     neurons=[784, 1024, 512, 10],
@@ -49,7 +49,7 @@ Build a Conv2d with activation and normalization.
 
 ```python
 import tensorneko as neko
-import torch
+import torch.nn
 
 conv2d = neko.layer.Conv2d(
     in_channels=256,
