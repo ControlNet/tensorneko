@@ -12,7 +12,7 @@ pip install tensorneko
 
 Build an MLP with linear layers. The activation and normalization will be placed in the hidden layers.
 
-768 -> 1024 -> 512 -> 10
+784 -> 1024 -> 512 -> 10
 
 ```python
 import tensorneko as neko
