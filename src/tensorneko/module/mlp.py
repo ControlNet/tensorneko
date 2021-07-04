@@ -43,11 +43,11 @@ class MLP(Module):
         .. code-block:: python
 
             mlp = tensorneko.module.MLP(
-                neurons=[768, 1024, 512, 10],
+                neurons=[784, 1024, 512, 10],
                 build_activation=torch.nn.ReLU,
                 build_normalization=[
-                    lambda: torch.nn.BatchNorm(1024),
-                    lambda: torch.nn.BatchNorm(512)
+                    lambda: torch.nn.BatchNorm1d(1024),
+                    lambda: torch.nn.BatchNorm1d(512)
                 ],
                 dropout_rate=0.5
             )
