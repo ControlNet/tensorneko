@@ -7,6 +7,59 @@ from torch.nn import Module
 
 
 class Conv2d(Module):
+    """
+    An enhanced Conv2d version of :class:`torch.nn.Conv2d` with combining activation and normalization.
+
+    Args:
+        in_channels (``int``): Number of channels in the input image
+
+        out_channels (``int``): Number of channels produced by the convolution
+
+        kernel_size (``int`` | ``tuple``): Size of the convolving kernel
+
+        stride (``int`` | ``tuple``, optional): Stride of the convolution. Default: 1
+
+        padding (``int`` | ``tuple`` | ``str``, optional): Padding added to all four sides of
+            the input. Default: 0
+
+        dilation (``int`` | ``tuple``, optional): Spacing between kernel elements. Default: 1
+
+        groups (``int``, optional): Number of blocked connections from input
+            channels to output channels. Default: 1
+
+        bias (``bool``, optional): If ``True``, adds a learnable bias to the
+            output. Default: ``True``
+
+        padding_mode (``string``, optional): ``'zeros'``, ``'reflect'``,
+            ``'replicate'`` or ``'circular'``. Default: ``'zeros'``
+
+        build_activation (``() -> torch.nn.Module``): An activation module builder to be used in the Conv2d layer.
+
+        build_normalization (``() -> torch.nn.Module``): An normalization module builder to be used in the layer.
+
+        normalization_after_activation (``bool``, optional): Set True then applying normalization after activation.
+            Default ``False``.
+
+    Attributes:
+        conv2d: (:class:`~torch.nn.Conv2d`): The PyTorch Conv2d object.
+
+        activation: (:class:`~torch.nn.Module`): The PyTorch activation module in the layer.
+
+        normalization: (:class:`~torch.nn.Module`): The PyTorch normalization module in the layer.
+
+    Examples::
+
+        conv2d = tensorneko.layer.Conv2d(
+            in_channels=256,
+            out_channels=1024,
+            kernel_size=(3, 3),
+            padding=(1, 1),
+            build_activation=torch.nn.ReLU,
+            build_normalization=lambda: torch.nn.BatchNorm2d(256),
+            normalization_after_activation=False
+        )
+
+    """
 
     def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, Sequence],
         stride: Union[int, Sequence] = 1, padding: Union[int, Sequence[int]] = 0,

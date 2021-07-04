@@ -5,12 +5,21 @@ from torch import Tensor
 
 @dataclass
 class VideoInfo:
+    """A dataclass for info of video"""
     video_fps: float
     audio_fps: int
 
 
 @dataclass
 class VideoData:
+    """
+    A dataclass for output of :class:`~.video_reader.VideoReader`
+
+    Attributes:
+        video (:class:`~torch.Tensor`): video float tensor of (T, C, H, W)
+        audio (:class:`~torch.Tensor`): audio float tensor of (C, T)
+        info (:class:`VideoInfo`): video and audio fps info
+    """
     video: Tensor
     audio: Tensor
     info: VideoInfo
