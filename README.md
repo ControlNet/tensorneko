@@ -16,8 +16,7 @@
 </div>
 
 <div align="center">
-    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/dev?label=dev%20unittest&style=flat-square"></a>
-    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/main?label=main%20unittest&style=flat-square"></a>
+    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/dev?label=unittest&style=flat-square"></a>
     <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Release/main?label=release&style=flat-square"></a>
 </div>
 
