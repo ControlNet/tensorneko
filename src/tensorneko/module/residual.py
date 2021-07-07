@@ -3,10 +3,11 @@ from typing import Optional, Callable, Sequence
 from torch import Tensor
 from torch.nn import Module, ModuleList, Sequential
 
+from ..neko_module import NekoModule
 from ..util import compose, ModuleFactory
 
 
-class ResidualBlock(Module):
+class ResidualBlock(NekoModule):
     """
     The ResidualBlock module is a single block of a residual connected block.
     x -> sub_module -> add_to(x) -> tail_module
@@ -53,7 +54,7 @@ class ResidualBlock(Module):
         return self.tail_module(x) if self.tail_module else x
 
 
-class ResidualModule(Module):
+class ResidualModule(NekoModule):
     """
     The Residual Module repeatedly generate Residual Blocks.
 

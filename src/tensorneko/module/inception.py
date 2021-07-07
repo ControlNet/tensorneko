@@ -4,12 +4,13 @@ from typing import Tuple
 
 from fn import F
 from torch import Tensor
-from torch.nn import Module, ModuleList, Sequential
+from torch.nn import ModuleList, Sequential
 
+from ..neko_module import NekoModule
 from ..layer import Concatenate
 
 
-class InceptionModule(Module):
+class InceptionModule(NekoModule):
     """
     InceptionModule is the module has multiple route for input feature and then concat the outputs of all routes. This
     is introduced firstly by Szegedy, et al. (2015).

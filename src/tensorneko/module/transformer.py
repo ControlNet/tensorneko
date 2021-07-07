@@ -3,14 +3,15 @@ from typing import Optional
 import torch
 from fn import F
 from torch import Tensor, zeros
-from torch.nn import Module, Parameter, LayerNorm, Linear, MultiheadAttention, GELU, Identity, ModuleList
+from torch.nn import Parameter, LayerNorm, Linear, MultiheadAttention, GELU, Identity, ModuleList
 
 from . import MLP, ResidualBlock
+from ..neko_module import NekoModule
 from ..layer import PositionalEmbedding, Concatenate
 from ..util import ModuleFactory, compose, Shape
 
 
-class AttentionModule(Module):
+class AttentionModule(NekoModule):
     """
     The AttentionModule is the layer taking the input and calculate Q, K and V and feed them into MultiHeadAttention
     layers.
@@ -61,7 +62,8 @@ class AttentionModule(Module):
         self.q_linear = Linear(embed_dim, self.kdim)
         self.k_linear = Linear(embed_dim, self.kdim)
         self.v_linear = Linear(embed_dim, self.vdim)
-        self.attention = MultiheadAttention(embed_dim, num_heads, dropout, bias, add_bias_kv, add_zero_attn, kdim, vdim, batch_first=True)
+        self.attention = MultiheadAttention(embed_dim, num_heads, dropout, bias, add_bias_kv, add_zero_attn, kdim, vdim,
+            batch_first=True)
         self.return_attention_weights = return_attention_weights
 
     def forward(self, x: Tensor) -> Tensor:
@@ -69,7 +71,8 @@ class AttentionModule(Module):
         x, weight = f([self.q_linear, self.k_linear, self.v_linear])
         return (x, weight) if self.return_attention_weights else x
 
-class TransformerEncoderBlock(Module):
+
+class TransformerEncoderBlock(NekoModule):
     """
     The TransformerEncoderBlock is a block in Transformer encoder which is proposed by Vaswani, et al. (2017).
 
@@ -163,7 +166,7 @@ class TransformerEncoderBlock(Module):
         return f(x)
 
 
-class TransformerEncoder(Module):
+class TransformerEncoder(NekoModule):
     """
     The TransformerEncoder repeatedly generate :class:`TransformerEncoderBlock` with specified times.
 

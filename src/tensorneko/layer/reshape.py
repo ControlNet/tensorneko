@@ -1,11 +1,11 @@
 import torch
 from torch import Tensor, reshape
-from torch.nn import Module
 
+from ..neko_module import NekoModule
 from ..util import Shape
 
 
-class Reshape(Module):
+class Reshape(NekoModule):
     """
     The module version of :func:`torch.reshape` operation.
 

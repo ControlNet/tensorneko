@@ -2,11 +2,12 @@ from typing import Union, Sequence, Optional, Callable
 
 from fn import F
 from torch import Tensor
-from torch.nn import Conv2d as PtConv2d
-from torch.nn import Module
+from torch.nn import Conv2d as PtConv2d, Module
+
+from ..neko_module import NekoModule
 
 
-class Conv2d(Module):
+class Conv2d(NekoModule):
     """
     An enhanced Conv2d version of :class:`torch.nn.Conv2d` with combining activation and normalization.
 

@@ -6,8 +6,9 @@ from . import optim
 from . import preprocess
 from . import util
 from . import visualization
-from .model import Model
-from .trainer import Trainer
+from .neko_model import NekoModel
+from .neko_trainer import NekoTrainer
+from .neko_module import NekoModule
 
 __all__ = [
     "callback",
@@ -18,6 +19,7 @@ __all__ = [
     "preprocess",
     "util",
     "visualization",
-    "Model",
-    "Trainer",
+    "NekoModel",
+    "NekoTrainer",
+    "NekoModule"
 ]

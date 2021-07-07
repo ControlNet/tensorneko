@@ -2,10 +2,11 @@ from typing import Union, List, Tuple, Optional
 
 import torch
 from torch import Tensor, cat
-from torch.nn import Module
+
+from ..neko_module import NekoModule
 
 
-class Concatenate(Module):
+class Concatenate(NekoModule):
     """
     A module version of concatenate multiple :class:`~torch.Tensor`.
 

@@ -3,12 +3,13 @@ from typing import Union, Optional
 from einops.layers.torch import Rearrange
 from fn import F
 from torch import Tensor
-from torch.nn import Module, Conv2d
+from torch.nn import Conv2d
 
+from ..neko_module import NekoModule
 from ..util import ModuleFactory, Shape
 
 
-class Patching(Module):
+class Patching(NekoModule):
 
     def __init__(self):
         super().__init__()
@@ -19,7 +20,7 @@ class Patching(Module):
         return x
 
 
-class PatchEmbedding2d(Module):
+class PatchEmbedding2d(NekoModule):
     """
     The patch embedding layer from Vision Transformer (ViT) (Dosovitskiy, et al., 2020). This layer will take a image
     as input, and divide to patches, and project to a provided number of channels.
@@ -78,7 +79,6 @@ class PatchEmbedding2d(Module):
         if self.has_norm:
             self.normalization = build_normalization()
         self.rearrange = Rearrange("b d nh nw -> b (nh nw) d")
-
 
     def forward(self, x: Tensor) -> Tensor:
         f = F() >> self.projection >> self.rearrange
