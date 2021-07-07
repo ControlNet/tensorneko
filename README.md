@@ -16,8 +16,7 @@
 </div>
 
 <div align="center">
-    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/dev?label=dev%20unittest&style=flat-square"></a>
-    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/main?label=main%20unittest&style=flat-square"></a>
+    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/dev?label=unittest&style=flat-square"></a>
     <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Release/main?label=release&style=flat-square"></a>
 </div>
 
@@ -69,7 +68,7 @@ conv2d = neko.layer.Conv2d(
 
 #### All modules and layers
 
-layer:
+layers:
 
 - `Concatenate`
 - `Conv2d`
@@ -86,6 +85,24 @@ modules:
 - `MLP`
 - `ResidualBlock` and `ResidualModule`
 - `AttentionModule`, `TransformerEncoderBlock` and `TransformerEncoder`
+
+## Neko modules
+
+All `tensorneko.layer` and `tensorneko.module` are `NekoModule`. They can be used in 
+[fn.py](https://github.com/kachayev/fn.py) pipe operation.
+
+```python
+from tensorneko.layer import Linear
+from torch.nn import ReLU
+import torch
+
+linear0 = Linear(16, 128, build_activation=ReLU)
+linear1 = Linear(128, 1)
+
+f = linear0 >> linear1
+print(f(torch.rand(16)).shape)
+# torch.Size([1])
+```
 
 ## Neko reader
 
@@ -137,7 +154,7 @@ import tensorneko as neko
 from tensorneko.util import get_activation, get_loss
 
 
-class MnistClassifier(neko.Model):
+class MnistClassifier(neko.NekoModel):
 
     def __init__(self, name: str, mlp_neurons: List[int], activation: str, dropout_rate: float, loss: str,
         learning_rate: float, weight_decay: float
@@ -199,11 +216,45 @@ model = MnistClassifier("mnist_mlp_classifier", [784, 1024, 512, 10], "ReLU", 0.
 
 dm = ...  # The MNIST datamodule from PyTorch Lightning
 
-trainer = neko.Trainer.build(log_every_n_steps=0, gpus=1, logger=model.name, precision=32,
+trainer = neko.NekoTrainer(log_every_n_steps=0, gpus=1, logger=model.name, precision=32,
     checkpoint_callback=ModelCheckpoint(dirpath="./ckpt",
         save_last=True, filename=model.name + "-{epoch}-{val_acc:.3f}", monitor="val_acc", mode="max"
     ))
 
 trainer.fit(model, dm)
 ```
+
+## Neko utilities
+
+`StringGetter`: Get PyTorch class from string.
+```python
+import tensorneko as neko
+activation = neko.util.get_activation("leakyRelu")()
+```
+
+`__`: The arguments to pipe operator
+```python
+from tensorneko.util import __, _
+result = __(20) >> (_ + 1) >> (_ * 2) >> __.get
+print(result)
+# 42
+```
+
+Utilities list:
+- `reduce_dict_by`
+- `summarize_dict_by`
+- `generate_inf_seq`
+- `compose`
+- `listdir`
+- `with_printed`
+- `with_printed_shape`
+- `is_bad_num`
+- `ifelse`
+- `dict_add`
+- `count_parameters`
+- `as_list`
+- `Configuration`
+- `get_activation`
+- `get_loss`
+- `__`
 

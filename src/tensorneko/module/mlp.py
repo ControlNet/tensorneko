@@ -1,13 +1,14 @@
 from typing import Optional, Union, Iterable, Sequence, Callable
 
 from torch import Tensor
-from torch.nn import Module, ModuleList
+from torch.nn import ModuleList
 
+from ..neko_module import NekoModule
 from ..layer import Linear
 from ..util import generate_inf_seq, ModuleFactory, compose
 
 
-class MLP(Module):
+class MLP(NekoModule):
     """
     The MLP module is a sequential module with multiple linear layers.
 

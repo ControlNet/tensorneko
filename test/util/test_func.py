@@ -10,8 +10,8 @@ import torch
 from fn import _, F
 from fn.iters import take
 
-from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose
-from tensorneko.util.func import listdir, with_printed, with_printed_shape, ifelse, is_bad_num
+from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
+    with_printed_shape, ifelse, is_bad_num, dict_add
 
 
 class UtilFuncTest(unittest.TestCase):
@@ -122,6 +122,13 @@ class UtilFuncTest(unittest.TestCase):
         self.assertTrue(is_bad_num(inf_tensor).all())
         self.assertTrue(is_bad_num(nan_tensor).all())
 
-
-    def test_string_getter(self):
-        pass  # TODO
+    def test_dict_add(self):
+        # test merge 2 dicts
+        dict_a = {"a": 1, 2: 3}
+        dict_b = {"a": 2, "b": 3}
+        self.assertEqual(dict_add(dict_a, dict_b), {"a": 2, 2: 3, "b": 3})
+        # test merge 3 dicts
+        dict_a = {"a": 1}
+        dict_b = {"b": 2}
+        dict_c = {"c": 3}
+        self.assertEqual(dict_add(dict_a, dict_b, dict_c), {"a": 1, "b": 2, "c": 3})

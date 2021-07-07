@@ -1,5 +1,5 @@
 import os
-from typing import Callable, List, Dict, Iterable, Sequence, Union, Any
+from typing import Callable, List, Dict, Iterable, Sequence, Union, Any, Tuple
 
 import numpy
 import numpy as np
@@ -261,3 +261,32 @@ def count_parameters(module: Module) -> int:
         ``int``: Number of parameters.
     """
     return sum(p.numel() for p in module.parameters())
+
+
+def dict_add(*dicts: dict):
+    """
+    Merge multiple dictionaries.
+
+    Args:
+        *dicts:
+
+    Returns:
+
+    """
+    new_dict = {}
+    for each in dicts:
+        new_dict.update(each)
+    return new_dict
+
+
+def as_list(*args, **kwargs) -> list:
+    """
+    Returns:
+        ``list``: The list of args.
+
+    Examples::
+
+        >>> as_list(1, 2, 3, 4, key=5)
+        [1, 2, 3, 4, 5]
+    """
+    return list(args) + list(kwargs.values())

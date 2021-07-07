@@ -1,13 +1,14 @@
 from typing import Iterable
 
 from torch import Tensor
-from torch.nn import Module, Sequential, ModuleList
+from torch.nn import Sequential, ModuleList
 
+from ..neko_module import NekoModule
 from ..layer import Concatenate
 from ..util import ModuleFactory
 
 
-class DenseBlock(Module):
+class DenseBlock(NekoModule):
     """
     The DenseBlock can be used to build a block with repeatable submodules with dense connections. This structure is
     proposed by Huang, Liu, Van Der Maaten, & Weinberger (2017).

@@ -3,12 +3,12 @@ from typing import Optional
 from fn import F
 from torch import Tensor
 from torch.nn import Linear as PtLinear, Dropout
-from torch.nn import Module
 
+from ..neko_module import NekoModule
 from ..util import ModuleFactory
 
 
-class Linear(Module):
+class Linear(NekoModule):
     """
     An enhanced Linear version of :class:`torch.nn.Linear` with combining activation, normalization and dropout.
 

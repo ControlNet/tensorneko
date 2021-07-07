@@ -1,13 +1,12 @@
-from typing import Iterable
-
 from fn import F, _
 from torch import Tensor, zeros
-from torch.nn import Module, Parameter, Dropout
+from torch.nn import Parameter, Dropout
 
+from ..neko_module import NekoModule
 from ..util import Shape
 
 
-class PositionalEmbedding(Module):
+class PositionalEmbedding(NekoModule):
     """
     Trainable positional embedding for transformer/self-attention layer.
 

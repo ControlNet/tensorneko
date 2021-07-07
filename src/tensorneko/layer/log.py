@@ -1,9 +1,10 @@
 import torch
 from torch import Tensor, log
-from torch.nn import Module
+
+from ..neko_module import NekoModule
 
 
-class Log(Module):
+class Log(NekoModule):
     """
     The module version of :func:`torch.log` operation.
 

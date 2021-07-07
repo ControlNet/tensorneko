@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Union, Tuple, List, Any, Sequence
+from typing import Optional, Dict, Union, Sequence
 
 import torch
 from pytorch_lightning import LightningModule
@@ -10,7 +10,7 @@ from torch import Tensor
 from .util import summarize_dict_by, Shape
 
 
-class Model(LightningModule, ABC):
+class NekoModel(LightningModule, ABC):
     """
     An abstract class for models. In this module, the loss and other metrics will be automatically logged in
     TensorBoard.
