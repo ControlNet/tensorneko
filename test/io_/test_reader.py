@@ -8,7 +8,7 @@ from tensorneko.io.video import VideoReader
 
 
 class TestReader(unittest.TestCase):
-    """A test for `read`"""
+    """A test for :class:`~tensorneko.io.read`"""
 
     def test_read(self):
         """Test read object if it has ImageReader, AudioReader, VideoReader and TextReader""" 
@@ -16,4 +16,3 @@ class TestReader(unittest.TestCase):
         self.assertIs(read.audio, AudioReader)
         self.assertIs(read.video, VideoReader)
         self.assertIs(read.text, TextReader)
-
