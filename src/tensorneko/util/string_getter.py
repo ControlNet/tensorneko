@@ -1,8 +1,12 @@
 from typing import Dict
 
-from torch.nn import LeakyReLU, GELU, ELU, ReLU, CrossEntropyLoss, L1Loss, MSELoss, BCELoss, BCEWithLogitsLoss, Mish, \
-    Module
+from torch.nn import LeakyReLU, GELU, ELU, ReLU, Mish, Module, ReLU6, PReLU, SELU, Sigmoid, \
+    Tanh, Softplus, Softshrink, Softsign, LogSoftmax, Softmin, Softmax, LogSoftmax
 
+from torch.nn import CrossEntropyLoss, L1Loss, MSELoss, BCELoss, BCEWithLogitsLoss, NLLLoss, \
+    NLLLoss2d, PoissonNLLLoss, KLDivLoss, HingeEmbeddingLoss, MarginRankingLoss, \
+    MultiLabelMarginLoss, MultiLabelSoftMarginLoss, MultiMarginLoss, SmoothL1Loss, SoftMarginLoss, \
+    TripletMarginLoss, CosineEmbeddingLoss, HuberLoss, SmoothL1Loss
 
 class StringGetter:
     """Util class for retrieve module class from string"""
@@ -12,7 +16,18 @@ class StringGetter:
         "GELU": GELU,
         "ELU": ELU,
         "RELU": ReLU,
+        "RELU6": ReLU6,
+        "PRELU": PReLU,
         "MISH": Mish,
+        "SELU": SELU,
+        "TANH": Tanh,
+        "SIGMOID": Sigmoid,
+        "SOFTPLUS": Softplus,
+        "SOFTSHRINK": Softshrink,
+        "SOFTSIGN": Softsign,
+        "LOGSOFTMAX": LogSoftmax,
+        "SOFTMIN": Softmin,
+        "SOFTMAX": Softmax
     }
 
     _loss_mapping: Dict[str, Module] = {
@@ -20,7 +35,21 @@ class StringGetter:
         "L1LOSS": L1Loss,
         "MSELOSS": MSELoss,
         "BCELOSS": BCELoss,
-        "BCEWITHLOGITSLOSS": BCEWithLogitsLoss
+        "BCEWITHLOGITSLOSS": BCEWithLogitsLoss,
+        "NLLLOSS": NLLLoss,
+        "NLLLOSS2D": NLLLoss2d,
+        "POISSONNLLLOSS": PoissonNLLLoss,
+        "KLDIVLOSS": KLDivLoss,
+        "HINGEEMBEDDINGLOSS": HingeEmbeddingLoss,
+        "MARGINRANKINGLOSS": MarginRankingLoss,
+        "MULTIMARGINLOSS": MultiMarginLoss,
+        "MULTILABELSOFTMARGINLOSS": MultiLabelSoftMarginLoss,
+        "MULTILABELMARGINLOSS": MultiLabelMarginLoss,
+        "SOFTMARGINLOSS": SoftMarginLoss,
+        "TRIPLETMARGINLOSS": TripletMarginLoss,
+        "COSINEEMBEDDINGLOSS": CosineEmbeddingLoss,
+        "HUBERLOSS": HuberLoss,
+        "SMOOTHL1LOSS": SmoothL1Loss
     }
 
     _mapping: Dict[str, Dict[str, Module]] = {
