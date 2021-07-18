@@ -7,10 +7,11 @@ from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor
 
+from . import NekoModule
 from .util import summarize_dict_by, Shape
 
 
-class NekoModel(LightningModule, ABC):
+class NekoModel(LightningModule, NekoModule):
     """
     An abstract class for models. In this module, the loss and other metrics will be automatically logged in
     TensorBoard.
@@ -37,18 +38,9 @@ class NekoModel(LightningModule, ABC):
             self.example_input_array = torch.rand([1, *input_shape])
         self.history = []
 
-    @property
-    def logger(self) -> Optional[LightningLoggerBase]:
-        """
-        :class:`~pytorch_lightning.loggers.LightningLoggerBase` | ``None``:
-            The training or validation logger for the module.
-        """
-        if not self.trainer:
-            return None
-        elif self.training:
-            return self.trainer.logger_train
-        else:
-            return self.trainer.logger_val
+    @abstractmethod
+    def forward(self, *args, **kwargs):
+        ...
 
     @abstractmethod
     def training_step(self,
@@ -151,6 +143,19 @@ class NekoModel(LightningModule, ABC):
     def configure_optimizers(self):
         """Inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.configure_optimizers`."""
         ...
+
+    @property
+    def logger(self) -> Optional[LightningLoggerBase]:
+        """
+        :class:`~pytorch_lightning.loggers.LightningLoggerBase` | ``None``:
+            The training or validation logger for the module.
+        """
+        if not self.trainer:
+            return None
+        elif self.training:
+            return self.trainer.logger_train
+        else:
+            return self.trainer.logger_val
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         """For each training epoch end, log the metrics"""

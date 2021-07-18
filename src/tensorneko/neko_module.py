@@ -5,7 +5,7 @@ from fn import F
 from torch.nn import Module
 
 
-class NekoModule(Module, F, ABC):
+class NekoModule(ABC, Module, F):
     """
     The module base of tensorneko. This NekoModule is inherited from :class:`~torch.nn.Module`
     and also support the ``fn.py`` library pipe operation.

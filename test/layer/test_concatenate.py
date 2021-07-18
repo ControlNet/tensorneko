@@ -1,7 +1,7 @@
 import unittest
 
 import torch
-from torch import zeros, rand
+from torch import rand
 
 from tensorneko.layer import Concatenate
 
