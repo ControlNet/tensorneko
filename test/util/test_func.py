@@ -74,7 +74,6 @@ class UtilFuncTest(unittest.TestCase):
         neko_res = listdir(path)
         os_res = os.listdir(path)
         os_res = list(map(lambda file: os.path.join(path, file), os_res))
-        print(neko_res)
         for neko_path, os_path in zip(neko_res, os_res):
             self.assertEqual(neko_path, os_path)
 

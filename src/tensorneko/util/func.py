@@ -144,7 +144,7 @@ def compose(fs: Union[ModuleList, Sequence[Callable]]) -> F:
     return reduce(_ >> _, fs, F())
 
 
-def listdir(path: str) -> List[str]:
+def listdir(path: str, filter_func: Callable[[str], bool] = lambda arg: True) -> List[str]:
     """
     The full path version of :func:`os.listdir`.
 
@@ -152,6 +152,7 @@ def listdir(path: str) -> List[str]:
 
     Args:
         path (``str``): The path for listdir.
+        filter_func (``(str) -> bool``, optional): The filter function to filter the file/directory name in ``listdir``.
 
     Returns:
         ``List[str]``: listdir result with input path.
@@ -166,7 +167,7 @@ def listdir(path: str) -> List[str]:
          'tensorneko/util/string_getter.py']
 
     """
-    files = filter(_ != ".DS_Store", os.listdir(path))
+    files = filter(filter_func, os.listdir(path))
     return list(map(F(os.path.join, path), files))
 
 
