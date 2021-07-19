@@ -5,7 +5,7 @@
     <img src="https://img.shields.io/github/forks/ControlNet/tensorneko?style=flat-square">
     <a href="https://github.com/ControlNet/tensorneko/issues"><img src="https://img.shields.io/github/issues/ControlNet/tensorneko?style=flat-square"></a>
     <a href="https://pypi.org/project/tensorneko/"><img src="https://img.shields.io/pypi/v/tensorneko?style=flat-square"></a>
-    <a href="https://pypi.org/project/tensorneko/"><img src="https://img.shields.io/pypi/wheel/tensorneko?style=flat-square"></a>
+    <a href="https://pypi.org/project/tensorneko/"><img src="https://img.shields.io/pypi/dm/tensorneko?style=flat-square"></a>
     <img src="https://img.shields.io/github/license/ControlNet/tensorneko?style=flat-square">
 </div>
 
