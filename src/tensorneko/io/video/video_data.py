@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from torch import Tensor
 
@@ -7,7 +8,7 @@ from torch import Tensor
 class VideoInfo:
     """A dataclass for info of video"""
     video_fps: float
-    audio_fps: int
+    audio_fps: Optional[int]
 
 
 @dataclass
@@ -27,4 +28,8 @@ class VideoData:
     def __init__(self, video, audio, info):
         self.video = video
         self.audio = audio
-        self.info = VideoInfo(**info)
+        info_args = info if len(info) == 2 else {
+            "video_fps": info["video_fps"],
+            "audio_fps": None
+        }
+        self.info = VideoInfo(**info_args)
