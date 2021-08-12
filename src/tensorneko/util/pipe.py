@@ -4,7 +4,7 @@ from typing import Callable, Union, Tuple
 
 from fn import F
 
-from tensorneko.util import dict_add
+from ..util import dict_add
 
 
 class Args(F):

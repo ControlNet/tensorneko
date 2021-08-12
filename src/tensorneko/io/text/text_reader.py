@@ -1,8 +1,11 @@
+import pandas as pd
+
+
 class TextReader:
     """TextReader for reading text file"""
 
     @staticmethod
-    def of(path: str, encoding: str = "UTF-8") -> str:
+    def of_plain(path: str, encoding: str = "UTF-8") -> str:
         """
         Read texts of a file.
 
@@ -16,3 +19,8 @@ class TextReader:
         with open(path, "r", encoding=encoding) as file:
             text = file.read()
         return text
+
+    of_json = pd.read_json
+    of_csv = pd.read_csv
+    of_xml = pd.read_xml
+    of = of_plain
