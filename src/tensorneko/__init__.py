@@ -2,6 +2,7 @@ from . import callback
 from . import io
 from . import layer
 from . import module
+from . import notebook
 from . import optim
 from . import preprocess
 from . import util
@@ -15,6 +16,7 @@ __all__ = [
     "io",
     "layer",
     "module",
+    "notebook",
     "optim",
     "preprocess",
     "util",
