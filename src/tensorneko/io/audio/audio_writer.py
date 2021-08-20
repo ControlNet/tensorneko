@@ -12,12 +12,12 @@ class AudioWriter:
     @staticmethod
     @overload
     def to(path: str, audio: AudioData):
-        pass
+        ...
 
     @staticmethod
     @overload
     def to(path: str, audio: Union[Tensor, ndarray], sample_rate: int = 16000):
-        pass
+        ...
 
     @staticmethod
     def to(path: str, audio: Union[Tensor, ndarray, AudioData], sample_rate: int = 16000):
