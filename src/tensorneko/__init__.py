@@ -25,3 +25,5 @@ __all__ = [
     "NekoTrainer",
     "NekoModule"
 ]
+
+__version__ = io.read.text.of("version.txt")
