@@ -1,12 +1,13 @@
 from typing import Dict
 
 from torch.nn import LeakyReLU, GELU, ELU, ReLU, Mish, Module, ReLU6, PReLU, SELU, Sigmoid, \
-    Tanh, Softplus, Softshrink, Softsign, LogSoftmax, Softmin, Softmax, LogSoftmax
+    Tanh, Softplus, Softshrink, Softsign, Softmin, Softmax, LogSoftmax
 
 from torch.nn import CrossEntropyLoss, L1Loss, MSELoss, BCELoss, BCEWithLogitsLoss, NLLLoss, \
     NLLLoss2d, PoissonNLLLoss, KLDivLoss, HingeEmbeddingLoss, MarginRankingLoss, \
-    MultiLabelMarginLoss, MultiLabelSoftMarginLoss, MultiMarginLoss, SmoothL1Loss, SoftMarginLoss, \
+    MultiLabelMarginLoss, MultiLabelSoftMarginLoss, MultiMarginLoss, SoftMarginLoss, \
     TripletMarginLoss, CosineEmbeddingLoss, HuberLoss, SmoothL1Loss
+
 
 class StringGetter:
     """Util class for retrieve module class from string"""
