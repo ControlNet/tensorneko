@@ -13,6 +13,12 @@ with open("requirements.txt", "r") as file:
 with open("version.txt", "r") as file:
     version = file.read()
 
+with open("src/tensorneko/__init__.py", "r") as file:
+    src = file.read().replace("__version__ = io.read.text.of(\"version.txt\")", f"__version__ = \"{version}\"")
+
+with open("src/tensorneko/__init__.py", "w") as file:
+    file.write(src)
+
 setuptools.setup(
     name="tensorneko",
     version=version,
