@@ -1,4 +1,4 @@
-from typing import Union, Optional, Callable
+from typing import Union, Optional, Callable, Tuple
 
 from fn import F
 from torch import Tensor
@@ -62,9 +62,9 @@ class Conv2d(NekoModule):
 
     """
 
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, (int, ...)],
-        stride: Union[int, (int, ...)] = 1, padding: Union[int, (int, ...), str] = 0,
-        dilation: Union[int, (int, ...)] = 1, groups: int = 1, bias: bool = True, padding_mode: str = 'zeros',
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, Tuple[int, ...]],
+        stride: Union[int, Tuple[int, ...]] = 1, padding: Union[int, Tuple[int, ...], str] = 0,
+        dilation: Union[int, Tuple[int, ...]] = 1, groups: int = 1, bias: bool = True, padding_mode: str = 'zeros',
         build_activation: Optional[Callable[[], Module]] = None,
         build_normalization: Optional[Callable[[], Module]] = None,
         normalization_after_activation: bool = False
