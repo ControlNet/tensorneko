@@ -2,7 +2,7 @@ import unittest
 
 from fn import F
 from torch import rand
-from torch.nn import Sequential, Linear, ReLU
+from torch.nn import Linear, ReLU
 
 from tensorneko.module import ResidualModule, ResidualBlock
 

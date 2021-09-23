@@ -37,15 +37,15 @@ class TestConv2d(unittest.TestCase):
 
     @property
     def kernel_size(self):
-        return (3, 3)
+        return 3, 3
 
     @property
     def stride(self):
-        return (1, 1)
+        return 1, 1
 
     @property
     def padding(self):
-        return (1, 1)
+        return 1, 1
 
     @property
     def activation_factory(self):

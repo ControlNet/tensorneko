@@ -5,7 +5,7 @@ import unittest
 class TestVersion(unittest.TestCase):
 
     def test_package_version(self):
-        VERSION_PATTERN = r"""
+        version_pattern = r"""
             v?
             (?:
                 (?:(?P<epoch>[0-9]+)!)?                           # epoch
@@ -37,7 +37,7 @@ class TestVersion(unittest.TestCase):
         """
 
         regex = re.compile(
-            r"^\s*" + VERSION_PATTERN + r"\s*$",
+            r"^\s*" + version_pattern + r"\s*$",
             re.VERBOSE | re.IGNORECASE,
         )
 

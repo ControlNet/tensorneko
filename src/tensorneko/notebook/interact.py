@@ -15,8 +15,8 @@ class Display:
         return IPython.display.display(Video(path, embed=embed))
 
     @staticmethod
-    def youtube_video(id: str):
-        return IPython.display.display(YouTubeVideo(id))
+    def youtube_video(id_: str):
+        return IPython.display.display(YouTubeVideo(id_))
 
     @staticmethod
     def code(path: str, language: str = None):

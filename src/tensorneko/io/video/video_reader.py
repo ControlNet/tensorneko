@@ -1,4 +1,4 @@
-from typing import overload, Union
+from typing import Union
 
 import torch
 from numpy import ndarray

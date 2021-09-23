@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Tuple
-
 from fn import F
 from torch import Tensor
-from torch.nn import ModuleList, Sequential
+from torch.nn import ModuleList, Sequential, Module
 
 from ..neko_module import NekoModule
 from ..layer import Concatenate
@@ -29,12 +27,12 @@ class InceptionModule(NekoModule):
         self.sub_seqs = ModuleList()
         self.channel_concat = Concatenate(dim=1)
 
-    def add_sub_sequence(self, *layers: Tuple[Module, ...]) -> InceptionModule:
+    def add_sub_sequence(self, *layers: Module) -> InceptionModule:
         """
         Add sub sequential module for this InceptionModule.
 
         Args:
-            *layers (``(torch.nn.Module, ...)``): The var length parameter layers are the modules used in one route.
+            *layers (:class:`~torch.nn.Module`): The var length parameter layers are the modules used in one route.
 
         Returns:
             :class:`InceptionModule`: The self InceptionModule object.

@@ -202,8 +202,8 @@ class MnistClassifier(neko.NekoModel):
 
     def predict_step(self, batch: Tensor, batch_idx: int, dataloader_idx: Optional[int] = None) -> Tensor:
         x, y = batch
-        logits = self(x)
-        return logits
+        logit = self(x)
+        return logit
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.learning_rate, betas=(0.5, 0.9), weight_decay=self.weight_decay)
