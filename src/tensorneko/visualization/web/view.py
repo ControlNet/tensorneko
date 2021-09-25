@@ -44,6 +44,9 @@ class View:
         return self._to_json()
 
     def _to_json(self) -> None:
+        if not os.path.exists(self.name):
+            os.mkdir(self.name)
+
         write.text.to_json(os.path.join(self.name, "data.json"),
             list(map(lambda comp: comp.to_dict(), self.components))
         )
