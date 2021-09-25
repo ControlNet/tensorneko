@@ -1,4 +1,5 @@
 import os
+from os.path import dirname, abspath
 from typing import Callable, List, Dict, Iterable, Sequence, Union, Any
 
 import numpy
@@ -291,3 +292,13 @@ def as_list(*args, **kwargs) -> list:
         [1, 2, 3, 4, 5]
     """
     return list(args) + list(kwargs.values())
+
+
+def tensorneko_path() -> str:
+    """
+    Get the `tensorneko` library root path
+
+    Returns:
+        ``str``: The root path of `tensorneko`
+    """
+    return dirname(dirname(abspath(__file__)))

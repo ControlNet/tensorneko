@@ -11,7 +11,7 @@ from fn import _, F
 from fn.iters import take
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
-    with_printed_shape, ifelse, is_bad_num, dict_add
+    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path
 
 
 class UtilFuncTest(unittest.TestCase):
@@ -131,3 +131,27 @@ class UtilFuncTest(unittest.TestCase):
         dict_b = {"b": 2}
         dict_c = {"c": 3}
         self.assertEqual(dict_add(dict_a, dict_b, dict_c), {"a": 1, "b": 2, "c": 3})
+
+    def test_tensorneko_path(self):
+        # get the dir name and check if it targets to "tensorneko" directory
+        if "/" in tensorneko_path:
+            self.assertEqual(tensorneko_path.split("/")[-1], "tensorneko")
+        elif "\\" in tensorneko_path:
+            self.assertEqual(tensorneko_path.split("\\")[-1], "tensorneko")
+        else:
+            self.assertTrue(False)
+
+        # test the modules are in the path
+        files = os.listdir(tensorneko_path)
+        self.assertTrue("callback" in files)
+        self.assertTrue("io" in files)
+        self.assertTrue("layer" in files)
+        self.assertTrue("module" in files)
+        self.assertTrue("notebook" in files)
+        self.assertTrue("optim" in files)
+        self.assertTrue("preprocess" in files)
+        self.assertTrue("util" in files)
+        self.assertTrue("visualization" in files)
+        self.assertTrue("neko_model.py" in files)
+        self.assertTrue("neko_module.py" in files)
+        self.assertTrue("neko_trainer.py" in files)
