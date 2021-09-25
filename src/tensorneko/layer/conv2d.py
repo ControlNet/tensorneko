@@ -1,4 +1,4 @@
-from typing import Union, Sequence, Optional, Callable
+from typing import Union, Optional, Callable, Tuple
 
 from fn import F
 from torch import Tensor
@@ -16,14 +16,14 @@ class Conv2d(NekoModule):
 
         out_channels (``int``): Number of channels produced by the convolution
 
-        kernel_size (``int`` | ``tuple``): Size of the convolving kernel
+        kernel_size (``int`` | ``(int, ...)``): Size of the convolving kernel
 
-        stride (``int`` | ``tuple``, optional): Stride of the convolution. Default: 1
+        stride (``int`` | ``(int, ...)``, optional): Stride of the convolution. Default: 1
 
-        padding (``int`` | ``tuple`` | ``str``, optional): Padding added to all four sides of
+        padding (``int`` | ``(int, ...)`` | ``str``, optional): Padding added to all four sides of
             the input. Default: 0
 
-        dilation (``int`` | ``tuple``, optional): Spacing between kernel elements. Default: 1
+        dilation (``int`` | ``(int, ...)``, optional): Spacing between kernel elements. Default: 1
 
         groups (``int``, optional): Number of blocked connections from input
             channels to output channels. Default: 1
@@ -62,9 +62,9 @@ class Conv2d(NekoModule):
 
     """
 
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, Sequence],
-        stride: Union[int, Sequence] = 1, padding: Union[int, Sequence[int]] = 0,
-        dilation: Union[int, Sequence] = 1, groups: int = 1, bias: bool = True, padding_mode: str = 'zeros',
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, Tuple[int, ...]],
+        stride: Union[int, Tuple[int, ...]] = 1, padding: Union[int, Tuple[int, ...], str] = 0,
+        dilation: Union[int, Tuple[int, ...]] = 1, groups: int = 1, bias: bool = True, padding_mode: str = 'zeros',
         build_activation: Optional[Callable[[], Module]] = None,
         build_normalization: Optional[Callable[[], Module]] = None,
         normalization_after_activation: bool = False

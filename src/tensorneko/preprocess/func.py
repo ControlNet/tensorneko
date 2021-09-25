@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Tuple
 
 import torch
 from cleanfid.resize import make_resizer
@@ -17,7 +16,7 @@ class ResizeMethod(Enum):
     BOX = "box"
 
 
-def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMethod = ResizeMethod.BICUBIC) -> Tensor:
+def resize_image(tensor: Tensor, size: (int, int), resize_method: ResizeMethod = ResizeMethod.BICUBIC) -> Tensor:
     """
     Resizing a image to determined size.
 
@@ -42,7 +41,7 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMet
     return f(tensor)
 
 
-def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMethod = ResizeMethod.BICUBIC):
+def resize_video(tensor: Tensor, size: (int, int), resize_method: ResizeMethod = ResizeMethod.BICUBIC) -> Tensor:
     """
     Resizing a video to determined size.
 

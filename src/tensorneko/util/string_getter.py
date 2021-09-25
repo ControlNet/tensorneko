@@ -58,8 +58,8 @@ class StringGetter:
         "loss": _loss_mapping
     }
 
-    def __init__(self, type: str):
-        self.type = type
+    def __init__(self, type_: str):
+        self.type = type_
         self.dict = StringGetter._mapping[self.type]
 
     def __call__(self, name: str):

@@ -69,7 +69,7 @@ class DenseBlock(NekoModule):
             self.build_sub_module(i) for i in range(repeat)
         ])
         self.concatenates = ModuleList([
-            Concatenate(dim=1) for i in range(repeat)
+            Concatenate(dim=1) for _ in range(repeat)
         ])
 
     def forward(self, x: Tensor) -> Tensor:
