@@ -19,7 +19,7 @@ class Component(ABC):
 @dataclass
 class Variable(Component, Generic[T]):
     """
-    The components containing a value
+    The components containing a value.
 
     Args:
         name (``str``): The name of the variable, which should be unique in

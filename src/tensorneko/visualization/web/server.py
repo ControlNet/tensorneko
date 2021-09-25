@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import subprocess
-from typing import Optional, Union
+from typing import Optional, Union, List
 from shutil import copyfile
 
 from .view import View
@@ -34,7 +36,11 @@ class Server:
         # stop the server
         server.stop()
 
+        # start the server on blocking
+        server.start_blocking()
+
     """
+    servers: List[Server] = []
 
     def __init__(self, view: Union[View, str], port: int = 8000):
         if type(view) == View:
@@ -46,6 +52,7 @@ class Server:
 
         self.port = port
         self.process: Optional[subprocess.Popen] = None
+        Server.servers.append(self)
 
     def start(self) -> None:
         """
@@ -55,6 +62,23 @@ class Server:
         if self.process is not None:
             self.stop()
         # copy files to the view directory
+        self._prepare()
+        # run python http server
+        self._run()
+
+    def start_blocking(self) -> None:
+        """
+        Start or restart the server on blocking.
+        """
+        # stop the old server
+        if self.process is not None:
+            self.stop()
+        # copy files to the view directory
+        self._prepare()
+        # run python http server
+        self._run_blocking()
+
+    def _prepare(self) -> None:
         source_path_index = os.path.join(tensorneko_path, "visualization", "web", "index.html")
         source_path_js = os.path.join(tensorneko_path, "visualization", "web", "main.js")
         target_path_index = os.path.join(self.view_name, "index.html")
@@ -65,8 +89,12 @@ class Server:
         copyfile(source_path_index, target_path_index)
         copyfile(source_path_js, target_path_js)
 
-        # run python http server
+    def _run(self) -> None:
         self.process = subprocess.Popen(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)])
+        print(f"Server started at port {self.port}, view \"{self.view_name}\".")
+
+    def _run_blocking(self):
+        self.process = subprocess.run(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)])
         print(f"Server started at port {self.port}, view \"{self.view_name}\".")
 
     def stop(self) -> None:
@@ -79,3 +107,11 @@ class Server:
             self.process = None
         else:
             print("Server is stopped.")
+
+    @classmethod
+    def stop_all(cls) -> None:
+        """
+        Stop all servers.
+        """
+        for server in cls.servers:
+            server.stop()
