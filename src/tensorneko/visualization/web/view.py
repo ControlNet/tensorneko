@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, List
 import os
 
 from ...io import write
@@ -37,7 +37,7 @@ class View:
 
     """
     name: str
-    components: list[Component] = field(init=False, default_factory=list)
+    components: List[Component] = field(init=False, default_factory=list)
 
     def update(self) -> None:
         """Save the state to the json file."""
