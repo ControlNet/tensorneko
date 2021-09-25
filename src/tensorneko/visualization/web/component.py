@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Generic
+from typing import Generic, List
 
 from .view import View
 from ...util.type import T
@@ -9,7 +9,7 @@ from ...util.type import T
 @dataclass
 class Component(ABC):
     name: str
-    views: list[View] = field(repr=False, init=False, default_factory=list)
+    views: List[View] = field(repr=False, init=False, default_factory=list)
 
     @abstractmethod
     def to_dict(self):
