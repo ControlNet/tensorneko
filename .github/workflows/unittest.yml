@@ -4,6 +4,31 @@ on:
     branches-ignore:
       - "main"
 jobs:
+  build-web:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: npm install and build
+        run: |
+          cd src/tensorneko/visualization/watcher/web
+          npm install
+          npm run build
+        env:
+          CI: true
+
+      - name: Print results
+        run: |
+          ls -l dist
+          ls -l dist/js
+          ls -l dist/css
+
   unittest:
     runs-on: ubuntu-20.04
 

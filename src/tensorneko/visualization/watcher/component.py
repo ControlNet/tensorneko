@@ -23,7 +23,7 @@ class Variable(Component, Generic[T]):
 
     Args:
         name (``str``): The name of the variable, which should be unique in
-            a :class:`~tensorneko.visualization.web.view.View`.
+            a :class:`~tensorneko.visualization.watcher.view.View`.
         __value (``T``): The wrapped value for watching.
 
     Attributes:
@@ -32,7 +32,7 @@ class Variable(Component, Generic[T]):
     Examples::
 
         # create a Variable component
-        var = tensorneko.visualization.web.Variable("x", 5)
+        var = tensorneko.visualization.watcher.Variable("x", 5)
         # update value
         var.value = 10
         # equivalent to
@@ -70,7 +70,7 @@ class ProgressBar(Component):
 
     Args:
         name (``str``):
-            The name of the variable, which should be unique in a :class:`~tensorneko.visualization.web.view.View`.
+            The name of the variable, which should be unique in a :class:`~tensorneko.visualization.watcher.view.View`.
         __value (``int``):
             The current progress of the progress bar.
         total (``int``):
@@ -82,7 +82,7 @@ class ProgressBar(Component):
     Examples::
 
         # create a ProgressBar component
-        pb = tensorneko.visualization.web.ProgressBar("process", 0, 10000)
+        pb = tensorneko.visualization.watcher.ProgressBar("process", 0, 10000)
         # update value. these 4 ways below are all equivalent.
         pb.value += 1
         pb.value = pb.value + 1
