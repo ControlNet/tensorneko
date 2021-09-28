@@ -14,6 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: npm install and build
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: |
+          npm install
+          npm run build
+        env:
+          CI: true
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:

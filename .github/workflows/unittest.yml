@@ -4,6 +4,39 @@ on:
     branches-ignore:
       - "main"
 jobs:
+  build-web:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: npm install and build
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: |
+          npm install
+          npm run build
+        env:
+          CI: true
+
+      - name: Eslint check
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: npm run lint
+
+      - name: Print dist path
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: |
+          echo ----------dist-------
+          ls -l dist
+          echo ----------dist/js-------
+          ls -l dist/js
+          echo ----------dist/css-------
+          ls -l dist/css
+
   unittest:
     runs-on: ubuntu-20.04
 

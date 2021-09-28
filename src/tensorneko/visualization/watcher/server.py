@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from typing import Optional, Union, List
-from shutil import copyfile
 
 from .view import View
 from ...util import tensorneko_path
@@ -15,22 +15,22 @@ class Server:
 
     Args:
         view (:class:`~tensorneko.visualization.web.view.View` | ``str``):
-            The :class:`~tensorneko.visualization.web.view.View` object or the name of
-            :class:`~tensorneko.visualization.web.view.View` for display.
+            The :class:`~tensorneko.visualization.watcher.view.View` object or the name of
+            :class:`~tensorneko.visualization.watcher.view.View` for display.
 
         port (``int``, optional): The port of the http server. Default 8000.
 
     Attributes:
-        view_name (``str``): The name of the :class:`~tensorneko.visualization.web.view.View`.
+        view_name (``str``): The name of the :class:`~tensorneko.visualization.watcher.view.View`.
         process (:class:``subprocess.Popen``): The process of the server.
 
     Examples::
 
         # start a server
-        var = tensorneko.visualization.web.Variable("x", 5)
-        view = tensorneko.visualization.web.View("view1")
+        var = tensorneko.visualization.watcher.Variable("x", 5)
+        view = tensorneko.visualization.watcher.View("view1")
         view.add(var)
-        server = tensorneko.visualization.web.Server(view)
+        server = tensorneko.visualization.watcher.Server(view)
         server.start()
 
         # stop the server
@@ -79,15 +79,26 @@ class Server:
         self._run_blocking()
 
     def _prepare(self) -> None:
-        source_path_index = os.path.join(tensorneko_path, "visualization", "web", "index.html")
-        source_path_js = os.path.join(tensorneko_path, "visualization", "web", "main.js")
-        target_path_index = os.path.join(self.view_name, "index.html")
-        target_path_js = os.path.join(self.view_name, "main.js")
+        source_path = os.path.join(tensorneko_path, "visualization", "watcher", "web", "dist")
+        target_path = os.path.join(self.view_name)
         if not os.path.exists(self.view_name):
             os.mkdir(self.view_name)
 
-        copyfile(source_path_index, target_path_index)
-        copyfile(source_path_js, target_path_js)
+        target_path_css = os.path.join(self.view_name, "css")
+        if os.path.exists(target_path_css):
+            shutil.rmtree(target_path_css)
+
+        target_path_js = os.path.join(self.view_name, "js")
+        if os.path.exists(target_path_js):
+            shutil.rmtree(target_path_js)
+
+        target_path_html = os.path.join(self.view_name, "index.html")
+        if os.path.exists(target_path_html):
+            os.remove(target_path_html)
+
+        shutil.copy(os.path.join(source_path, "index.html"), target_path_html)
+        shutil.copytree(os.path.join(source_path, "css"), target_path_css)
+        shutil.copytree(os.path.join(source_path, "js"), target_path_js)
 
     def _run(self) -> None:
         self.process = subprocess.Popen(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)])
@@ -115,3 +126,10 @@ class Server:
         """
         for server in cls.servers:
             server.stop()
+
+    def __enter__(self) -> Server:
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()

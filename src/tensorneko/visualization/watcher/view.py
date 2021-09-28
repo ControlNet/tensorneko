@@ -18,21 +18,21 @@ class View:
         name (``str``): The name of the view.
 
     Attributes:
-        components (``List[Component]``): The :class:`~tensorneko.visualization.web.component.Component` objects in the
+        components (``List[Component]``): The :class:`~tensorneko.visualization.watcher.component.Component` objects in the
             view.
 
     Examples::
 
         # create components
-        var = tensorneko.visualization.web.Variable("x", 5)
-        pb = tensorneko.visualization.web.ProgressBar("process", 0, 10000)
+        var = tensorneko.visualization.watcher.Variable("x", 5)
+        pb = tensorneko.visualization.watcher.ProgressBar("process", 0, 10000)
 
         # create a view and add components
-        view = tensorneko.visualization.web.View("view1")
+        view = tensorneko.visualization.watcher.View("view1")
         view.add(var).add(pb)
 
         # components also support read by multiple views
-        view2 = tensorneko.visualization.web.View("view2")
+        view2 = tensorneko.visualization.watcher.View("view2")
         view2.add(var)
 
     """
