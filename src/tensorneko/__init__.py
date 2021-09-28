@@ -26,4 +26,4 @@ __all__ = [
     "NekoModule"
 ]
 
-__version__ = io.read.text.of("version.txt")
+__version__ = "0.1.9"

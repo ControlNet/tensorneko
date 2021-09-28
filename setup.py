@@ -33,6 +33,9 @@ setuptools.setup(
     },
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
+    package_data={
+        "tensorneko": ["visualization/web/*.html", "visualization/web/*.js"]
+    },
     python_requires=">=3.7",
     install_requires=requirements,
     classifiers=[
