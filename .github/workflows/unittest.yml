@@ -30,8 +30,11 @@ jobs:
       - name: Print dist path
         working-directory: ./src/tensorneko/visualization/watcher/web
         run: |
+          echo ----------dist-------
           ls -l dist
+          echo ----------dist/js-------
           ls -l dist/js
+          echo ----------dist/css-------
           ls -l dist/css
 
   unittest:
