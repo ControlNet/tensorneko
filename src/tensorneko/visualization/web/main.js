@@ -19,7 +19,7 @@ async function initApp() {
         },
 
         methods: {
-            async update(cache = "no-cache") {
+            update(cache = "no-cache") {
                 fetch("data.json", {cache: cache})
                     .then(response => response.json())
                     .then(json => {
