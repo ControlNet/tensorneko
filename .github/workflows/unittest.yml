@@ -16,14 +16,19 @@ jobs:
           node-version: 16.x
 
       - name: npm install and build
+        working-directory: ./src/tensorneko/visualization/watcher/web
         run: |
-          cd src/tensorneko/visualization/watcher/web
           npm install
           npm run build
         env:
           CI: true
 
-      - name: Print results
+      - name: Eslint check
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: npm run lint
+
+      - name: Print dist path
+        working-directory: ./src/tensorneko/visualization/watcher/web
         run: |
           ls -l dist
           ls -l dist/js
