@@ -57,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          python setup.py install
+          python init.py
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV

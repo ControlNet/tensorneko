@@ -1,20 +1,15 @@
-import setuptools
+import setuptools, init
 
 with open("README.md", "r") as file:
     long_description = file.read()
-
 
 requirements = []
 with open("requirements.txt", "r") as file:
     for line in file:
         requirements.append(line.strip())
 
-
-with open("version.txt", "r") as file:
-    version = file.read()
-
-with open("src/tensorneko/version.txt", "w") as file:
-    file.write(version)
+version = init.read_version()
+init.write_version(version)
 
 setuptools.setup(
     name="tensorneko",
