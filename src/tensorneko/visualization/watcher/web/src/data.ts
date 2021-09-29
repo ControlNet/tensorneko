@@ -1,7 +1,7 @@
-export declare class ComponentData {
+export declare abstract class ComponentData {
     name: string
     type: string
-    value: any
+    value: unknown
 }
 
 export declare class VariableData extends ComponentData {
