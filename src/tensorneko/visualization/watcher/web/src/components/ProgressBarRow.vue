@@ -1,12 +1,14 @@
 <template>
-  <th scope="row">{{d.name}}</th>
-  <td><div class="progress" style="height: 30px;">
-    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-         :style="'width: ' + this.percentage(this.d) + '%'"
-         :aria-valuenow="this.d.value" aria-valuemin="0" :aria-valuemax="this.d.total">
-      {{d.value}} / {{d.total}}
-    </div>
-  </div></td>
+  <th scope="row">{{ d.name }}</th>
+  <td>
+    <b-progress striped animated style="height: 30px;" :max="d.total">
+      <b-progress-bar :value="d.value" :variant="variant">
+        <span><strong>
+          {{d.value}} / {{d.total}}
+        </strong></span>
+      </b-progress-bar>
+    </b-progress>
+  </td>
 </template>
 
 <script lang="ts">
@@ -19,14 +21,51 @@ export default class ProgressBarRow extends Vue {
   @Prop(String) k!: string
 
   d: ProgressBarData = progressbars[this.k]
+  prev: ProgressBarData = null
+  lastModified: number = +new Date()
+  variant: Variant = "warning"
 
-  percentage(d: ProgressBarData): number {
-    return d.value / d.total * 100
+  private getType(): Variant {
+    const dTime = +new Date() - this.lastModified;
+
+    if (dTime > 10000) {
+      return "warning";
+    } else if (this.prev !== null) {
+      if (this.d.value > this.prev.value) {
+        return "success";
+      } else if (this.d.value < this.prev.value) {
+        return "danger";
+      } else {
+        return "warning";
+      }
+    } else {
+      return "warning";
+    }
+  }
+
+  updateVariant(): void {
+    this.variant = this.getType()
+    setTimeout(this.updateVariant, 10000)
   }
 
   update(): void {
+    this.prev = this.d;
     this.d = progressbars[this.k];
+    this.lastModified = +new Date()
+  }
+
+  mounted(): void {
+    this.updateVariant();
   }
 
 }
+
+type Variant = "success" | "warning" | "danger";
+
 </script>
+
+<style scoped>
+div.progress-bar > span {
+  color: black;
+}
+</style>

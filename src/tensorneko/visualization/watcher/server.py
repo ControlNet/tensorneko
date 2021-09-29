@@ -101,7 +101,10 @@ class Server:
         shutil.copytree(os.path.join(source_path, "js"), target_path_js)
 
     def _run(self) -> None:
-        self.process = subprocess.Popen(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)])
+        self.process = subprocess.Popen(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT
+        )
         print(f"Server started at port {self.port}, view \"{self.view_name}\".")
 
     def _run_blocking(self):

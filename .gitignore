@@ -259,3 +259,6 @@ node_modules
 .idea
 scratch.py
 scratch.ipynb
+src/tensorneko/version.txt
+src/tensorneko/visualization/watcher/web/public/*
+!src/tensorneko/visualization/watcher/web/public/index.html

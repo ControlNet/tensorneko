@@ -63,6 +63,7 @@ class View:
         """
         component.views.append(self)
         self.components.append(component)
+        component.update()
         self.update()
         return self
 

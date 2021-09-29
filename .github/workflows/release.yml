@@ -58,4 +58,4 @@ jobs:
           title: "[${{ env.VERSION }}] TensorNeko Release"
           prerelease: false
           files: "dist/*"
-          draft: false
+          draft: true
