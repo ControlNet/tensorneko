@@ -102,7 +102,8 @@ class Server:
 
     def _run(self) -> None:
         self.process = subprocess.Popen(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)],
-            stdout=subprocess.DEVNULL
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT
         )
         print(f"Server started at port {self.port}, view \"{self.view_name}\".")
 

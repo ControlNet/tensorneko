@@ -4,7 +4,6 @@ export declare class ComponentData {
     value: any
 }
 
-
 export declare class VariableData extends ComponentData {
     type: "Variable"
     value: string
@@ -16,5 +15,15 @@ export declare class ProgressBarData extends ComponentData {
     total: number
 }
 
-export const variables: { [name: string]: VariableData } = {};
-export const progressbars: { [name: string]: ProgressBarData } = {};
+export declare class ImageData extends ComponentData {
+    type: "Image"
+    value: string
+}
+
+export type Variables = { [name: string]: VariableData }
+export type Progressbars = { [name: string]: ProgressBarData }
+export type Images = { [name: string]: ImageData }
+
+export const variables: Variables = {};
+export const progressbars: Progressbars = {};
+export const images: Images = {};

@@ -7,32 +7,37 @@
   </div>
   <ProgressBarTable v-if="Object.keys(this.progressbars).length > 0" ref="progressbar"/>
   <VariableTable v-if="Object.keys(this.variables).length > 0" ref="variable"/>
+  <ImageSection v-if="Object.keys(this.images).length > 0" ref="image"/>
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { ComponentData, variables, progressbars } from "@/data";
+import { ComponentData, variables, progressbars, images } from "@/data";
 import ProgressBarTable from "@/components/ProgressBarTable.vue";
 import VariableTable from "@/components/VariableTable.vue";
+import ImageSection from "@/components/ImageSection.vue";
 
 type RequestCache = "default" | "force-cache" | "no-cache" | "no-store" | "only-if-cached" | "reload";
 
 
 @Options({
   components: {
+    ImageSection,
     ProgressBarTable,
     VariableTable
   },
 })
 export default class App extends Vue {
-  variables = variables
-  progressbars = progressbars
-  updateDuration = 1000
+  readonly variables = variables
+  readonly progressbars = progressbars
+  readonly images = images
+  updateDuration = 5000
 
-  get refs(): { progressbar: ProgressBarTable, variable: VariableTable } {
+  get refs(): { progressbar: ProgressBarTable, variable: VariableTable, image: ImageSection } {
     return {
       progressbar: this.$refs.progressbar as ProgressBarTable,
-      variable: this.$refs.variable as VariableTable
+      variable: this.$refs.variable as VariableTable,
+      image: this.$refs.image as ImageSection
     }
   }
 
@@ -57,6 +62,8 @@ export default class App extends Vue {
               updateArray(d, this.variables);
             } else if (d.type === "ProgressBar") {
               updateArray(d, this.progressbars);
+            } else if (d.type === "Image") {
+              updateArray(d, this.images);
             }
           });
 
@@ -65,6 +72,8 @@ export default class App extends Vue {
               this.refs.progressbar.refs[name].update();
             } else if (type === "Variable") {
               this.refs.variable.refs[name].update();
+            } else if (type === "Image") {
+              this.refs.image.refs[name].update();
             }
           });
 
@@ -83,6 +92,6 @@ export default class App extends Vue {
 
 <style>
 body {
-  margin: 10px;
+  margin: 10px !important;
 }
 </style>
