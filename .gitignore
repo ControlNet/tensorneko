@@ -259,3 +259,4 @@ node_modules
 .idea
 scratch.py
 scratch.ipynb
+src/tensorneko/version.txt
