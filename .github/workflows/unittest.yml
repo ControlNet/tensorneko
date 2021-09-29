@@ -55,7 +55,7 @@ jobs:
           architecture: x64
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: python setup.py install
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV

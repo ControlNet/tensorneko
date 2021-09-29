@@ -13,11 +13,8 @@ with open("requirements.txt", "r") as file:
 with open("version.txt", "r") as file:
     version = file.read()
 
-with open("src/tensorneko/__init__.py", "r") as file:
-    src = file.read().replace("__version__ = io.read.text.of(\"version.txt\")", f"__version__ = \"{version}\"")
-
-with open("src/tensorneko/__init__.py", "w") as file:
-    file.write(src)
+with open("src/tensorneko/version.txt", "w") as file:
+    file.write(version)
 
 setuptools.setup(
     name="tensorneko",
@@ -35,6 +32,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src"),
     package_data={
         "tensorneko": [
+            "version.txt",
             "visualization/watcher/web/dist/index.html",
             "visualization/watcher/web/dist/css/*",
             "visualization/watcher/web/dist/js/*"

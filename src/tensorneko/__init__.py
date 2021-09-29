@@ -1,3 +1,5 @@
+import os.path
+
 from . import callback
 from . import io
 from . import layer
@@ -26,4 +28,4 @@ __all__ = [
     "NekoModule"
 ]
 
-__version__ = io.read.text.of("version.txt")
+__version__ = io.read.text.of(os.path.join(util.get_tensorneko_path(), "version.txt"))
