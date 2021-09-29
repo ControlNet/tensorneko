@@ -4,7 +4,70 @@ on:
     branches:
       - "main"
 jobs:
+  build-web:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: npm install and build
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: |
+          npm install
+          npm run build
+        env:
+          CI: true
+
+      - name: Eslint check
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: npm run lint
+
+      - name: Print dist path
+        working-directory: ./src/tensorneko/visualization/watcher/web
+        run: |
+          echo ----------dist-------
+          ls -l dist
+          echo ----------dist/js-------
+          ls -l dist/js
+          echo ----------dist/css-------
+          ls -l dist/css
+
+  unittest:
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          python init.py
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
+
+      - name: Run Test
+        run: python -m unittest discover test
+
+
   release:
+    needs: [build-web, unittest]
     runs-on: ubuntu-20.04
 
     strategy:
@@ -37,12 +100,6 @@ jobs:
         run: |
           pip install -r requirements.txt
           python init.py
-
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
-
-      - name: Run Test
-        run: python -m unittest discover test
 
       - name: Build package
         run: python setup.py sdist bdist_wheel
