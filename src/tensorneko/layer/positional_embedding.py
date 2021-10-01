@@ -35,7 +35,6 @@ class PositionalEmbedding(NekoModule):
         if self.use_dropout:
             self.dropout = Dropout(dropout_rate)
 
-
     def forward(self, x: Tensor) -> Tensor:
         f = F() >> _ + self.emb
         if self.use_dropout:
