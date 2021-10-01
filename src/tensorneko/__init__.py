@@ -1,6 +1,7 @@
 import os.path
 
 from . import callback
+from . import evaluation
 from . import io
 from . import layer
 from . import module
@@ -15,6 +16,7 @@ from .neko_trainer import NekoTrainer
 
 __all__ = [
     "callback",
+    "evaluation",
     "io",
     "layer",
     "module",
