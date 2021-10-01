@@ -26,8 +26,6 @@ import VariableRow from "@/components/VariableRow.vue";
 export default class VariableTable extends Vue {
   variables = variables
 
-  get refs(): Record<string, VariableRow> {
-    return this.$refs as Record<string, VariableRow>
-  }
+  $refs!: Record<string, VariableRow>
 }
 </script>

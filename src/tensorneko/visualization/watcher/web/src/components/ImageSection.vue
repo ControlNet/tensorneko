@@ -19,9 +19,7 @@ import { Images, images } from "@/data";
 export default class ImageSection extends Vue {
   images = images
 
-  get refs(): Record<string, ImageCard> {
-    return this.$refs as Record<string, ImageCard>
-  }
+  $refs!: Record<string, ImageCard>
 
   get imageGroups(): Array<Images> {
     const groups: Array<Images> = [{}];

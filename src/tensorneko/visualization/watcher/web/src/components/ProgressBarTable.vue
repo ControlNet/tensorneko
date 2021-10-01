@@ -28,8 +28,6 @@ import ProgressBarRow from "@/components/ProgressBarRow.vue";
 export default class ProgressBarTable extends Vue {
   progressbars = progressbars;
 
-  get refs(): Record<string, ProgressBarRow> {
-    return this.$refs as Record<string, ProgressBarRow>
-  }
+  $refs!: Record<string, ProgressBarRow>
 }
 </script>

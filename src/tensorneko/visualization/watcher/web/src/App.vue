@@ -22,9 +22,9 @@ type RequestCache = "default" | "force-cache" | "no-cache" | "no-store" | "only-
 
 @Options({
   components: {
-    ImageSection,
     ProgressBarTable,
-    VariableTable
+    VariableTable,
+    ImageSection
   },
 })
 export default class App extends Vue {
@@ -33,12 +33,10 @@ export default class App extends Vue {
   readonly images = images
   updateDuration = 5000
 
-  get refs(): { progressbar: ProgressBarTable, variable: VariableTable, image: ImageSection } {
-    return {
-      progressbar: this.$refs.progressbar as ProgressBarTable,
-      variable: this.$refs.variable as VariableTable,
-      image: this.$refs.image as ImageSection
-    }
+  $refs!: {
+    progressbar: ProgressBarTable,
+    variable: VariableTable,
+    image: ImageSection
   }
 
   update(cache: RequestCache = "no-cache"): void {
@@ -69,11 +67,11 @@ export default class App extends Vue {
 
           changes.forEach(({type, name}) => {
             if (type === "ProgressBar") {
-              this.refs.progressbar.refs[name].update();
+              this.$refs.progressbar.$refs[name].update();
             } else if (type === "Variable") {
-              this.refs.variable.refs[name].update();
+              this.$refs.variable.$refs[name].update();
             } else if (type === "Image") {
-              this.refs.image.refs[name].update();
+              this.$refs.image.$refs[name].update();
             }
           });
 
