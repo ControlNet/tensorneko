@@ -85,6 +85,10 @@ class TextReader:
     of_xml = pd.read_xml
     of = of_plain
 
+    def __new__(cls, path: str, encoding: str = "UTF-8") -> str:
+        """Alias of :meth:`~TextReader.of_plain`"""
+        return cls.of_plain(path, encoding)
+
 
 def json_data(cls):
     """

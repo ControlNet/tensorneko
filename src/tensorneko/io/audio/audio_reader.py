@@ -26,3 +26,7 @@ class AudioReader:
             return torchaudio.info(path)
         else:
             return AudioData(*torchaudio.load(path))
+
+    def __new__(cls, path: str, return_info: bool = False) -> Union[AudioData, AudioMetaData]:
+        """Alias of :meth:`~AudioReader.of`"""
+        return cls.of(path, return_info)
