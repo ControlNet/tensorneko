@@ -1,7 +1,9 @@
 import subprocess
 
+from tensorneko.util.server import AbstractServer
 
-class Server:
+
+class Server(AbstractServer):
     def __init__(self, logdir: str = "logs", port: int = 6006):
         self.logdir = logdir
         self.port = port
