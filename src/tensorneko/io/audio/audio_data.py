@@ -15,3 +15,6 @@ class AudioData:
     """
     audio: Tensor
     sample_rate: int
+
+    def __iter__(self):
+        return iter((self.audio, self.sample_rate))

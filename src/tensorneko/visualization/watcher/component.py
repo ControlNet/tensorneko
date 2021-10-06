@@ -170,3 +170,20 @@ class Image(Component[Union[ndarray, Tensor, None]]):
                 img_path = os.path.join(view.name, self.path) + f"-{self._ver}.jpg"
                 # C, H, W
                 write.image.to_jpeg(img_path, self.value)
+
+
+@dataclass
+class Logger(Component[List[str]]):
+    __value: List[str] = field(default_factory=list)
+
+    def log(self, msg):
+        self.__value.append(msg)
+        for view in self.views:
+            view.update()
+
+    def to_dict(self):
+        return {
+            "type": "Logger",
+            "name": self.name,
+            "value": self.value
+        }

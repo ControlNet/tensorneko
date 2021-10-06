@@ -6,10 +6,10 @@ import subprocess
 from typing import Optional, Union, List
 
 from .view import View
-from ...util import tensorneko_path
+from ...util import tensorneko_path, AbstractServer
 
 
-class Server:
+class Server(AbstractServer):
     """
     The http server for display watched components.
 
@@ -129,10 +129,3 @@ class Server:
         """
         for server in cls.servers:
             server.stop()
-
-    def __enter__(self) -> Server:
-        self.start()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.stop()

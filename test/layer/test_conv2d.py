@@ -62,7 +62,7 @@ class TestConv2d(unittest.TestCase):
 
         # Create a single layer
         neko_layer = Conv2d(self.in_features, self.out_features, self.kernel_size, self.stride, self.padding)
-        torch_layer = nn.Sequential(neko_layer.conv2d)
+        torch_layer = nn.Sequential(neko_layer.conv)
 
         # Forward prop
         neko_result: Tensor = neko_layer(x)
@@ -78,7 +78,7 @@ class TestConv2d(unittest.TestCase):
 
         # Create a single layer
         neko_layer = Conv2d(self.in_features, self.out_features, self.kernel_size, self.stride, self.padding, build_activation=self.activation_factory)
-        torch_layer = nn.Sequential(neko_layer.conv2d, neko_layer.activation)
+        torch_layer = nn.Sequential(neko_layer.conv, neko_layer.activation)
 
         # Forward prop
         neko_result: Tensor = neko_layer(x)
@@ -94,7 +94,7 @@ class TestConv2d(unittest.TestCase):
 
         # Create a single layer
         neko_layer = Conv2d(self.in_features, self.out_features, self.kernel_size, self.stride, self.padding, build_normalization=self.normalization_factory)
-        torch_layer = nn.Sequential(neko_layer.conv2d, neko_layer.normalization)
+        torch_layer = nn.Sequential(neko_layer.conv, neko_layer.normalization)
 
         # Forward prop
         neko_result: Tensor = neko_layer(x)
@@ -110,7 +110,7 @@ class TestConv2d(unittest.TestCase):
 
         # Create a single layer
         neko_layer = Conv2d(self.in_features, self.out_features, self.kernel_size, self.stride, self.padding, build_activation=self.activation_factory, build_normalization=self.normalization_factory)
-        torch_layer = nn.Sequential(neko_layer.conv2d, neko_layer.normalization, neko_layer.activation)
+        torch_layer = nn.Sequential(neko_layer.conv, neko_layer.normalization, neko_layer.activation)
 
         # Forward prop
         neko_result: Tensor = neko_layer(x)

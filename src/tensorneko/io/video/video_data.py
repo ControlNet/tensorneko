@@ -10,6 +10,9 @@ class VideoInfo:
     video_fps: float
     audio_fps: Optional[int]
 
+    def __iter__(self):
+        return iter((self.video_fps, self.audio_fps))
+
 
 @dataclass
 class VideoData:
@@ -33,3 +36,6 @@ class VideoData:
             "audio_fps": None
         }
         self.info = VideoInfo(**info_args)
+
+    def __iter__(self):
+        return iter((self.video, self.audio, self.info))

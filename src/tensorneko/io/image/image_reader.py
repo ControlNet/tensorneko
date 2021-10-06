@@ -23,3 +23,7 @@ class ImageReader:
             :class:`~torch.Tensor`: A float tensor of image (C, H, W), with value range of 0. to 1.
         """
         return read_image(path, mode) / 255
+
+    def __new__(cls, path: str, mode: ImageReadMode = ImageReadMode.UNCHANGED) -> Tensor:
+        """Alias of :meth:`~ImageReader.of`"""
+        return cls.of(path, mode)

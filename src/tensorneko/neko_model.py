@@ -45,9 +45,9 @@ class NekoModel(LightningModule, NekoModule):
     @abstractmethod
     def training_step(self,
         batch: Optional[Union[Tensor, Sequence[Tensor]]] = None,
-        batch_idx: Optional[int]=None,
-        optimizer_idx: Optional[int]=None,
-        hiddens: Optional[Tensor]=None
+        batch_idx: Optional[int] = None,
+        optimizer_idx: Optional[int] = None,
+        hiddens: Optional[Tensor] = None
     ) -> Dict[str, Tensor]:
         """
         The method inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.training_step`.

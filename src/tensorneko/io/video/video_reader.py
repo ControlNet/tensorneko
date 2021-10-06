@@ -27,7 +27,7 @@ class VideoReader:
         Returns:
             :class:`~tensorneko.io.video.video_data.VideoData`:
                 A VideoData object contains a float tensor of video (T, C, H, W), with value range of 0. to 1,
-                an audio tensor of (T, D) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
+                an audio tensor of (T, C) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
         """
         if video.max() > 1:
             video = video / 255
@@ -51,10 +51,15 @@ class VideoReader:
         Returns:
             :class:`~tensorneko.io.video.video_data.VideoData`:
                 A VideoData object contains a float tensor of video (T, C, H, W), with value range of 0. to 1,
-                an audio tensor of (T, D) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
+                an audio tensor of (T, C) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
         """
         video, audio, info = read_video(path)
         video = video.permute(0, 3, 1, 2) / 255
+        audio = audio.permute(1, 0)
         return VideoData(video, audio, info)
 
     of = of_path
+
+    def __new__(cls, path: str) -> VideoData:
+        """Alias of :meth:`~VideoReader.of_path`"""
+        return cls.of_path(path)
