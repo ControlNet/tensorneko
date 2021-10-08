@@ -10,15 +10,12 @@ from ..util import F
 class Stack(NekoModule):
     """
     The module version of torch.stack function family.
-
-
-
     """
 
     def __init__(self, mode: str = "", dim: int = 0):
         super().__init__()
         # other mode cannot specify the dim
-        assert not (mode == "" and dim != 0), "Other modes cannot specify the dim"
+        assert not (mode != "" and dim != 0), "Other modes cannot specify the dim"
         if mode == "":
             self.stack_func = F(torch.stack, dim=dim)
         elif mode.lower() == "d":
