@@ -1,5 +1,5 @@
 <template>
-  <h6 class="display-6">Images</h6>
+  <h6 class="display-6">Logs</h6>
   <LoggerCard v-for="k of Object.keys(logs)" :key="k" :k="k" :ref="k"/>
 </template>
 
