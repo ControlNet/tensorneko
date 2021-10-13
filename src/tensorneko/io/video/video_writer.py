@@ -5,6 +5,7 @@ from numpy import ndarray
 from torch import Tensor
 
 from .video_data import VideoData
+from ...util import Rearrange
 
 
 class VideoWriter:
@@ -53,4 +54,5 @@ class VideoWriter:
                 audio_fps=video.info.audio_fps,
             )
         else:
-            torchvision.io.write_video(path, video, video_fps, audio_fps=audio_fps, audio_array=audio)
+            rearrange = Rearrange("t c h w -> t h w c")
+            torchvision.io.write_video(path, rearrange(video), video_fps, audio_fps=audio_fps, audio_array=audio)
