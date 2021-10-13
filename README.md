@@ -110,15 +110,26 @@ Easily load different modal data.
 
 ```python
 import tensorneko as neko
+from tensorneko.io.text.text_reader import json_data
+from typing import List
 
 # read video (Temporal, Channel, Height, Width)
 video_tensor = neko.io.read.video.of("path/to/video.mp4")
 # read audio (Channel, Temporal)
 audio_tensor = neko.io.read.audio.of("path/to/audio.wav")
 # read image (Channel, Height, Width)
-image_tensor = neko.io.read.audio.of("path/to/image.png")
-# read text 
+image_tensor = neko.io.read.image.of("path/to/image.png")
+# read plain text
 text_string = neko.io.read.text.of("path/to/text.txt")
+# read json as DataFrame
+json_df = neko.io.read.text.of_json("path/to/json.json", to_df=True)
+# read json as a object
+@json_data
+class JsonData:
+    x: int
+    y: int
+
+json_obj: List[JsonData] = neko.io.read.text.of_json("path/to/json.json", cls=List[JsonData])
 ```
 
 ## Neko preprocessing
@@ -186,7 +197,7 @@ class MnistClassifier(neko.NekoModel):
         x, y = batch
         logit = self(x)
         prob = logit.sigmoid()
-        loss = self.loss_func(prob, y)
+        loss = self.loss_func(logit, y)
         acc = self.acc_func(prob.max(dim=1)[1], y)
         return {"loss": loss, "acc": acc}
 
@@ -196,7 +207,7 @@ class MnistClassifier(neko.NekoModel):
         x, y = batch
         logit = self(x)
         prob = logit.sigmoid()
-        loss = self.loss_func(prob, y)
+        loss = self.loss_func(logit, y)
         acc = self.acc_func(prob.max(dim=1)[1], y)
         return {"loss": loss, "acc": acc}
 
