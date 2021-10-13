@@ -16,7 +16,7 @@ setuptools.setup(
     version=version,
     author="ControlNet",
     author_email="smczx@hotmail.com",
-    description="A small package for PyTorch utils",
+    description="Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lightning.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ControlNet/tensorneko",
