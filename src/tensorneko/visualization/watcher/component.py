@@ -124,7 +124,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
         name (``str``): The name of the image for display, which should be unique in
             a :class:`~tensorneko.visualization.watcher.view.View`.
 
-        __value (:class:`~numpy.ndarray` | :class:`~torch.Tensor` | ``None``, default): The image array with (C, H, W).
+        __value (:class:`~numpy.ndarray` | :class:`~torch.Tensor` | ``None``, optional): The image array with (C, H, W).
             Value range are between [0, 1].
 
     Attributes:
@@ -174,6 +174,23 @@ class Image(Component[Union[ndarray, Tensor, None]]):
 
 @dataclass
 class Logger(Component[List[str]]):
+    """
+    The component of log texts for display.
+
+    Args:
+        name (``str``): The name of the image for display, which should be unique in
+            a :class:`~tensorneko.visualization.watcher.view.View`.
+
+        __value (``List[str]``, optional): The initial logs. Default [].
+
+    Examples::
+
+        # create a Logger component
+        logger = tensorneko.visualization.watcher.Logger("training_log")
+        # log new message
+        logger.log("Epoch 1, loss: 0.1234, val_loss: 0.2345")
+
+    """
     __value: List[str] = field(default_factory=list)
 
     def log(self, msg):

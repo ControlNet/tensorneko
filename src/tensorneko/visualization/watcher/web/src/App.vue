@@ -8,14 +8,16 @@
   <ProgressBarTable v-if="Object.keys(this.progressbars).length > 0" ref="progressbar"/>
   <VariableTable v-if="Object.keys(this.variables).length > 0" ref="variable"/>
   <ImageSection v-if="Object.keys(this.images).length > 0" ref="image"/>
+  <LoggerSection v-if="Object.keys(this.logs).length > 0" ref="logger" />
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { ComponentData, variables, progressbars, images } from "@/data";
+import { ComponentData, variables, progressbars, images, logs } from "@/data";
 import ProgressBarTable from "@/components/ProgressBarTable.vue";
 import VariableTable from "@/components/VariableTable.vue";
 import ImageSection from "@/components/ImageSection.vue";
+import LoggerSection from "@/components/LoggerSection.vue";
 
 type RequestCache = "default" | "force-cache" | "no-cache" | "no-store" | "only-if-cached" | "reload";
 
@@ -24,19 +26,22 @@ type RequestCache = "default" | "force-cache" | "no-cache" | "no-store" | "only-
   components: {
     ProgressBarTable,
     VariableTable,
-    ImageSection
+    ImageSection,
+    LoggerSection
   },
 })
 export default class App extends Vue {
   readonly variables = variables
   readonly progressbars = progressbars
   readonly images = images
+  readonly logs = logs
   updateDuration = 5000
 
   $refs!: {
     progressbar: ProgressBarTable,
     variable: VariableTable,
-    image: ImageSection
+    image: ImageSection,
+    logger: LoggerSection
   }
 
   update(cache: RequestCache = "no-cache"): void {
@@ -62,6 +67,8 @@ export default class App extends Vue {
               updateArray(d, this.progressbars);
             } else if (d.type === "Image") {
               updateArray(d, this.images);
+            } else if (d.type === "Logger") {
+              updateArray(d, this.logs)
             }
           });
 
@@ -72,6 +79,8 @@ export default class App extends Vue {
               this.$refs.variable.$refs[name].update();
             } else if (type === "Image") {
               this.$refs.image.$refs[name].update();
+            } else if (type === "Logger") {
+              this.$refs.logger.$refs[name].update();
             }
           });
 
