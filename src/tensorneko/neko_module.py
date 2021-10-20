@@ -48,4 +48,3 @@ class NekoModule(ABC, Module, F):
     def __lshift__(self, g):
         """Overload >> operator for F instances"""
         return self.__class__.__compose(self.f, self.__ensure_callable(g))
-

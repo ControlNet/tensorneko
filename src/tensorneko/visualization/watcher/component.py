@@ -191,7 +191,8 @@ class Logger(Component[List[str]]):
         logger.log("Epoch 1, loss: 0.1234, val_loss: 0.2345")
 
     """
-    __value: List[str] = field(default_factory=list)
+    def __init__(self, __value: List[str] = None):
+        self.__value = __value or []
 
     def log(self, msg):
         self.__value.append(msg)
