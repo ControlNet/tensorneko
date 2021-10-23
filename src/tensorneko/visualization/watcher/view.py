@@ -51,20 +51,21 @@ class View:
             list(map(lambda comp: comp.to_dict(), self.components))
         )
 
-    def add(self, component: Component) -> View:
+    def add(self, *components: Component) -> View:
         """
         Add the new component to the view.
 
         Args:
-            component (:class:`~tensorneko.visualization.web.component.Component`): The component for adding.
+            components (:class:`~tensorneko.visualization.web.component.Component`): The component for adding.
 
         Returns:
             :class:`~tensorneko.visualization.web.view.View`: The self view object.
         """
-        component.views.append(self)
-        self.components.append(component)
-        component.update()
-        self.update()
+        for component in components:
+            component.views.append(self)
+            self.components.append(component)
+            component.update()
+            self.update()
         return self
 
     def remove(self, component: Union[Component, str]) -> View:

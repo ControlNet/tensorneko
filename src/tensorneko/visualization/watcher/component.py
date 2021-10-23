@@ -1,6 +1,5 @@
 import os.path
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from typing import Generic, List, Union
 
 from numpy import ndarray
@@ -11,19 +10,23 @@ from ...io import write
 from ...util.type import T
 
 
-@dataclass
 class Component(ABC, Generic[T]):
     name: str
-    views: List[View] = field(repr=False, init=False, default_factory=list)
-    __value: T
+    views: List[View]
+    _value: T
+
+    def __init__(self, name: str, value: T):
+        self.name = name
+        self._value = value
+        self.views = []
 
     @property
     def value(self):
-        return self.__value
+        return self._value
 
     @value.setter
     def value(self, value_in: T):
-        self.__value = value_in
+        self._value = value_in
         for view in self.views:
             view.update()
 
@@ -37,16 +40,21 @@ class Component(ABC, Generic[T]):
     def update(self):
         pass
 
+    def __str__(self):
+        return f"<{self.__class__.__name__}: {self.to_dict()}>"
 
-@dataclass
-class Variable(Component):
+    def __repr__(self):
+        return self.__str__()
+
+
+class Variable(Component[T]):
     """
     The components containing a value.
 
     Args:
         name (``str``): The name of the variable, which should be unique in
             a :class:`~tensorneko.visualization.watcher.view.View`.
-        __value (``T``): The wrapped value for watching.
+        value (``T``): The wrapped value for watching.
 
     Attributes:
         views (``List`` [:class:`~tensorneko.visualization.web.view.View`]): The views that the variable belongs to.
@@ -62,6 +70,9 @@ class Variable(Component):
 
     """
 
+    def __init__(self, name: str, value: T):
+        super().__init__(name, value)
+
     def to_dict(self):
         return {
             "type": "Variable",
@@ -70,7 +81,6 @@ class Variable(Component):
         }
 
 
-@dataclass
 class ProgressBar(Component[int]):
     """
     The components as a progress bar.
@@ -78,7 +88,7 @@ class ProgressBar(Component[int]):
     Args:
         name (``str``):
             The name of the variable, which should be unique in a :class:`~tensorneko.visualization.watcher.view.View`.
-        __value (``int``):
+        value (``int``):
             The current progress of the progress bar.
         total (``int``):
             The maximum number of the progress bar.
@@ -99,8 +109,8 @@ class ProgressBar(Component[int]):
     """
     total: int
 
-    def __init__(self, name: str, total: int, __value: int = 0):
-        super().__init__(name, __value)
+    def __init__(self, name: str, total: int, value: int = 0):
+        super().__init__(name, value)
         self.total = total
 
     def add(self, value_in: int):
@@ -115,7 +125,6 @@ class ProgressBar(Component[int]):
         }
 
 
-@dataclass
 class Image(Component[Union[ndarray, Tensor, None]]):
     """
     The component of image for display.
@@ -124,7 +133,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
         name (``str``): The name of the image for display, which should be unique in
             a :class:`~tensorneko.visualization.watcher.view.View`.
 
-        __value (:class:`~numpy.ndarray` | :class:`~torch.Tensor` | ``None``, optional): The image array with (C, H, W).
+        value (:class:`~numpy.ndarray` | :class:`~torch.Tensor` | ``None``, optional): The image array with (C, H, W).
             Value range are between [0, 1].
 
     Attributes:
@@ -140,8 +149,8 @@ class Image(Component[Union[ndarray, Tensor, None]]):
 
     """
 
-    def __init__(self, name: str, __value: Union[ndarray, Tensor, None] = None):
-        super().__init__(name, __value)
+    def __init__(self, name: str, value: Union[ndarray, Tensor, None] = None):
+        super().__init__(name, value)
         self.path = os.path.join("img", self.name)
         self._ver = 0
 
@@ -172,7 +181,6 @@ class Image(Component[Union[ndarray, Tensor, None]]):
                 write.image.to_jpeg(img_path, self.value)
 
 
-@dataclass
 class Logger(Component[List[str]]):
     """
     The component of log texts for display.
@@ -181,7 +189,7 @@ class Logger(Component[List[str]]):
         name (``str``): The name of the image for display, which should be unique in
             a :class:`~tensorneko.visualization.watcher.view.View`.
 
-        __value (``List[str]``, optional): The initial logs. Default [].
+        value (``List[str]``, optional): The initial logs. Default [].
 
     Examples::
 
@@ -191,10 +199,12 @@ class Logger(Component[List[str]]):
         logger.log("Epoch 1, loss: 0.1234, val_loss: 0.2345")
 
     """
-    __value: List[str] = field(default_factory=list)
+    def __init__(self, name: str, value: List[str] = None):
+        value = value or []
+        super().__init__(name, value)
 
     def log(self, msg):
-        self.__value.append(msg)
+        self._value.append(msg)
         for view in self.views:
             view.update()
 

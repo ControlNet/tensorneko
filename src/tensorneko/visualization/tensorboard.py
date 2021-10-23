@@ -1,6 +1,6 @@
 import subprocess
 
-from tensorneko.util.server import AbstractServer
+from ..util.server import AbstractServer
 
 
 class Server(AbstractServer):

@@ -3,8 +3,8 @@ from typing import Sequence, Union
 import torch
 from torch import Tensor
 
-from tensorneko import NekoModule
-from tensorneko.util import F
+from .. import NekoModule
+from ..util import F
 
 
 class Aggregation(NekoModule):

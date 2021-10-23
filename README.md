@@ -104,9 +104,9 @@ print(f(torch.rand(16)).shape)
 # torch.Size([1])
 ```
 
-## Neko reader
+## Neko IO
 
-Easily load different modal data.
+Easily load and save different modal data.
 
 ```python
 import tensorneko as neko
@@ -114,13 +114,29 @@ from tensorneko.io.text.text_reader import json_data
 from typing import List
 
 # read video (Temporal, Channel, Height, Width)
-video_tensor = neko.io.read.video.of("path/to/video.mp4")
+video_tensor, audio_tensor, video_info = neko.io.read.video.of("path/to/video.mp4")
+# write video
+neko.io.write.video.to("path/to/video.mp4", 
+    video_tensor, video_info.video_fps,
+    audio_tensor, video_info.audio_fps
+)
+
 # read audio (Channel, Temporal)
-audio_tensor = neko.io.read.audio.of("path/to/audio.wav")
-# read image (Channel, Height, Width)
+audio_tensor, sample_rate = neko.io.read.audio.of("path/to/audio.wav")
+# write audio
+neko.io.write.audio.to("path/to/audio.wav", audio_tensor, sample_rate)
+
+# read image (Channel, Height, Width) with float value in range [0, 1]
 image_tensor = neko.io.read.image.of("path/to/image.png")
+# write image
+neko.io.write.image.to_png("path/to/image.png", image_tensor)
+neko.io.write.image.to_jpeg("path/to/image.jpg", image_tensor)
+
 # read plain text
 text_string = neko.io.read.text.of("path/to/text.txt")
+# write plain text
+neko.io.write.text.to("path/to/text.txt", text_string)
+
 # read json as DataFrame
 json_df = neko.io.read.text.of_json("path/to/json.json", to_df=True)
 # read json as a object
@@ -130,6 +146,11 @@ class JsonData:
     y: int
 
 json_obj: List[JsonData] = neko.io.read.text.of_json("path/to/json.json", cls=List[JsonData])
+# read json as a dict or list
+json_dict = neko.io.read.text.of_json("path/to/json.json")
+# write json
+neko.io.write.text.to_json("path/to/json.json", json_dict)
+
 ```
 
 ## Neko preprocessing
@@ -147,6 +168,44 @@ neko.preprocess.resize_video(video, (256, 256))
 
 - `resize_video`
 - `resize_image`
+- `padding_video`
+- `padding_audio`
+
+## Neko Visualization
+
+### Variable Web Watcher
+Start a web server to watch the variable status when the program (e.g. training, inference, data preprocessing) is running.
+```python
+from tensorneko.visualization.watcher import *
+data_list = ... # a list of data
+def preprocessing(d): ...
+
+# initialize the components
+pb = ProgressBar("Processing", total=len(data_list))
+logger = Logger("Log message")
+var = Variable("Some Value", 0)
+view = View("Data preprocessing").add(pb, logger, var)
+# open server when the code block in running.
+with Server(view, port=8000):
+    for data in data_list:
+        preprocessing(data) # do some processing here
+        
+        logger.log("Some messages")  # log messages to the server
+        var.value = ...  # keep tracking a variable
+        pb.add(1)  # update the progress bar by add 1
+```
+When the script is running, go to `127.0.0.1:8000` to keep tracking the status.
+
+### Matplotlib wrappers
+Display an image of (C, H, W) shape by `plt.imshow` wrapper.
+```python
+import tensorneko as neko
+import matplotlib.pyplot as plt
+
+image_tensor = ...  # an image tensor with shape (C, H, W)
+neko.visualization.imshow(image_tensor)
+plt.show()
+```
 
 ## Neko Model
 
@@ -235,7 +294,19 @@ trainer = neko.NekoTrainer(log_every_n_steps=0, gpus=1, logger=model.name, preci
 trainer.fit(model, dm)
 ```
 
-## Neko utilities
+## Neko Notebook Helpers
+Here are some helper functions to better interact with Jupyter Notebook.
+```python
+import tensorneko as neko
+# display a video
+neko.notebook.Display.video("path/to/video.mp4")
+# display an audio
+neko.notebook.Display.audio("path/to/audio.wav")
+# display a code file
+neko.notebook.Display.code("path/to/code.java")
+```
+
+## Neko Utilities
 
 `StringGetter`: Get PyTorch class from string.
 ```python
@@ -267,5 +338,6 @@ Utilities list:
 - `Configuration`
 - `get_activation`
 - `get_loss`
+- `Seed`
 - `__`
 

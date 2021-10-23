@@ -5,7 +5,7 @@ from typing import Union, Dict, Any
 import pandas as pd
 from pandas import DataFrame
 
-from tensorneko.util.type import T
+from ...util.type import T
 
 
 class TextReader:
@@ -151,7 +151,17 @@ def json_data(cls):
 
             self.__dict__[k] = v
 
+    def to_dict(self) -> dict:
+        out = {}
+        for field in fields(self):
+            value = self.__dict__[field.name]
+            if "is_json_data" in type(value).__dict__ and type(value).is_json_data:
+                value = value.to_dict()
+            out[field.name] = value
+        return out
+
     processed_class: type = dataclass(cls)
     processed_class.__init__ = constructor
+    processed_class.to_dict = to_dict
     processed_class.is_json_data = True
     return processed_class
