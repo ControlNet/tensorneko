@@ -20,8 +20,8 @@ class Seed:
             train_dataset,
             batch_size=batch_size,
             num_workers=num_workers,
-            worker_init_fn=Seed.get_loader_worker_init()
-            generator=Seed.get_torch_generator(),
+            worker_init_fn=Seed.get_loader_worker_init(),
+            generator=Seed.get_torch_generator()
         )
 
         # See https://pytorch.org/docs/stable/notes/randomness.html
