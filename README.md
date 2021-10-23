@@ -17,7 +17,7 @@
 
 <div align="center">
     <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Unittest/dev?label=unittest&style=flat-square"></a>
-    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Release/main?label=release&style=flat-square"></a>
+    <a href="https://github.com/ControlNet/tensorneko/actions"><img src="https://img.shields.io/github/workflow/status/ControlNet/tensorneko/Release/master?label=release&style=flat-square"></a>
 </div>
 
 Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lightning.
