@@ -5,7 +5,7 @@ from numpy import ndarray
 from torch import Tensor
 
 
-def iou_1d(pred: Union[Tensor, ndarray], real: Union[Tensor, ndarray]) -> float:
+def iou_1d(pred: Union[Tensor, ndarray], real: Union[Tensor, ndarray]) -> Tensor:
     """
     Calculate 1D IOU for N proposals with L labels.
 
