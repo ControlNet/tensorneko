@@ -5,7 +5,7 @@ from typing import Union, Dict, Any
 import pandas as pd
 from pandas import DataFrame
 
-from tensorneko.util.type import T
+from ...util.type import T
 
 
 class TextReader:

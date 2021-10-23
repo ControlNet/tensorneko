@@ -8,7 +8,7 @@ from einops import rearrange
 from fn import F, _
 from torch import Tensor, uint8, float32
 
-from tensorneko.util import Rearrange
+from ..util import Rearrange
 
 
 class ResizeMethod(Enum):
