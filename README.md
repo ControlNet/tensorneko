@@ -322,6 +322,24 @@ print(result)
 # 42
 ```
 
+`Seed`: The universal seed for `numpy`, `torch` and Python `random`.
+```python
+from tensorneko.util import Seed
+from torch.utils.data import DataLoader
+
+# set seed to 42 for all numpy, torch and python random
+Seed.set(42)
+
+# Apply seed to parallel workers of DataLoader
+DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    num_workers=num_workers,
+    worker_init_fn=Seed.get_loader_worker_init(),
+    generator=Seed.get_torch_generator()
+)
+```
+
 Utilities list:
 - `reduce_dict_by`
 - `summarize_dict_by`
