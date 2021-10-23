@@ -35,29 +35,41 @@ class TextWriter:
 
     @staticmethod
     @overload
-    def to_json(path: str, obj: Union[dict, list], encoding="UTF-8") -> None:
+    def to_json(path: str, obj: Union[dict, list, object], encoding="UTF-8") -> None:
         """
         Save as Json file from a dictionary or list.
 
         Args:
             path (``str``): The path of output file.
-            obj (``dict`` | ``list``): The json data which need to be used for output.
+            obj (``dict`` | ``list`` | ``object``): The json data which need to be used for output. The type should be
+                ``dict``, ``list`` or the ``object`` decorated by :func:`~tensorneko.io.text.text_reader.json_data`.
             encoding (``str``, optional): Python file IO encoding parameter. Default: "UTF-8".
         """
         ...
 
     @staticmethod
-    def to_json(path: str, obj: Union[dict, list, DataFrame], encoding="UTF-8", orient=None) -> None:
+    def to_json(path: str, obj: Union[dict, list, object, DataFrame], encoding="UTF-8", orient=None) -> None:
         """
         The implementation of :meth:`~TextWriter.to_json` method.
         """
-        if type(obj) in (dict, list):
+        if type(obj) == DataFrame:
+            obj.to_json(path, orient=orient)
+        elif type(obj) is dict:
             with open(path, "w", encoding=encoding) as file:
                 file.write(json.dumps(obj))
-        elif type(obj) == DataFrame:
-            obj.to_json(path, orient=orient)
+        elif "is_json_data" in type(obj).__dict__ and type(obj).is_json_data:
+            with open(path, "w", encoding=encoding) as file:
+                file.write(json.dumps(obj.to_dict()))
+        elif type(obj) is list:
+            if len(obj) == 0 or type(obj[0]) in (dict, list):
+                with open(path, "w", encoding=encoding) as file:
+                    file.write(json.dumps(obj))
+            elif "is_json_data" in type(obj[0]).__dict__ and type(obj[0]).is_json_data:
+                obj = [each.to_dict() for each in obj]
+                with open(path, "w", encoding=encoding) as file:
+                    file.write(json.dumps(obj))
         else:
-            raise TypeError("Not implemented type. Only support dict, list and DataFrame.")
+            raise TypeError("Not implemented type. Only support dict, list, json_data and DataFrame.")
 
     @staticmethod
     def to_csv(path: str, dataframe: DataFrame, index: bool = True, columns=None, header=True, sep=",") -> None:
