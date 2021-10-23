@@ -1,4 +1,5 @@
-import setuptools, init
+import init
+import setuptools
 
 with open("README.md", "r") as file:
     long_description = file.read()
