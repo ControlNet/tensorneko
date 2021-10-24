@@ -1,24 +1,28 @@
+from __future__ import annotations
 import os.path
 from abc import ABC, abstractmethod
-from typing import Generic, List, Union
+from typing import Generic, List, Union, Dict, TYPE_CHECKING
 
 from numpy import ndarray
 from torch import Tensor
 
-from .view import View
 from ...io import write
 from ...util.type import T
+if TYPE_CHECKING:
+    from .view import View
 
 
 class Component(ABC, Generic[T]):
     name: str
     views: List[View]
     _value: T
+    components: Dict[str, Component] = {}
 
     def __init__(self, name: str, value: T):
         self.name = name
         self._value = value
         self.views = []
+        Component.components[self.name] = self
 
     @property
     def value(self):

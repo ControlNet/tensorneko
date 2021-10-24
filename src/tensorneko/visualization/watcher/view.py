@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Union, List
+from typing import Union, List
 import os
 
 from ...io import write
-if TYPE_CHECKING:
-    from . import Component
+from . import Component
 
 
 @dataclass
@@ -44,10 +43,14 @@ class View:
         return self._to_json()
 
     def _to_json(self) -> None:
-        if not os.path.exists(self.name):
-            os.mkdir(self.name)
+        if not os.path.exists("watcher"):
+            os.mkdir("watcher")
 
-        write.text.to_json(os.path.join(self.name, "data.json"),
+        view_path = os.path.join("watcher", self.name)
+        if not os.path.exists(view_path):
+            os.mkdir(view_path)
+
+        write.text.to_json(os.path.join("watcher", self.name, "data.json"),
             list(map(lambda comp: comp.to_dict(), self.components))
         )
 
@@ -67,6 +70,15 @@ class View:
             component.update()
             self.update()
         return self
+
+    def add_all(self) -> View:
+        """
+        Add all defined components.
+
+        Returns:
+            :class:`~tensorneko.visualization.web.view.View`: The self view object.
+        """
+        return self.add(*Component.components.values())
 
     def remove(self, component: Union[Component, str]) -> View:
         """
