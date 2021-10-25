@@ -1,19 +1,19 @@
-from typing import overload, Union, Optional
+from typing import Union, Optional
 
 import torchvision
 from numpy import ndarray
 from torch import Tensor
 
 from .video_data import VideoData
-from ...util import Rearrange
+from ...util import Rearrange, dispatch
 
 
 class VideoWriter:
     """The VideoWriter for writing video file"""
 
     @staticmethod
-    @overload
-    def to(path: str, video: VideoData):
+    @dispatch
+    def to(path: str, video: VideoData) -> None:
         """
         Write to video file from :class:`~tensorneko.io.video.video_data.VideoData`.
 
@@ -21,13 +21,15 @@ class VideoWriter:
             path (``str``): The path of output file.
             video (:class:`~tensorneko.io.video.video_data.VideoData`): The VideoData object for output.
         """
-        ...
+        torchvision.io.write_video(path, video.video, fps=video.info.video_fps, audio_array=video.audio,
+            audio_fps=video.info.audio_fps,
+        )
 
     @staticmethod
-    @overload
+    @dispatch
     def to(path: str, video: Union[Tensor, ndarray], video_fps: float, audio: Union[Tensor, ndarray] = None,
         audio_fps: Optional[int] = None
-    ):
+    ) -> None:
         """
         Write to video file from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (T, C, H, W).
 
@@ -40,19 +42,5 @@ class VideoWriter:
                 for output. None means no audio in output video file. Default: None.
             audio_fps (``int``, optional): The audio fps. Default: None.
         """
-        ...
-
-    @staticmethod
-    def to(path: str, video: Union[Tensor, ndarray, VideoData], video_fps: float = None,
-        audio: Union[Tensor, ndarray] = None, audio_fps: int = None
-    ):
-        """
-        The implementation of :meth:`~tensorneko.io.read.video.video_writer.VideoWriter.to`.
-        """
-        if type(video) == VideoData:
-            torchvision.io.write_video(path, video.video, fps=video.info.video_fps, audio_array=video.audio,
-                audio_fps=video.info.audio_fps,
-            )
-        else:
-            rearrange = Rearrange("t c h w -> t h w c")
-            torchvision.io.write_video(path, rearrange(video), video_fps, audio_fps=audio_fps, audio_array=audio)
+        rearrange = Rearrange("t c h w -> t h w c")
+        torchvision.io.write_video(path, rearrange(video), video_fps, audio_fps=audio_fps, audio_array=audio)
