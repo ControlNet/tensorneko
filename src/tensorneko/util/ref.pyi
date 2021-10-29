@@ -1,0 +1,26 @@
+from __future__ import annotations
+
+from typing import Generic, overload
+import inspect
+
+from ..util import dispatch
+from ..util.type import CT
+
+
+class Ref(Generic[CT]):
+    @overload
+    def __new__(cls, value: str) -> StringRef: ...
+    @overload
+    def __new__(cls, value: int) -> Ref[int]: ...
+    @overload
+    def __new__(cls, value: float) -> Ref[float]: ...
+    @overload
+    def __new__(cls, value: bool) -> Ref[bool]: ...
+
+class StringRef(Ref[str]): ...
+
+class IntRef(Ref[int]): ...
+
+class FloatRef(Ref[float]): ...
+
+class BoolRef(Ref[bool]): ...

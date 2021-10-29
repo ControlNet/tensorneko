@@ -20,3 +20,4 @@ Shape = Union[Size, List[int], Tuple[int, ...]]
 # Generic types
 T = TypeVar('T')  # Any type
 A = TypeVar("A", torch.Tensor, np.ndarray)  # Array type
+CT = TypeVar("CT", covariant=True)  # Covariant type
