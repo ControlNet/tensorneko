@@ -302,3 +302,16 @@ def tensorneko_path() -> str:
         ``str``: The root path of `tensorneko`
     """
     return dirname(dirname(abspath(__file__)))
+
+
+def list_to_dict(l: List[T], key: Callable[[T], Any]) -> Dict[Any, T]:
+    """
+    Convert the list as a dictionary by given key.
+    Args:
+        l (``List[T]``): Input list.
+        key (``(T) -> Any``): The key getter function.
+
+    Returns:
+        ``Dict[Any, T]``: The output dictionary.
+    """
+    return {key(x): x for x in l}
