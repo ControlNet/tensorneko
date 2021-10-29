@@ -35,6 +35,7 @@ class Seed:
     @classmethod
     def torch(cls, seed: int) -> None:
         torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
 
     @classmethod
     def python(cls, seed: int) -> None:

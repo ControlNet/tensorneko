@@ -8,6 +8,20 @@ from ..util import dict_add
 
 
 class Args(F):
+    """
+    A variable wrapper for pipe operations.
+
+    Args:
+        args, kwargs: The arguments to be passed to the pipe.
+
+    Examples::
+
+        from tensorneko.util import __, _
+        result = __(20) >> (_ + 1) >> (_ * 2) >> __.get
+        print(result)
+        # 42
+
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__()

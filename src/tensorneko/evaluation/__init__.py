@@ -1,5 +1,5 @@
 from .iou import iou_1d
 
 __all__ = [
-    "iou_1d"
+    "iou_1d",
 ]

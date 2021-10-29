@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import warnings
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Generic
 
 import inspect
+
+from .type import T
 
 
 class Dispatcher:
@@ -13,7 +15,7 @@ class Dispatcher:
         self.name = name
         self._functions = {}
 
-    def __call__(self, func) -> Callable:
+    def __call__(self, func: Callable[..., T]) -> Resolver[T]:
         if isinstance(func, (classmethod, staticmethod)):
             func = func.__func__
 
@@ -38,7 +40,7 @@ class Dispatcher:
 
         return Resolver(self)
 
-    def __class_getitem__(cls, key) -> Dispatcher:
+    def __class_getitem__(cls, key: str) -> Dispatcher:
         if key in cls.dispatchers:
             return cls.dispatchers[key]
         else:
@@ -47,19 +49,42 @@ class Dispatcher:
             return new_obj
 
 
-def dispatch(func):
-    name = ".".join([func.__module__, func.__qualname__])
-    return Dispatcher[name](func)
-
-
-class Resolver:
+class Resolver(Generic[T]):
 
     def __init__(self, dispatcher: Dispatcher):
         self._dispatcher = dispatcher
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> T:
         types = tuple([type(arg) for arg in args] + [type(kwarg) for kwarg in kwargs.values()])
         if types in self._dispatcher._functions:
             return self._dispatcher._functions[types](*args, **kwargs)
         else:
             raise TypeError(f"Not valid for type {str(types)} for function {self._dispatcher.name}")
+
+
+def dispatch(func: Callable[..., T]) -> Resolver[T]:
+    """
+    Decorator for dispatcher.
+    Args:
+        func(``(...) -> T``): function to be dispatched.
+
+    Returns:
+        :class:`~tensorneko.util.dispatcher.Resolver[T]`: Resolver object.
+
+    Example::
+
+        @dispatch
+        def add(x: int, y: int) -> int:
+            return x + y
+
+        @dispatch
+        def add(x: List[int], y: List[int]) -> List[int]:
+            assert len(x) == len(y)
+            return [x[i] + y[i] for i in range(len(x))]
+
+        add(1, 2)  # get 3
+        add([1, 2], [3, 4])  # get [4, 6]
+
+    """
+    name = ".".join([func.__module__, func.__qualname__])
+    return Dispatcher[name](func)
