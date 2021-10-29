@@ -7,7 +7,9 @@ from numpy import ndarray
 from torch import Tensor
 
 from ...io import write
-from ...util.type import T
+from ...util.ref import Ref
+from ...util.type import T, P
+
 if TYPE_CHECKING:
     from .view import View
 
@@ -50,6 +52,25 @@ class Component(ABC, Generic[T]):
     def __repr__(self) -> str:
         return self.__str__()
 
+    def bind(self, ref: Ref[P]) -> BindableComponent[P]:
+        return BindableComponent(ref, self.name, self.value)
+
+
+class BindableComponent(Component[P]):
+    ref: Ref[P]
+
+    def __init__(self, ref: Ref[P], name: str, value: P):
+        super().__init__(name, value)
+        self.ref = ref
+
+    @property
+    def value(self):
+        return self.ref.value
+
+    @value.setter
+    def value(self, value_in: P):
+        raise ValueError("Cannot set value of bindable component")
+
 
 class Variable(Component[T]):
     """
@@ -83,6 +104,13 @@ class Variable(Component[T]):
             "name": self.name,
             "value": str(self.value)
         }
+
+    def bind(self, ref: Ref[P]) -> BindableComponent[P]:
+        return BindableVariable(ref, self.name, self.value)
+
+
+class BindableVariable(BindableComponent[P], Variable[P]):
+    ...
 
 
 class ProgressBar(Component[int]):
@@ -127,6 +155,16 @@ class ProgressBar(Component[int]):
             "value": self.value,
             "total": self.total
         }
+
+    def bind(self, ref: Ref[P]) -> BindableComponent[P]:
+        return BindableProgressBar(ref, self.name, self.value, self.total)
+
+
+class BindableProgressBar(ProgressBar, BindableComponent[int]):
+
+    def __init__(self, ref: Ref[P], name: str, total: int, value: int = 0):
+        ProgressBar.__init__(self, name, total, value)
+        BindableComponent.__init__(self, ref, name, value)
 
 
 class Image(Component[Union[ndarray, Tensor, None]]):
