@@ -33,6 +33,9 @@ class Component(ABC, Generic[T]):
     @value.setter
     def value(self, value_in: T) -> None:
         self._value = value_in
+        self.update_view()
+
+    def update_view(self):
         for view in self.views:
             view.update()
 
@@ -52,16 +55,12 @@ class Component(ABC, Generic[T]):
     def __repr__(self) -> str:
         return self.__str__()
 
-    def bind(self, ref: Ref[P]) -> BindableComponent[P]:
-        return BindableComponent(ref, self.name, self.value)
+    def bind(self, ref: Ref[P]) -> Bindable[P]:
+        ...
 
 
-class BindableComponent(Component[P]):
+class Bindable(ABC, Generic[P]):
     ref: Ref[P]
-
-    def __init__(self, ref: Ref[P], name: str, value: P):
-        super().__init__(name, value)
-        self.ref = ref
 
     @property
     def value(self):
@@ -105,12 +104,16 @@ class Variable(Component[T]):
             "value": str(self.value)
         }
 
-    def bind(self, ref: Ref[P]) -> BindableComponent[P]:
-        return BindableVariable(ref, self.name, self.value)
+    def bind(self, ref: Ref[P]) -> BindableVariable[P]:
+        return BindableVariable(ref, self.name)
 
 
-class BindableVariable(BindableComponent[P], Variable[P]):
-    ...
+class BindableVariable(Bindable[P], Variable[P]):
+
+    def __init__(self, ref: Ref[P], name: str):
+        super().__init__(name, ref.value)
+        Bindable.__init__(self)
+        self.ref = ref
 
 
 class ProgressBar(Component[int]):
@@ -156,15 +159,16 @@ class ProgressBar(Component[int]):
             "total": self.total
         }
 
-    def bind(self, ref: Ref[P]) -> BindableComponent[P]:
-        return BindableProgressBar(ref, self.name, self.value, self.total)
+    def bind(self, ref: Ref[P]) -> BindableProgressBar[P]:
+        return BindableProgressBar(ref, self.name, self.total)
 
 
-class BindableProgressBar(ProgressBar, BindableComponent[int]):
+class BindableProgressBar(Bindable[int], ProgressBar):
 
-    def __init__(self, ref: Ref[P], name: str, total: int, value: int = 0):
-        ProgressBar.__init__(self, name, total, value)
-        BindableComponent.__init__(self, ref, name, value)
+    def __init__(self, ref: Ref[P], name: str, total: int):
+        super().__init__(name, total, ref.value)
+        Bindable.__init__(self)
+        self.ref = ref
 
 
 class Image(Component[Union[ndarray, Tensor, None]]):
@@ -247,8 +251,7 @@ class Logger(Component[List[str]]):
 
     def log(self, msg) -> None:
         self._value.append(msg)
-        for view in self.views:
-            view.update()
+        self.update_view()
 
     def to_dict(self) -> Dict[str, Any]:
         return {

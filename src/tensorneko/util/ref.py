@@ -1,32 +1,30 @@
 from __future__ import annotations
 
-from typing import Generic, Callable
+from abc import ABC
+from typing import Generic, Callable, TYPE_CHECKING, Optional
 
-from ..util import dispatch
+from ..util import dispatcher
 from ..util.type import P
+if TYPE_CHECKING:
+    from ..visualization.watcher import Component
 
 
-class Ref(Generic[P]):
-    value: P
+class Ref(ABC, Generic[P]):
+    _value: P
 
     def __init__(self, value: P):
-        self.value = value
+        self._value = value
+        self.bound_comp: Optional[Component] = None
 
-    @dispatch
-    def __new__(cls, value: str) -> StringRef:
-        return StringRef(value)
+    @property
+    def value(self) -> P:
+        return self._value
 
-    @dispatch
-    def __new__(cls, value: int) -> IntRef:
-        return IntRef(value)
-
-    @dispatch
-    def __new__(cls, value: float) -> FloatRef:
-        return FloatRef(value)
-
-    @dispatch
-    def __new__(cls, value: bool) -> BoolRef:
-        return BoolRef(value)
+    @value.setter
+    def value(self, value: P):
+        self._value = value
+        if self.bound_comp is not None:
+            self.bound_comp.update_view()
 
     def apply(self, f: Callable[[P], P]) -> Ref[P]:
         new_value = f(self.value)
@@ -37,26 +35,46 @@ class Ref(Generic[P]):
     def __rshift__(self, f: Callable[[P], P]) -> Ref[P]:
         return self.apply(f)
 
-    def bind(self, var: "Component"):
-        ...
-
 
 class StringRef(Ref[str]):
+
     def __str__(self):
         return self.value
 
 
 class IntRef(Ref[int]):
+
     def __int__(self):
         return self.value
 
 
 class FloatRef(Ref[float]):
+
     def __float__(self):
         return self.value
 
 
 class BoolRef(Ref[bool]):
+
     def __bool__(self):
         return self.value
 
+
+@dispatcher(str)
+def ref(value: str) -> StringRef:
+    return StringRef(value)
+
+
+@dispatcher(int)
+def ref(value: int) -> IntRef:
+    return IntRef(value)
+
+
+@dispatcher(float)
+def ref(value: float) -> FloatRef:
+    return FloatRef(value)
+
+
+@dispatcher(bool)
+def ref(value: bool) -> BoolRef:
+    return BoolRef(value)
