@@ -23,7 +23,9 @@ setuptools.setup(
     url="https://github.com/ControlNet/tensorneko",
     project_urls={
         "Bug Tracker": "https://github.com/ControlNet/tensorneko/issues",
+        "Source Code": "https://github.com/ControlNet/tensorneko",
     },
+    keywords=["deep learning", "pytorch", "AI"],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     package_data={
@@ -37,11 +39,13 @@ setuptools.setup(
     python_requires=">=3.7",
     install_requires=requirements,
     classifiers=[
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Intended Audience :: Developers",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
         "Topic :: Utilities"
     ],

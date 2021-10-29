@@ -2,7 +2,7 @@ name: Unittest
 on:
   push:
     branches-ignore:
-      - "main"
+      - "master"
 jobs:
   build-web:
     runs-on: ubuntu-20.04

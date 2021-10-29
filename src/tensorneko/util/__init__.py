@@ -9,6 +9,7 @@ from .string_getter import get_activation, get_loss
 from .reproducibility import Seed
 from .pipe import Args as __
 from .server import AbstractServer
+from .dispatcher import dispatch
 
 from fn.underscore import shortcut
 from fn import func
@@ -44,5 +45,6 @@ __all__ = [
     "_",
     "F",
     "tensorneko_path",
-    "AbstractServer"
+    "AbstractServer",
+    "dispatch"
 ]

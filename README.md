@@ -340,6 +340,40 @@ DataLoader(
 )
 ```
 
+`dispatch`: Multi-dispatch implementation for Python. 
+
+To my knowledge, 3 popular multi-dispatch libraries still have critical limitations. 
+[plum](https://github.com/wesselb/plum) doesn't support static methods, 
+[mutipledispatch](https://github.com/mrocklin/multipledispatch) doesn't support Python type annotation syntax and 
+[multimethod](https://github.com/coady/multimethod) doesn't support default augments. TensorNeko can do it all.
+
+```python
+from tensorneko.util import dispatch
+
+class StaticTest:
+
+    @staticmethod
+    @dispatch
+    def go() -> None:
+        print("Go0")
+
+    @staticmethod
+    @dispatch
+    def go(x: int) -> None:
+        print("Go1")
+
+    @staticmethod
+    @dispatch
+    def go(x: float, y: float = 1.0) -> None:
+        print("Go2")
+
+
+@dispatch
+def come(x: int) -> str:
+    return "Come1"
+```
+
+
 Utilities list:
 - `reduce_dict_by`
 - `summarize_dict_by`
@@ -357,5 +391,5 @@ Utilities list:
 - `get_activation`
 - `get_loss`
 - `Seed`
+- `dispatch`
 - `__`
-

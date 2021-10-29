@@ -1,7 +1,9 @@
 import json
-from typing import overload, Union
+from typing import Union
 
 from pandas import DataFrame
+
+from ...util import dispatch
 
 
 class TextWriter:
@@ -21,7 +23,7 @@ class TextWriter:
             file.write(text)
 
     @staticmethod
-    @overload
+    @dispatch
     def to_json(path: str, obj: DataFrame, orient: str = None) -> None:
         """
         Save as Json file from a :class:`~pandas.DataFrame`.
@@ -31,13 +33,13 @@ class TextWriter:
             obj (:class:`~pandas.DataFrame`): The DataFrame used for json output.
             orient (``str``, optional): The json format option from :meth:`~pandas.DataFrame.to_json`. Default: None.
         """
-        ...
+        obj.to_json(path, orient=orient)
 
     @staticmethod
-    @overload
+    @dispatch
     def to_json(path: str, obj: Union[dict, list, object], encoding="UTF-8") -> None:
         """
-        Save as Json file from a dictionary or list.
+        Save as Json file from a dictionary, list or json_dict.
 
         Args:
             path (``str``): The path of output file.
@@ -45,16 +47,7 @@ class TextWriter:
                 ``dict``, ``list`` or the ``object`` decorated by :func:`~tensorneko.io.text.text_reader.json_data`.
             encoding (``str``, optional): Python file IO encoding parameter. Default: "UTF-8".
         """
-        ...
-
-    @staticmethod
-    def to_json(path: str, obj: Union[dict, list, object, DataFrame], encoding="UTF-8", orient=None) -> None:
-        """
-        The implementation of :meth:`~TextWriter.to_json` method.
-        """
-        if type(obj) == DataFrame:
-            obj.to_json(path, orient=orient)
-        elif type(obj) is dict:
+        if type(obj) is dict:
             with open(path, "w", encoding=encoding) as file:
                 file.write(json.dumps(obj))
         elif "is_json_data" in type(obj).__dict__ and type(obj).is_json_data:
@@ -86,4 +79,30 @@ class TextWriter:
         """
         dataframe.to_csv(path, sep=sep, columns=columns, header=header, index=index)
 
-    to = to_plain
+    @staticmethod
+    def to_xml(path: str, dataframe: DataFrame):
+        # TODO
+        dataframe.to_xml(path)
+
+    @classmethod
+    def to(cls, path: str, *args, **kwargs) -> None:
+        """
+        Save text files with auto inferred type.
+
+        Args:
+            path (``str``): The path of output file.
+            *args: Other arguments in corresponded TextWriter functions.
+            **kwargs: Other arguments in corresponded TextWriter functions.
+        """
+        ext = path.split(".")[-1]
+
+        if ext == "txt":
+            return cls.to_plain(path, *args, **kwargs)
+        elif ext == "json":
+            return cls.to_json(path, *args, **kwargs)
+        elif ext == "csv":
+            return cls.to_csv(path, *args, **kwargs)
+        elif ext == "xml":
+            return cls.to_xml(path, *args, **kwargs)
+        else:
+            raise Exception(f"Cannot infer the file type [{ext}]. Please explicitly invoke other writer functions.")

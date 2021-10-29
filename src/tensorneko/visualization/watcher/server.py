@@ -80,19 +80,19 @@ class Server(AbstractServer):
 
     def _prepare(self) -> None:
         source_path = os.path.join(tensorneko_path, "visualization", "watcher", "web", "dist")
-        target_path = os.path.join(self.view_name)
-        if not os.path.exists(self.view_name):
-            os.mkdir(self.view_name)
+        target_path = os.path.join("watcher", self.view_name)
+        if not os.path.exists(target_path):
+            os.mkdir(target_path)
 
-        target_path_css = os.path.join(self.view_name, "css")
+        target_path_css = os.path.join(target_path, "css")
         if os.path.exists(target_path_css):
             shutil.rmtree(target_path_css)
 
-        target_path_js = os.path.join(self.view_name, "js")
+        target_path_js = os.path.join(target_path, "js")
         if os.path.exists(target_path_js):
             shutil.rmtree(target_path_js)
 
-        target_path_html = os.path.join(self.view_name, "index.html")
+        target_path_html = os.path.join(target_path, "index.html")
         if os.path.exists(target_path_html):
             os.remove(target_path_html)
 
@@ -101,14 +101,16 @@ class Server(AbstractServer):
         shutil.copytree(os.path.join(source_path, "js"), target_path_js)
 
     def _run(self) -> None:
-        self.process = subprocess.Popen(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)],
+        self.process = subprocess.Popen(["python", "-m", "http.server", "--directory",
+            os.path.join("watcher", self.view_name), str(self.port)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT
         )
         print(f"Server started at port {self.port}, view \"{self.view_name}\".")
 
     def _run_blocking(self):
-        self.process = subprocess.run(["python", "-m", "http.server", "--directory", self.view_name, str(self.port)])
+        self.process = subprocess.run(["python", "-m", "http.server", "--directory",
+            os.path.join("watcher", self.view_name), str(self.port)])
         print(f"Server started at port {self.port}, view \"{self.view_name}\".")
 
     def stop(self) -> None:

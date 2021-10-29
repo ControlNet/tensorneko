@@ -43,7 +43,7 @@ class TextReader:
             encoding (``str``, optional): The encoding for python ``open`` function. Default: "UTF-8"
 
         Returns:
-            ``dict`` | ``list`` | :class:`~pandas.DataFrame`: The object of given json.
+            ``dict`` | ``list`` | :class:`~pandas.DataFrame` | ``object``: The object of given json.
         """
 
         if to_df:
@@ -83,7 +83,29 @@ class TextReader:
 
     of_csv = pd.read_csv
     of_xml = pd.read_xml
-    of = of_plain
+
+    @classmethod
+    def of(cls, path: str, *args, **kwargs) -> Union[str, dict, list, DataFrame]:
+        """
+        Auto infer by the file extension.
+        Args:
+            path (``str``): Text file path.
+
+        Returns:
+            ``str`` | ``dict`` | ``list`` | :class:`~pandas.DataFrame`: Parsed value of the file.
+        """
+        ext = path.split(".")[-1]
+
+        if ext == "txt":
+            return cls.of_plain(path, *args, **kwargs)
+        elif ext == "json":
+            return cls.of_json(path, *args, **kwargs)
+        elif ext == "csv":
+            return cls.of_csv(path, *args, **kwargs)
+        elif ext == "xml":
+            return cls.of_xml(path, *args, **kwargs)
+        else:
+            raise Exception(f"Cannot infer the file type [{ext}]. Please explicitly invoke other reader functions.")
 
     def __new__(cls, path: str, encoding: str = "UTF-8") -> str:
         """Alias of :meth:`~TextReader.of_plain`"""
