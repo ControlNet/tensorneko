@@ -6,10 +6,10 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { logs } from "@/data";
-import LoggerCard from "@/components/LoggerCard.vue";
+import LoggerCard from "@/components/logger/LoggerCard.vue";
 
 @Options({
-  components: {LoggerCard }
+  components: { LoggerCard }
 })
 export default class LoggerSection extends Vue {
   readonly logs = logs

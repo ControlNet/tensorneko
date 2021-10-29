@@ -9,7 +9,7 @@
 
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
-import ImageCard from "@/components/ImageCard.vue";
+import ImageCard from "@/components/image/ImageCard.vue";
 import { Images, images } from "@/data";
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os.path
 from abc import ABC, abstractmethod
-from typing import Generic, List, Union, Dict, TYPE_CHECKING
+from typing import Generic, List, Union, Dict, TYPE_CHECKING, Any, Optional, Tuple
 
 from numpy import ndarray
 from torch import Tensor
@@ -25,29 +25,29 @@ class Component(ABC, Generic[T]):
         Component.components[self.name] = self
 
     @property
-    def value(self):
+    def value(self) -> T:
         return self._value
 
     @value.setter
-    def value(self, value_in: T):
+    def value(self, value_in: T) -> None:
         self._value = value_in
         for view in self.views:
             view.update()
 
-    def set(self, value_in: T):
+    def set(self, value_in: T) -> None:
         self.value = value_in
 
     @abstractmethod
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         ...
 
-    def update(self):
+    def update(self) -> None:
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"<{self.__class__.__name__}: {self.to_dict()}>"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
 
@@ -77,7 +77,7 @@ class Variable(Component[T]):
     def __init__(self, name: str, value: T):
         super().__init__(name, value)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "Variable",
             "name": self.name,
@@ -117,10 +117,10 @@ class ProgressBar(Component[int]):
         super().__init__(name, value)
         self.total = total
 
-    def add(self, value_in: int):
+    def add(self, value_in: int) -> None:
         self.value += value_in
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "ProgressBar",
             "name": self.name,
@@ -158,7 +158,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
         self.path = os.path.join("img", self.name)
         self._ver = 0
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         self.update()
         return {
             "type": "Image",
@@ -166,7 +166,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
             "value": f"/img/{self.name}-{self._ver}.jpg"
         }
 
-    def update(self):
+    def update(self) -> None:
         if self.value is not None:
             for view in self.views:
                 img_dir = os.path.join(view.name, "img")
@@ -207,14 +207,47 @@ class Logger(Component[List[str]]):
         value = value or []
         super().__init__(name, value)
 
-    def log(self, msg):
+    def log(self, msg) -> None:
         self._value.append(msg)
         for view in self.views:
             view.update()
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "Logger",
+            "name": self.name,
+            "value": self.value
+        }
+
+
+class LineChart(Component[List[Dict[str, Union[float, str]]]]):
+    """
+    The component for logging a line chart.
+    """
+
+    def __init__(self, name: str, value: Optional[List[Dict[str, Union[float, str]]]] = None):
+        value = value or []
+        super().__init__(name, value)
+
+    def add(self, value_in: Union[Tuple[float, float, str], Tuple[float, float]]) -> None:
+        if len(value_in) == 2:
+            self._value.append({
+                "x": value_in[0],
+                "y": value_in[1],
+                "label": ""
+            })
+        elif len(value_in) == 3:
+            self._value.append({
+                "x": value_in[0],
+                "y": value_in[1],
+                "label": value_in[2]
+            })
+        else:
+            raise ValueError("Value should be a tuple of (x, y, label) or (x, y)")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "LineChart",
             "name": self.name,
             "value": self.value
         }

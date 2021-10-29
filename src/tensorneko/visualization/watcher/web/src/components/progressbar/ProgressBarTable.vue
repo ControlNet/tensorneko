@@ -19,7 +19,7 @@
 import { Options, Vue } from "vue-class-component";
 
 import { progressbars } from "@/data";
-import ProgressBarRow from "@/components/ProgressBarRow.vue";
+import ProgressBarRow from "@/components/progressbar/ProgressBarRow.vue";
 
 
 @Options({
