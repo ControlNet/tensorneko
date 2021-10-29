@@ -8,6 +8,10 @@ import inspect
 from .type import T
 
 
+class DispatcherTypeWarning(Warning):
+    pass
+
+
 class Dispatcher:
     dispatchers: Dict[str, Dispatcher] = {}
 
@@ -58,7 +62,14 @@ class Dispatcher:
 
         for types in possible_types:
             if tuple(types) in self._functions:
-                warnings.warn(f"The dispatcher in {func.__name__}({str(types)[1:-1]}) is overridden!", stacklevel=2)
+                warnings.warn(f"The dispatcher in {func.__module__ + '.' + func.__name__}({str(types)[1:-1]}) "
+                              f"is overridden!",
+                    DispatcherTypeWarning, stacklevel=2)
+
+            if inspect.Signature.empty in types:
+                warnings.warn(f"The dispatcher in {func.__module__ + '.' + func.__name__}({str(types)[1:-1]}) "
+                              f"has no type annotation!",
+                    DispatcherTypeWarning, stacklevel=2)
             self._functions[tuple(types)] = func
 
         return Resolver(self)

@@ -10,7 +10,7 @@ class TextWriter:
     """TextWriter for writing files for text"""
 
     @staticmethod
-    def to_plain(path: str, text: str, encoding="UTF-8") -> None:
+    def to_plain(path: str, text: str, encoding: str = "UTF-8") -> None:
         """
         Save as a plain text file.
 
@@ -37,7 +37,7 @@ class TextWriter:
 
     @staticmethod
     @dispatch
-    def to_json(path: str, obj: Union[dict, list, object], encoding="UTF-8") -> None:
+    def to_json(path: str, obj: Union[dict, list, object], encoding: str = "UTF-8") -> None:
         """
         Save as Json file from a dictionary, list or json_dict.
 
