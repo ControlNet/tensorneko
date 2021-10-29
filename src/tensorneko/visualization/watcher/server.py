@@ -23,6 +23,7 @@ class Server(AbstractServer):
     Attributes:
         view_name (``str``): The name of the :class:`~tensorneko.visualization.watcher.view.View`.
         process (:class:``subprocess.Popen``): The process of the server.
+        save_dir (``str``): The directory to save the web files.
 
     Examples::
 
@@ -42,7 +43,7 @@ class Server(AbstractServer):
     """
     servers: List[Server] = []
 
-    def __init__(self, view: Union[View, str], port: int = 8000):
+    def __init__(self, view: Union[View, str], port: int = 8000, save_dir: str = None):
         if type(view) == View:
             self.view_name = view.name
         elif type(view) == str:
@@ -50,6 +51,7 @@ class Server(AbstractServer):
         else:
             raise TypeError("The view type should be View or str")
 
+        self.save_dir = save_dir or os.path.join("watcher", self.view_name)
         self.port = port
         self.process: Optional[subprocess.Popen] = None
         Server.servers.append(self)
@@ -80,7 +82,7 @@ class Server(AbstractServer):
 
     def _prepare(self) -> None:
         source_path = os.path.join(tensorneko_path, "visualization", "watcher", "web", "dist")
-        target_path = os.path.join("watcher", self.view_name)
+        target_path = self.save_dir
         if not os.path.exists(target_path):
             os.mkdir(target_path)
 

@@ -9,7 +9,7 @@
 <script lang="ts">
 import { Vue } from "vue-class-component";
 import { Prop } from "vue-property-decorator";
-import { logs } from "@/data.ts";
+import { logs } from "@/data";
 
 export default class LoggerCard extends Vue {
   @Prop(String) k!: string

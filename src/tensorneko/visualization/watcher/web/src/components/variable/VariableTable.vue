@@ -18,7 +18,7 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 import { variables } from "@/data";
-import VariableRow from "@/components/VariableRow.vue";
+import VariableRow from "@/components/variable/VariableRow.vue";
 
 @Options({
   components: { VariableRow }

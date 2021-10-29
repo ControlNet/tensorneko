@@ -350,7 +350,7 @@ To my knowledge, 3 popular multi-dispatch libraries still have critical limitati
 ```python
 from tensorneko.util import dispatch
 
-class StaticTest:
+class DispatchExample:
 
     @staticmethod
     @dispatch

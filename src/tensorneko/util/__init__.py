@@ -10,6 +10,7 @@ from .reproducibility import Seed
 from .pipe import Args as __
 from .server import AbstractServer
 from .dispatcher import dispatch
+from .average_meter import AverageMeter
 
 from fn.underscore import shortcut
 from fn import func
@@ -46,5 +47,6 @@ __all__ = [
     "F",
     "tensorneko_path",
     "AbstractServer",
-    "dispatch"
+    "dispatch",
+    "AverageMeter"
 ]
