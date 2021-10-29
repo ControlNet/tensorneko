@@ -24,6 +24,16 @@ class Dispatcher:
             func = func.__func__
 
         parameters: List[inspect.Parameter] = [*inspect.signature(func).parameters.values()]
+
+        if isinstance(func, classmethod):
+            parameters[0] = inspect.Parameter("cls", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=type)
+
+        is_method = False
+        if parameters[0].name == "self" and parameters[0].annotation is inspect.Parameter.empty:
+            # if the function is a method
+            parameters = parameters[1:]
+            is_method = True
+
         possible_types = [[]]
 
         for param in parameters:
@@ -60,6 +70,7 @@ class Dispatcher:
             else:
                 raise TypeError(f"Unknown Error in Dispatcher with {parameters}")
 
+        has_empty_type = False
         for types in possible_types:
             if tuple(types) in self._functions:
                 warnings.warn(f"The dispatcher in {func.__module__ + '.' + func.__name__}({str(types)[1:-1]}) "
@@ -70,9 +81,13 @@ class Dispatcher:
                 warnings.warn(f"The dispatcher in {func.__module__ + '.' + func.__name__}({str(types)[1:-1]}) "
                               f"has no type annotation!",
                     DispatcherTypeWarning, stacklevel=2)
+                has_empty_type = True
             self._functions[tuple(types)] = func
 
-        return Resolver(self)
+        if not is_method:
+            return Resolver(self)
+        else:
+            return MethodResolver(self)
 
     def __class_getitem__(cls, key: str) -> Dispatcher:
         if key in cls.dispatchers:
@@ -90,6 +105,16 @@ class Resolver(Generic[T]):
 
     def __call__(self, *args, **kwargs) -> T:
         types = tuple([type(arg) for arg in args] + [type(kwarg) for kwarg in kwargs.values()])
+        if types in self._dispatcher._functions:
+            return self._dispatcher._functions[types](*args, **kwargs)
+        else:
+            raise TypeError(f"Not valid for type {str(types)} for function {self._dispatcher.name}")
+
+
+class MethodResolver(Resolver[T], Generic[T]):
+
+    def __call__(self, *args, **kwargs) -> T:
+        types = tuple([type(arg) for arg in args] + [type(kwarg) for kwarg in kwargs.values()])[1:]
         if types in self._dispatcher._functions:
             return self._dispatcher._functions[types](*args, **kwargs)
         else:
