@@ -108,12 +108,12 @@ class Server(AbstractServer):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT
         )
-        print(f"Server started at port {self.port}, view \"{self.view_name}\".")
+        print(f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\".")
 
     def _run_blocking(self):
         self.process = subprocess.run(["python", "-m", "http.server", "--directory",
             os.path.join("watcher", self.view_name), str(self.port)])
-        print(f"Server started at port {self.port}, view \"{self.view_name}\".")
+        print(f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\".")
 
     def stop(self) -> None:
         """

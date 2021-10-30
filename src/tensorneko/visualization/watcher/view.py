@@ -51,7 +51,10 @@ class View:
             os.mkdir(view_path)
 
         write.text.to_json(os.path.join("watcher", self.name, "data.json"),
-            list(map(lambda comp: comp.to_dict(), self.components))
+            {
+                "view": self.name,
+                "data": list(map(lambda comp: comp.to_dict(), self.components))
+            }
         )
 
     def add(self, *components: Component) -> View:
