@@ -3,8 +3,8 @@ from __future__ import annotations
 from abc import ABC
 from typing import Generic, Callable, TYPE_CHECKING, Optional
 
-from ..util import dispatcher
-from ..util.type import P
+from .dispatcher import dispatch
+from .type import P
 if TYPE_CHECKING:
     from ..visualization.watcher import Component
 
@@ -60,21 +60,21 @@ class BoolRef(Ref[bool]):
         return self.value
 
 
-@dispatcher(str)
+@dispatch.of(str)
 def ref(value: str) -> StringRef:
     return StringRef(value)
 
 
-@dispatcher(int)
+@dispatch.of(int)
 def ref(value: int) -> IntRef:
     return IntRef(value)
 
 
-@dispatcher(float)
+@dispatch.of(float)
 def ref(value: float) -> FloatRef:
     return FloatRef(value)
 
 
-@dispatcher(bool)
+@dispatch.of(bool)
 def ref(value: bool) -> BoolRef:
     return BoolRef(value)
