@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from functools import partial
-from typing import Callable, Dict, List, Generic, Sequence
+from typing import Callable, Dict, List, Generic, Sequence, Any
 
 import inspect
 
@@ -26,15 +26,16 @@ class Dispatcher:
         if not set_types:
             parameters: List[inspect.Parameter] = [*inspect.signature(func).parameters.values()]
 
-            if parameters[0].name == "cls" and parameters[0].annotation is inspect.Parameter.empty:
-                # if it is a class method
-                parameters[0] = inspect.Parameter("cls", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=type)
-
             is_method = False
-            if parameters[0].name == "self" and parameters[0].annotation is inspect.Parameter.empty:
-                # if the function is a method
-                parameters = parameters[1:]
-                is_method = True
+            if len(parameters) > 0:
+                if parameters[0].name == "cls" and parameters[0].annotation is inspect.Parameter.empty:
+                    # if it is a class method
+                    parameters[0] = inspect.Parameter("cls", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=type)
+
+                if parameters[0].name == "self" and parameters[0].annotation is inspect.Parameter.empty:
+                    # if the function is a method
+                    parameters = parameters[1:]
+                    is_method = True
 
             possible_types = [[]]
 
@@ -131,36 +132,49 @@ class MethodResolver(Resolver[T], Generic[T]):
             raise TypeError(f"Not valid for type {str(types)} for function {self._dispatcher.name}")
 
 
-def dispatcher(*types: type) -> Callable[[Callable[... , T]], Resolver[T]]:
-    def wrapper(func: Callable[..., T]) -> Resolver[T]:
+class DispatcherDecorator:
+
+    def __init__(self):
+        self.__doc__ = DispatcherDecorator.__call__.__doc__
+
+    @staticmethod
+    def of(*types: type) -> Callable[[Callable[..., T]], Resolver[T]]:
+        def wrapper(func: Callable[..., T]) -> Resolver[T]:
+            name = ".".join([func.__module__, func.__qualname__])
+            return Dispatcher.get(name)(func, types)
+        return wrapper
+
+    def __call__(self, func: Callable[..., T]) -> Resolver[T]:
+        """
+        Decorator for dispatcher.
+        Args:
+            func(``(...) -> T``): function to be dispatched.
+
+        Returns:
+            :class:`~tensorneko.util.dispatcher.Resolver[T]`: Resolver object.
+
+        Example::
+
+            @dispatch
+            def add(x: int, y: int) -> int:
+                return x + y
+
+            @dispatch
+            def add(x: List[int], y: List[int]) -> List[int]:
+                assert len(x) == len(y)
+                return [x[i] + y[i] for i in range(len(x))]
+
+            @dispatch.of(float, float)
+            def add(x, y) -> float:
+                return x + y
+
+            add(1, 2)  # get 3
+            add([1, 2], [3, 4])  # get [4, 6]
+            add(1.0, 2.0)  # get 3.0
+
+        """
         name = ".".join([func.__module__, func.__qualname__])
-        return Dispatcher.get(name)(func, types)
-    return wrapper
+        return Dispatcher.get(name)(func)
 
 
-def dispatch(func: Callable[..., T]) -> Resolver[T]:
-    """
-    Decorator for dispatcher.
-    Args:
-        func(``(...) -> T``): function to be dispatched.
-
-    Returns:
-        :class:`~tensorneko.util.dispatcher.Resolver[T]`: Resolver object.
-
-    Example::
-
-        @dispatch
-        def add(x: int, y: int) -> int:
-            return x + y
-
-        @dispatch
-        def add(x: List[int], y: List[int]) -> List[int]:
-            assert len(x) == len(y)
-            return [x[i] + y[i] for i in range(len(x))]
-
-        add(1, 2)  # get 3
-        add([1, 2], [3, 4])  # get [4, 6]
-
-    """
-    name = ".".join([func.__module__, func.__qualname__])
-    return Dispatcher.get(name)(func)
+dispatch = DispatcherDecorator()

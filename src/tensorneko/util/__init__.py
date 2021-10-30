@@ -9,7 +9,7 @@ from .string_getter import get_activation, get_loss
 from .reproducibility import Seed
 from .pipe import Args as __
 from .server import AbstractServer
-from .dispatcher import dispatch, dispatcher
+from .dispatcher import dispatch
 from .average_meter import AverageMeter
 
 from fn.underscore import shortcut
@@ -48,6 +48,5 @@ __all__ = [
     "tensorneko_path",
     "AbstractServer",
     "dispatch",
-    "dispatcher",
     "AverageMeter"
 ]
