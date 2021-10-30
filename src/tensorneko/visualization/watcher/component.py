@@ -225,29 +225,24 @@ class LineChart(Component[List[Dict[str, Union[float, str]]]]):
     The component for logging a line chart.
     """
 
-    def __init__(self, name: str, value: Optional[List[Dict[str, Union[float, str]]]] = None):
+    def __init__(self, name: str, value: Optional[List[Dict[str, Union[float, str]]]] = None,
+        x_label: str = "index", y_label: str = "value"
+    ):
         value = value or []
         super().__init__(name, value)
+        self.x_label = x_label
+        self.y_label = y_label
 
-    def add(self, value_in: Union[Tuple[float, float, str], Tuple[float, float]]) -> None:
-        if len(value_in) == 2:
-            self._value.append({
-                "x": value_in[0],
-                "y": value_in[1],
-                "label": ""
-            })
-        elif len(value_in) == 3:
-            self._value.append({
-                "x": value_in[0],
-                "y": value_in[1],
-                "label": value_in[2]
-            })
-        else:
-            raise ValueError("Value should be a tuple of (x, y, label) or (x, y)")
+    def add(self, x: float, y: float, label: str = "") -> None:
+        self._value.append({"x": x, "y": y, "label": label})
+        for view in self.views:
+            view.update()
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "LineChart",
             "name": self.name,
+            "x_label": self.x_label,
+            "y_label": self.y_label,
             "value": self.value
         }

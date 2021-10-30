@@ -27,6 +27,8 @@ export declare class LoggerData extends ComponentData {
 
 export declare class LineChartData extends ComponentData {
     type: "LineChart"
+    x_label: string
+    y_label: string
     value: Array<{
         x: number
         y: number
