@@ -7,17 +7,19 @@
   </div>
   <ProgressBarTable v-if="Object.keys(this.progressbars).length > 0" ref="progressbar"/>
   <VariableTable v-if="Object.keys(this.variables).length > 0" ref="variable"/>
+  <PlotSection v-if="this.nPlots > 0" ref="plot"/>
   <ImageSection v-if="Object.keys(this.images).length > 0" ref="image"/>
   <LoggerSection v-if="Object.keys(this.logs).length > 0" ref="logger" />
 </template>
 
 <script lang="ts">
 import { Options, Vue } from 'vue-class-component';
-import { ComponentData, variables, progressbars, images, logs } from "@/data";
-import ProgressBarTable from "@/components/ProgressBarTable.vue";
-import VariableTable from "@/components/VariableTable.vue";
-import ImageSection from "@/components/ImageSection.vue";
-import LoggerSection from "@/components/LoggerSection.vue";
+import { ComponentData, variables, progressbars, images, logs, lineCharts } from "@/data";
+import ProgressBarTable from "@/components/progressbar/ProgressBarTable.vue";
+import VariableTable from "@/components/variable/VariableTable.vue";
+import ImageSection from "@/components/image/ImageSection.vue";
+import LoggerSection from "@/components/logger/LoggerSection.vue";
+import PlotSection from "@/components/plot/PlotSection.vue";
 
 type RequestCache = "default" | "force-cache" | "no-cache" | "no-store" | "only-if-cached" | "reload";
 
@@ -27,7 +29,8 @@ type RequestCache = "default" | "force-cache" | "no-cache" | "no-store" | "only-
     ProgressBarTable,
     VariableTable,
     ImageSection,
-    LoggerSection
+    LoggerSection,
+    PlotSection
   },
 })
 export default class App extends Vue {
@@ -35,13 +38,15 @@ export default class App extends Vue {
   readonly progressbars = progressbars
   readonly images = images
   readonly logs = logs
+  readonly lineCharts = lineCharts
   updateDuration = 5000
 
   $refs!: {
     progressbar: ProgressBarTable,
     variable: VariableTable,
     image: ImageSection,
-    logger: LoggerSection
+    logger: LoggerSection,
+    plot: PlotSection
   }
 
   update(cache: RequestCache = "no-cache"): void {
@@ -69,6 +74,8 @@ export default class App extends Vue {
               updateArray(d, this.images);
             } else if (d.type === "Logger") {
               updateArray(d, this.logs)
+            } else if (d.type === "LineChart") {
+              updateArray(d, this.lineCharts)
             }
           });
 
@@ -81,6 +88,8 @@ export default class App extends Vue {
               this.$refs.image.$refs[name].update();
             } else if (type === "Logger") {
               this.$refs.logger.$refs[name].update();
+            } else if (type === "LineChart") {
+              this.$refs.plot.$refs[name].update();
             }
           });
 
@@ -93,6 +102,10 @@ export default class App extends Vue {
 
   mounted(): void {
     this.update();
+  }
+
+  get nPlots(): number {
+    return Object.keys(this.lineCharts).length;
   }
 }
 </script>

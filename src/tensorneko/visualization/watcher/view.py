@@ -106,3 +106,18 @@ class View:
 
         self.update()
         return self
+
+    def __getitem__(self, component_name: str) -> Component:
+        """
+        Get the component by name.
+
+        Args:
+            component_name (``str``): The name of the component.
+
+        Returns:
+            :class:`~tensorneko.visualization.web.component.Component`: The component object.
+        """
+        for component in self.components:
+            if component.name == component_name:
+                return component
+        raise KeyError(f"Component {component_name} not found")

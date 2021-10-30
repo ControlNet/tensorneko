@@ -176,6 +176,7 @@ neko.preprocess.resize_video(video, (256, 256))
 ### Variable Web Watcher
 Start a web server to watch the variable status when the program (e.g. training, inference, data preprocessing) is running.
 ```python
+import time
 from tensorneko.visualization.watcher import *
 data_list = ... # a list of data
 def preprocessing(d): ...
@@ -184,12 +185,18 @@ def preprocessing(d): ...
 pb = ProgressBar("Processing", total=len(data_list))
 logger = Logger("Log message")
 var = Variable("Some Value", 0)
-view = View("Data preprocessing").add(pb, logger, var)
+line_chart = LineChart("Line Chart", "x", "y")
+view = View("Data preprocessing").add_all()
+
+t0 = time.time()
 # open server when the code block in running.
 with Server(view, port=8000):
-    for data in data_list:
+    for i, data in enumerate(data_list):
         preprocessing(data) # do some processing here
         
+        x = time.time() - t0  # time since the start of the program
+        y = i # processed number of data
+        line_chart.add(x, y)  # add to the line chart
         logger.log("Some messages")  # log messages to the server
         var.value = ...  # keep tracking a variable
         pb.add(1)  # update the progress bar by add 1
@@ -350,7 +357,7 @@ To my knowledge, 3 popular multi-dispatch libraries still have critical limitati
 ```python
 from tensorneko.util import dispatch
 
-class StaticTest:
+class DispatchExample:
 
     @staticmethod
     @dispatch
@@ -367,10 +374,13 @@ class StaticTest:
     def go(x: float, y: float = 1.0) -> None:
         print("Go2")
 
-
 @dispatch
 def come(x: int) -> str:
     return "Come1"
+
+@dispatch.of(str)
+def come(x) -> str:
+    return "Come2"
 ```
 
 

@@ -1,13 +1,15 @@
 from __future__ import annotations
 import os.path
 from abc import ABC, abstractmethod
-from typing import Generic, List, Union, Dict, TYPE_CHECKING
+from typing import Generic, List, Union, Dict, TYPE_CHECKING, Any, Optional, Tuple
 
 from numpy import ndarray
 from torch import Tensor
 
 from ...io import write
-from ...util.type import T
+from ...util.ref import Ref
+from ...util.type import T, P
+
 if TYPE_CHECKING:
     from .view import View
 
@@ -25,30 +27,48 @@ class Component(ABC, Generic[T]):
         Component.components[self.name] = self
 
     @property
-    def value(self):
+    def value(self) -> T:
         return self._value
 
     @value.setter
-    def value(self, value_in: T):
+    def value(self, value_in: T) -> None:
         self._value = value_in
+        self.update_view()
+
+    def update_view(self):
         for view in self.views:
             view.update()
 
-    def set(self, value_in: T):
+    def set(self, value_in: T) -> None:
         self.value = value_in
 
     @abstractmethod
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         ...
 
-    def update(self):
+    def update(self) -> None:
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"<{self.__class__.__name__}: {self.to_dict()}>"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
+
+    def bind(self, ref: Ref[P]) -> Bindable[P]:
+        ...
+
+
+class Bindable(ABC, Generic[P]):
+    ref: Ref[P]
+
+    @property
+    def value(self):
+        return self.ref.value
+
+    @value.setter
+    def value(self, value_in: P):
+        raise ValueError("Cannot set value of bindable component")
 
 
 class Variable(Component[T]):
@@ -77,12 +97,24 @@ class Variable(Component[T]):
     def __init__(self, name: str, value: T):
         super().__init__(name, value)
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "Variable",
             "name": self.name,
             "value": str(self.value)
         }
+
+    def bind(self, ref: Ref[P]) -> BindableVariable[P]:
+        return BindableVariable(ref, self.name)
+
+
+class BindableVariable(Bindable[P], Variable[P]):
+
+    def __init__(self, ref: Ref[P], name: str):
+        super().__init__(name, ref.value)
+        Bindable.__init__(self)
+        self.ref = ref
+        self.ref.bound_comp = self
 
 
 class ProgressBar(Component[int]):
@@ -117,16 +149,28 @@ class ProgressBar(Component[int]):
         super().__init__(name, value)
         self.total = total
 
-    def add(self, value_in: int):
+    def add(self, value_in: int) -> None:
         self.value += value_in
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "ProgressBar",
             "name": self.name,
             "value": self.value,
             "total": self.total
         }
+
+    def bind(self, ref: Ref[P]) -> BindableProgressBar[P]:
+        return BindableProgressBar(ref, self.name, self.total)
+
+
+class BindableProgressBar(Bindable[int], ProgressBar):
+
+    def __init__(self, ref: Ref[P], name: str, total: int):
+        super().__init__(name, total, ref.value)
+        Bindable.__init__(self)
+        self.ref = ref
+        self.ref.bound_comp = self
 
 
 class Image(Component[Union[ndarray, Tensor, None]]):
@@ -158,7 +202,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
         self.path = os.path.join("img", self.name)
         self._ver = 0
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         self.update()
         return {
             "type": "Image",
@@ -166,7 +210,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
             "value": f"/img/{self.name}-{self._ver}.jpg"
         }
 
-    def update(self):
+    def update(self) -> None:
         if self.value is not None:
             for view in self.views:
                 img_dir = os.path.join(view.name, "img")
@@ -207,14 +251,41 @@ class Logger(Component[List[str]]):
         value = value or []
         super().__init__(name, value)
 
-    def log(self, msg):
+    def log(self, msg) -> None:
         self._value.append(msg)
-        for view in self.views:
-            view.update()
+        self.update_view()
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "type": "Logger",
             "name": self.name,
+            "value": self.value
+        }
+
+
+class LineChart(Component[List[Dict[str, Union[float, str]]]]):
+    """
+    The component for logging a line chart.
+    """
+
+    def __init__(self, name: str, value: Optional[List[Dict[str, Union[float, str]]]] = None,
+        x_label: str = "index", y_label: str = "value"
+    ):
+        value = value or []
+        super().__init__(name, value)
+        self.x_label = x_label
+        self.y_label = y_label
+
+    def add(self, x: float, y: float, label: str = "") -> None:
+        self._value.append({"x": x, "y": y, "label": label})
+        for view in self.views:
+            view.update()
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": "LineChart",
+            "name": self.name,
+            "x_label": self.x_label,
+            "y_label": self.y_label,
             "value": self.value
         }

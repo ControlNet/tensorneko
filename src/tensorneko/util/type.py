@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Callable, Union, List, Tuple, TypeVar
 
 import numpy as np
@@ -20,3 +21,5 @@ Shape = Union[Size, List[int], Tuple[int, ...]]
 # Generic types
 T = TypeVar('T')  # Any type
 A = TypeVar("A", torch.Tensor, np.ndarray)  # Array type
+P = TypeVar("P", int, float, str, bool)  # Primitive type
+E = TypeVar("E", bound=Enum)
