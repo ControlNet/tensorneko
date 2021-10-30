@@ -14,15 +14,14 @@ import { Options, Vue } from "vue-class-component";
 import { Prop } from "vue-property-decorator";
 import { LineChartData, lineCharts } from "@/data";
 import {
-  CallbackDataParams,
-  DatasetOption,
-  LegendOption,
-  TitleOption,
-  TooltipOption,
-  XAXisOption,
-  YAXisOption
-} from "echarts/types/dist/shared";
-import { EChartsOption, SeriesOption } from "echarts";
+  DatasetComponentOption,
+  EChartsOption, LegendComponentOption,
+  SeriesOption, TitleComponentOption,
+  TooltipComponentOption,
+  XAXisComponentOption,
+  YAXisComponentOption
+} from "echarts";
+import { CallbackDataParams } from "echarts/types/dist/shared";
 
 use([
   CanvasRenderer,
@@ -36,7 +35,7 @@ use([
 
 @Options({
   name: "LineChartCard",
-  components: {VChart}
+  components: { VChart }
 })
 export default class LineChartCard extends Vue {
 
@@ -54,7 +53,7 @@ export default class LineChartCard extends Vue {
 
   option: EChartsOption = this.genOption(lineCharts[this.k]);
 
-  genOption(d: LineChartData): any {
+  genOption(d: LineChartData): EChartsOption {
     const linesMap: Map<string, Array<{ x: number, y: number }>> = new Map();
     d.value.forEach(p => {
       if (!linesMap.has(p.label)) {
@@ -65,11 +64,11 @@ export default class LineChartCard extends Vue {
     const lines = Array.from(linesMap.entries());
     const lineKeys = lines.map(p => p[0]);
 
-    const title: TitleOption = {
+    const title: TitleComponentOption = {
       text: d.name,
       left: "center"
     };
-    const tooltip: TooltipOption = {
+    const tooltip: TooltipComponentOption = {
       trigger: "axis",
       axisPointer: {
         type: "line"
@@ -79,16 +78,16 @@ export default class LineChartCard extends Vue {
             `${this.yLabel}: ${Math.round(params[0].data[1] * 10000) / 10000}`
       }
     };
-    const legend: LegendOption = {
+    const legend: LegendComponentOption = {
       orient: "vertical",
       left: "left",
       data: lineKeys
     }
-    const xAxis: XAXisOption = {};
-    const yAxis: YAXisOption = {
+    const xAxis: XAXisComponentOption = {};
+    const yAxis: YAXisComponentOption = {
       min: "dataMin"
     };
-    const dataset: Array<DatasetOption> = lines.map(([label, points]) => {
+    const dataset: Array<DatasetComponentOption> = lines.map(([label, points]) => {
       return {
         name: label,
         source: points.map(p => [p.x, p.y]),
