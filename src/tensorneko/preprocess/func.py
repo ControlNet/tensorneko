@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union, TypeVar, Type, List, Tuple
+from typing import Union, Type, List, Tuple
 
 import torch
 from torch.nn import functional as func
@@ -9,6 +9,7 @@ from fn import F, _
 from torch import Tensor, uint8, float32
 
 from ..util import Rearrange
+from ..util.type import E
 
 
 class ResizeMethod(Enum):
@@ -31,9 +32,6 @@ class PaddingPosition(Enum):
     HEAD = "head"
     TAIL = "tail"
     AVERAGE = "average"
-
-
-E = TypeVar("E", bound=Enum)
 
 
 def _get_enum_value(enum: Union[E, str], EnumType: Type[E]) -> str:
