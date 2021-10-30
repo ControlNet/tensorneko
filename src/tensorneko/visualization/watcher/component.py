@@ -114,6 +114,7 @@ class BindableVariable(Bindable[P], Variable[P]):
         super().__init__(name, ref.value)
         Bindable.__init__(self)
         self.ref = ref
+        self.ref.bound_comp = self
 
 
 class ProgressBar(Component[int]):
@@ -169,6 +170,7 @@ class BindableProgressBar(Bindable[int], ProgressBar):
         super().__init__(name, total, ref.value)
         Bindable.__init__(self)
         self.ref = ref
+        self.ref.bound_comp = self
 
 
 class Image(Component[Union[ndarray, Tensor, None]]):

@@ -106,10 +106,14 @@ class Dispatcher:
 
 class Resolver(Generic[T]):
 
-    def __init__(self, dispatcher: Dispatcher):
-        self._dispatcher = dispatcher
+    def __init__(self, d: Dispatcher):
+        self._dispatcher = d
 
     def __call__(self, *args, **kwargs) -> T:
+        """
+        Returns:
+            ``T``: The result of the function call.
+        """
         types = tuple([type(arg) for arg in args] + [type(kwarg) for kwarg in kwargs.values()])
         if types in self._dispatcher._functions:
             return self._dispatcher._functions[types](*args, **kwargs)
