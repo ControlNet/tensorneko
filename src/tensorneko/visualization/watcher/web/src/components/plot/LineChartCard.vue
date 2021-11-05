@@ -74,7 +74,7 @@ export default class LineChartCard extends Vue {
         type: "line"
       },
       formatter: (params: CallbackDataParams) => {
-        return `${this.xLabel}: ${Math.round(params[0].data[0] * 10000) / 10000}\n` +
+        return `${this.xLabel}: ${Math.round(params[0].data[0] * 10000) / 10000}<br/>` +
             `${this.yLabel}: ${Math.round(params[0].data[1] * 10000) / 10000}`
       }
     };

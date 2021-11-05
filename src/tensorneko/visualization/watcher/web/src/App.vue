@@ -1,5 +1,5 @@
 <template>
-  <h2 class="display-2">Tensorneko Web Watcher</h2>
+  <h2 class="display-2">Tensorneko Web Watcher::{{view}}</h2>
   <div class="row mb-3">
     <label class="col-sm-2 col-form-label" style="width: 200px">Update Rate (ms)</label>
     <div class="col-sm-10" style="width: 200px;"><input type="number" class="form-control" placeholder="1000"
@@ -40,6 +40,7 @@ export default class App extends Vue {
   readonly logs = logs
   readonly lineCharts = lineCharts
   updateDuration = 5000
+  view: string = null
 
   $refs!: {
     progressbar: ProgressBarTable,
@@ -65,7 +66,9 @@ export default class App extends Vue {
             }
           }
 
-          json.forEach((d: ComponentData) => {
+          this.view = json.view;
+
+          json.data.forEach((d: ComponentData) => {
             if (d.type === "Variable") {
               updateArray(d, this.variables);
             } else if (d.type === "ProgressBar") {

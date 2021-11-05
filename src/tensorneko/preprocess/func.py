@@ -71,7 +71,8 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: Union[Res
     return f(tensor)
 
 
-def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: Union[ResizeMethod, str] = ResizeMethod.BICUBIC
+def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: Union[ResizeMethod, str] = ResizeMethod.BICUBIC,
+    fast = False
 ) -> Tensor:
     """
     Resizing a video to determined size.
@@ -80,17 +81,21 @@ def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: Union[Res
         tensor (:class:`~torch.Tensor`): Video tensor (T, C, H, W)
         size ((``int``, ``int``)): Target size (H, W)
         resize_method (:class:`ResizeMethod`, optional): Resize method. Default bicubic.
+        fast (bool, optional): If True, use fast mode (pytorch F.interpolate). Default False.
 
     Returns:
         :class:`~torch.Tensor`: The resized video.
     """
-    resize_method = _get_enum_value(resize_method, ResizeMethod)
-    image_resizer = F(resize_image, size=size, resize_method=resize_method) \
-                    >> F(rearrange, pattern="c h w -> 1 c h w")
-    f = F(map, image_resizer) \
-        >> list \
-        >> torch.vstack
-    return f(tensor)
+    if not fast:
+        resize_method = _get_enum_value(resize_method, ResizeMethod)
+        image_resizer = F(resize_image, size=size, resize_method=resize_method) \
+                        >> F(rearrange, pattern="c h w -> 1 c h w")
+        f = F(map, image_resizer) \
+            >> list \
+            >> torch.vstack
+        return f(tensor)
+    else:
+        return func.interpolate(tensor, size, mode=_get_enum_value(resize_method, ResizeMethod), align_corners=False)
 
 
 def _get_padding_pair(padding_size: int, padding_position: Union[PaddingPosition, str]) -> List[int]:
