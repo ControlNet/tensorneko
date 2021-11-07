@@ -107,9 +107,9 @@ class TextReader:
         else:
             raise Exception(f"Cannot infer the file type [{ext}]. Please explicitly invoke other reader functions.")
 
-    def __new__(cls, path: str, encoding: str = "UTF-8") -> str:
+    def __new__(cls, path: str, *args, **kwargs) -> str:
         """Alias of :meth:`~TextReader.of_plain`"""
-        return cls.of_plain(path, encoding)
+        return cls.of(path, *args, **kwargs)
 
 
 def json_data(cls):

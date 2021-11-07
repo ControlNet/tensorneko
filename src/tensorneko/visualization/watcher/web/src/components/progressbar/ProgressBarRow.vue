@@ -1,7 +1,7 @@
 <template>
   <th scope="row">{{ d.name }}</th>
   <td>
-    <b-progress striped animated style="height: 30px;" :max="d.total">
+    <b-progress striped animated style="height: 30px;" :max="max">
       <b-progress-bar :value="d.value" :variant="variant">
         <span><strong>
           {{d.value}} / {{d.total}}
@@ -21,6 +21,7 @@ export default class ProgressBarRow extends Vue {
   @Prop(String) k!: string
 
   d: ProgressBarData = progressbars[this.k]
+  max: number = this.d.total
   prev: ProgressBarData = null
   lastModified: number = +new Date()
   variant: Variant = "warning"
@@ -50,6 +51,7 @@ export default class ProgressBarRow extends Vue {
 
   update(): void {
     this.prev = this.d;
+    this.max = this.d.total;
     this.d = progressbars[this.k];
     this.lastModified = +new Date()
   }
