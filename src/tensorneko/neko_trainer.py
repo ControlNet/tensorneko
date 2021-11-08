@@ -12,7 +12,11 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.accelerators import Accelerator
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.plugins import Plugin
+try:
+    from pytorch_lightning.plugins import Plugin  # for pytorch_lightning < 1.5.x
+except ImportError:
+    from pytorch_lightning.plugins import PLUGIN as Plugin  # for pytorch_lightning >= 1.5.x
+
 from pytorch_lightning.plugins.environments import ClusterEnvironment
 from pytorch_lightning.profiler import BaseProfiler
 
