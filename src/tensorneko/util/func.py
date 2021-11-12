@@ -6,12 +6,19 @@ import numpy
 import numpy as np
 import torch
 from fn import F, _, Stream
-from fn.op import identity
 from fn.uniform import reduce
 from torch import Tensor
 from torch.nn import ModuleList, Module
 
-from .type import T, A
+from .type import T, A, R
+
+
+def identity(*args, **kwargs):
+    """
+    Pickle-friendly identity function.
+    """
+    assert kwargs != {}, "identity function doesn't accept keyword arguments"
+    return args
 
 
 def reduce_dict_by(key: str, op: Callable[[T, T], T]) -> Callable[[List[Dict[str, T]]], T]:
@@ -217,17 +224,18 @@ def with_printed_shape(x: A) -> A:
     return F(with_printed, func=lambda tensor: tensor.shape)(x)
 
 
-def ifelse(predicate: Callable[[Any], bool], func_true: Callable, func_false: Callable) -> Callable:
+def ifelse(predicate: Callable[[T], bool], func_true: Callable[[T], R], func_false: Callable[[T], R] = identity
+) -> Callable[[T], R]:
     """
     A function composition util for if-else control flow.
 
     Args:
-        predicate (``(...) -> bool``): A predicate produce a bool.
-        func_true (``(...) -> Any``): If the bool from predicate is True, return this function.
-        func_false (``(...) -> Any``): If the bool from predicate is False, return this function.
+        predicate (``(T) -> bool``): A predicate produce a bool.
+        func_true (``(T) -> R``): If the bool from predicate is True, return this function.
+        func_false (``(T) -> R``): If the bool from predicate is False, return this function.
 
     Returns:
-        ``(...) -> Any``: Composed function with if-else control flow.
+        ``(T) -> R``: Composed function with if-else control flow.
     """
 
     def wrapper(*args, **kwargs):

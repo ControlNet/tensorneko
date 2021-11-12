@@ -1,7 +1,7 @@
 from einops.layers.torch import Rearrange as _Rearrange
 
 from .func import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
-    with_printed_shape, is_bad_num, ifelse, dict_add, count_parameters, as_list
+    with_printed_shape, is_bad_num, ifelse, dict_add, count_parameters, as_list, identity
 from .func import tensorneko_path as get_tensorneko_path
 from .type import ModuleFactory, Shape, Device
 from .configuration import Configuration
