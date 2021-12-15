@@ -171,10 +171,10 @@ def listdir(path: str, filter_func: Callable[[str], bool] = lambda arg: True) ->
     Examples::
 
         >>> os.listdir("tensorneko/util")[:3]  # python os library
-        ['configuration.py', 'func.py', 'string_getter.py']
+        ['configuration.py', 'enum.py', 'string_getter.py']
         >>> listdir("tensorneko/util")[:3]  # tensorneko
         ['tensorneko/util/configuration.py',
-         'tensorneko/util/func.py',
+         'tensorneko/util/enum.py',
          'tensorneko/util/string_getter.py']
 
     """
