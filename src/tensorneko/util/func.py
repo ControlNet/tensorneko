@@ -17,8 +17,11 @@ def identity(*args, **kwargs):
     """
     Pickle-friendly identity function.
     """
-    assert kwargs != {}, "identity function doesn't accept keyword arguments"
-    return args
+    assert kwargs == {}, "identity function doesn't accept keyword arguments"
+    if len(args) == 1:
+        return args[0]
+    else:
+        return args
 
 
 def reduce_dict_by(key: str, op: Callable[[T, T], T]) -> Callable[[List[Dict[str, T]]], T]:
