@@ -28,6 +28,11 @@ Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lig
 pip install tensorneko
 ```
 
+To use the library without PyTorch and PyTorch Lightning, you can install with following command.
+```shell
+pip install tensorneko_util
+```
+
 ## Neko Layers and Modules
 
 Build an MLP with linear layers. The activation and normalization will be placed in the hidden layers.
