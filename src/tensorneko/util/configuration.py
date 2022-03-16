@@ -57,7 +57,7 @@ class Configuration(ABC):
     @abstractmethod
     def build(self) -> Any:
         """
-        A method to build a object.
+        A method to build an object.
 
         Returns:
             ``Any``: The target object of this configuration.

@@ -57,6 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install -r requirements_util.txt
           python init.py
 
       - name: Set PYTHONPATH
@@ -64,7 +65,6 @@ jobs:
 
       - name: Run Test
         run: python -m unittest discover test
-
 
   release:
     needs: [build-web, unittest]
@@ -99,12 +99,28 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install -r requirements_util.txt
           python init.py
 
-      - name: Build package
+      - name: Build package for tensorneko_util
+        run: python setup_util.py sdist bdist_wheel
+
+      - name: Release tensorneko_util to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Clean build for tensorneko_util
+        run: |
+          rm -rf dist/
+          rm -rf build/
+          rm -rf src/tensorneko_util.egg-info/
+
+      - name: Build package for tensorneko
         run: python setup.py sdist bdist_wheel
 
-      - name: Release main branch to PyPI
+      - name: Release tensorneko to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__

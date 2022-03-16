@@ -1,25 +1,24 @@
 import init
 import setuptools
 
-with open("README.md", "r") as file:
-    long_description = file.read()
+long_description = """
+The independent util library for TensorNeko. This library doesn't require PyTorch as a dependency.
+"""
 
 requirements = []
-with open("requirements.txt", "r") as file:
+with open("requirements_util.txt", "r") as file:
     for line in file:
         requirements.append(line.strip())
 
-
 version = init.read_version()
 init.write_version(version)
-requirements.append(f"tensorneko_util == {version}")
 
 setuptools.setup(
-    name="tensorneko",
+    name="tensorneko_util",
     version=version,
     author="ControlNet",
     author_email="smczx@hotmail.com",
-    description="Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lightning.",
+    description="The Utils for Library TensorNeko.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ControlNet/tensorneko",
@@ -29,13 +28,10 @@ setuptools.setup(
     },
     keywords=["deep learning", "pytorch", "AI"],
     package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src", include=["tensorneko", "tensorneko.*"]),
+    packages=setuptools.find_packages(where="src", include=["tensorneko_util", "tensorneko_util.*"]),
     package_data={
-        "tensorneko": [
-            "version.txt",
-            "visualization/watcher/web/dist/index.html",
-            "visualization/watcher/web/dist/css/*",
-            "visualization/watcher/web/dist/js/*"
+        "tensorneko_util": [
+            "version.txt"
         ]
     },
     python_requires=">=3.7",

@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os.path
 from abc import ABC, abstractmethod
-from typing import Generic, List, Union, Dict, TYPE_CHECKING, Any, Optional, Tuple
+from typing import Generic, List, Union, Dict, TYPE_CHECKING, Any, Optional
 
 from numpy import ndarray
 from torch import Tensor

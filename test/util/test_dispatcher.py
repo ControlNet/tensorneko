@@ -29,7 +29,7 @@ def h(x: int, y: str = ""):
     return type(x), type(y)
 
 
-class MyTestCase(unittest.TestCase):
+class UtilDispatcherTest(unittest.TestCase):
 
     @staticmethod
     def _get_register_type(func) -> List[Tuple[type, ...]]:
