@@ -1,5 +1,4 @@
-from types import Union
-from typing import Optional, overload
+from typing import Optional, overload, Union
 
 from numpy import ndarray
 from torch import Tensor

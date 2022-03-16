@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from functools import partial
-from typing import Callable, Dict, List, Generic, Sequence, Any
+from typing import Callable, Dict, List, Generic, Sequence
 
 import inspect
 
@@ -142,6 +141,7 @@ class DispatcherDecorator:
         def wrapper(func: Callable[..., T]) -> Resolver[T]:
             name = ".".join([func.__module__, func.__qualname__])
             return Dispatcher.get(name)(func, types)
+
         return wrapper
 
     def __call__(self, func: Callable[..., T]) -> Resolver[T]:

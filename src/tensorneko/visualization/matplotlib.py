@@ -13,7 +13,7 @@ def imshow(tensor: Union[Tensor, ndarray], *args, **kwargs):
     Except the first parameter, other parameters are from :func:`matplotlib.pyplot.imshow`.
 
     Args:
-        image (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The image with (C, H, W) to show.
+        tensor (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The image with (C, H, W) to show.
 
         *args: Other parameters for :func:`matplotlib.pyplot.plot`.
         **kwargs: Other parameters for :func:`matplotlib.pyplot.imshow`.
@@ -28,7 +28,7 @@ def imshow(tensor: Union[Tensor, ndarray], *args, **kwargs):
 
 def plot(tensor: Union[Tensor, ndarray], *args, **kwargs):
     """
-    Use matplotlib to plot tensor with Tensor with shape (N, 2). First column is X and second column is Y.
+    Use matplotlib to plot tensor with shape (N, 2). First column is X and second column is Y.
 
     Except the first parameter, other parameters are from :func:`matplotlib.pyplot.plot`.
 

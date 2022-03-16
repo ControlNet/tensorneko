@@ -39,7 +39,7 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: Union[Res
 
 
 def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: Union[ResizeMethod, str] = ResizeMethod.BICUBIC,
-    fast = False
+    fast=False
 ) -> Tensor:
     """
     Resizing a video to determined size.

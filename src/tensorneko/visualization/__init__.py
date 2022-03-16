@@ -1,5 +1,5 @@
 from .log_graph import log_graph
-from .color import Colors, ContinuousColors
+from tensorneko_util.visualization import Colors, ContinuousColors
 from . import watcher
 from . import tensorboard
 
@@ -20,7 +20,7 @@ else:
     __all__.append("matplotlib")
 
 try:
-    from . import seaborn
+    from tensorneko_util.visualization import seaborn
 except ImportError:
     pass
 else:

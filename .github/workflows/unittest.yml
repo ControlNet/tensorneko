@@ -65,8 +65,41 @@ jobs:
       - name: Run Test
         run: python -m unittest discover test
 
-  build-test:
+  build-tensorneko-util:
     needs: [build-web, unittest]
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements_util.txt
+          python init.py
+
+      - name: Build package
+        run: |
+          pip install wheel
+          python setup_util.py sdist bdist_wheel
+
+  build-tensorneko:
+    needs: [build-tensorneko-util]
     runs-on: ubuntu-20.04
 
     strategy:
@@ -99,6 +132,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install -r requirements_util.txt
           python init.py
 
       - name: Build package

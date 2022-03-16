@@ -33,5 +33,3 @@ def get_enum_value(enum: Union[E, str], EnumType: Type[E]) -> str:
         return enum.lower()
     else:
         raise TypeError("Not matched enum type.")
-
-
