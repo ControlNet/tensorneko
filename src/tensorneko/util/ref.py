@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from typing import Generic, Callable, TYPE_CHECKING, Optional
 
-from .dispatcher import dispatch
+from tensorneko_util.util import dispatch
 from .type import P
 if TYPE_CHECKING:
     from ..visualization.watcher import Component

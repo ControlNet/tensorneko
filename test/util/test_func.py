@@ -11,7 +11,7 @@ from fn import _, F
 from fn.iters import take
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
-    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path
+    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path, as_list, identity
 
 
 class UtilFuncTest(unittest.TestCase):
@@ -155,3 +155,15 @@ class UtilFuncTest(unittest.TestCase):
         self.assertTrue("neko_model.py" in files)
         self.assertTrue("neko_module.py" in files)
         self.assertTrue("neko_trainer.py" in files)
+
+    def test_as_list(self):
+        # test list
+        self.assertEqual(as_list(), [])
+        self.assertEqual(as_list(1, 2, 3), [1, 2, 3])
+        self.assertEqual(as_list(1, 2, 3, k1=4, k2=5, k6=111), [1, 2, 3, 4, 5, 111])
+
+    def test_identity(self):
+        # test identity
+        self.assertEqual(identity(1), 1)
+        self.assertEqual(identity(1, 2, 3), (1, 2, 3))
+        self.assertRaises(AssertionError, identity, 1, 2, 3, 4, k=1)

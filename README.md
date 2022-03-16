@@ -28,6 +28,11 @@ Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lig
 pip install tensorneko
 ```
 
+To use the library without PyTorch and PyTorch Lightning, you can install with following command.
+```shell
+pip install tensorneko_util
+```
+
 ## Neko Layers and Modules
 
 Build an MLP with linear layers. The activation and normalization will be placed in the hidden layers.
@@ -156,12 +161,13 @@ neko.io.write.text.to_json("path/to/json.json", json_dict)
 ## Neko preprocessing
 
 ```python
+import tensorneko.preprocess.resize
 import tensorneko as neko
 
 # A video tensor with (120, 3, 720, 1280)
 video = neko.io.read.video.of("example/video.mp4")
 # Get a resized tensor with (120, 3, 256, 256)
-neko.preprocess.resize_video(video, (256, 256))
+tensorneko.preprocess.resize.resize_video(video, (256, 256))
 ```
 
 #### All preprocessing utils

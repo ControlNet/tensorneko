@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Generic, overload
 
-from ..util.type import P
+from .type import P
 
 
 class Ref(Generic[P]):
