@@ -100,7 +100,7 @@ jobs:
           python setup_util.py sdist bdist_wheel
 
   build-tensorneko:
-    needs: [build-tensorneko-util]
+    needs: [build-web, unittest]
     runs-on: ubuntu-20.04
 
     strategy:
@@ -132,8 +132,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
           pip install -r requirements_util.txt
+          pip install -r requirements.txt
           python init.py
 
       - name: Build package
