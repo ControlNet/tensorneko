@@ -3,7 +3,7 @@ import unittest
 from torch import Tensor
 
 from tensorneko.layer import Conv2d
-from fn import F
+from tensorneko.util import F
 import torch.nn as nn
 import torch
 

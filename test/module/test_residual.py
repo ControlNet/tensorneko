@@ -1,10 +1,10 @@
 import unittest
 
-from fn import F
 from torch import rand
 from torch.nn import Linear, ReLU
 
 from tensorneko.module import ResidualModule, ResidualBlock
+from tensorneko.util import F
 
 
 class TestResidualBlock(unittest.TestCase):

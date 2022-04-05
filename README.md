@@ -28,7 +28,7 @@ Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lig
 pip install tensorneko
 ```
 
-To use the library without PyTorch and PyTorch Lightning, you can install with following command.
+To use the library without PyTorch and PyTorch Lightning, you can install the util library (support Python 3.7 ~ 3.10) with following command.
 ```shell
 pip install tensorneko_util
 ```

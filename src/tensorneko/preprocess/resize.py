@@ -3,11 +3,11 @@ from typing import Tuple, Union
 import torch
 from cleanfid.resize import make_resizer
 from einops import rearrange
-from fn import F, _
 from torch import Tensor, uint8, float32
 from torch.nn import functional as func
 
 from .enum import ResizeMethod, get_enum_value
+from ..util import F, _
 
 
 def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: Union[ResizeMethod, str] = ResizeMethod.BICUBIC

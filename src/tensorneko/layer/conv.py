@@ -1,11 +1,11 @@
 from typing import Union, Optional, Callable, Tuple, TypeVar, Type
 
-from fn import F
 from torch import Tensor
 from torch.nn import Conv1d as PtConv1d, Conv2d as PtConv2d, Conv3d as PtConv3d, Module
 from torch.nn.modules.conv import _ConvNd
 
 from ..neko_module import NekoModule
+from ..util import F
 
 C = TypeVar("C", bound=_ConvNd)
 

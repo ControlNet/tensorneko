@@ -7,11 +7,10 @@ from random import randint
 
 import numpy as np
 import torch
-from fn import _, F
-from fn.iters import take
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
-    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path, as_list, identity
+    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path, as_list, identity, _, F
+from itertools import islice
 
 
 class UtilFuncTest(unittest.TestCase):
@@ -42,6 +41,9 @@ class UtilFuncTest(unittest.TestCase):
 
     def test_generate_inf_seq(self):
         length = 20
+
+        def take(n, iterable):
+            return islice(iterable, n)
         # test on single atomic types
         take_length_of = lambda l: F() >> generate_inf_seq >> F(take, l) >> list
         self.assertEqual(take_length_of(length)([3]), [3] * length)

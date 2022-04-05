@@ -1,10 +1,10 @@
 import unittest
 
 import torch
-from fn import F
 from torch.nn import Linear, Sigmoid, ELU, LayerNorm
 
 from tensorneko.module import MLP
+from tensorneko.util import F
 
 
 class TestMLP(unittest.TestCase):

@@ -1,11 +1,10 @@
 from typing import Optional
 
-from fn import F
 from torch import Tensor
 from torch.nn import Linear as PtLinear, Dropout
 
 from ..neko_module import NekoModule
-from ..util import ModuleFactory
+from ..util import ModuleFactory, F
 
 
 class Linear(NekoModule):

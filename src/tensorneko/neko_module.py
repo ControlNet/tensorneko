@@ -1,14 +1,15 @@
 from abc import abstractmethod, ABC
 from typing import Dict, Any, Callable, Tuple
 
-from fn import F
 from torch.nn import Module
+
+from .util import F
 
 
 class NekoModule(ABC, Module, F):
     """
     The module base of tensorneko. This NekoModule is inherited from :class:`~torch.nn.Module`
-    and also support the ``fn.py`` library pipe operation.
+    and also support the ``tensorneko.util.fp`` pipe operation.
 
     Examples::
 

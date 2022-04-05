@@ -1,15 +1,14 @@
+from functools import reduce
 from os.path import dirname, abspath
 from typing import Callable, List, Dict, Sequence, Union
 
 import numpy
 import numpy as np
 import torch
-from fn import F, _
-from fn.uniform import reduce
 from torch import Tensor
 from torch.nn import Module, ModuleList
 
-from tensorneko_util.util import with_printed, ifelse
+from tensorneko_util.util import with_printed, ifelse, F, _
 from .type import T, A
 
 
@@ -97,7 +96,7 @@ def compose(fs: Union[ModuleList, Sequence[Callable]]) -> F:
         fs (``Sequence[Callable]`` | :class:`~torch.nn.ModuleList`): The functions input for composition.
 
     Returns:
-        :class:`~fn.func.F`: The composed output function.
+        :class:`~fp.func.F`: The composed output function.
 
     Examples::
 

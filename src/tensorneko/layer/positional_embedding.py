@@ -1,9 +1,8 @@
-from fn import F, _
 from torch import Tensor, zeros
 from torch.nn import Parameter, Dropout
 
 from ..neko_module import NekoModule
-from ..util import Shape
+from ..util import Shape, F, _
 
 
 class PositionalEmbedding(NekoModule):

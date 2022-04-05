@@ -1,14 +1,13 @@
 from typing import Optional
 
 import torch
-from fn import F
 from torch import Tensor, zeros
 from torch.nn import Parameter, LayerNorm, Linear, MultiheadAttention, GELU, Identity, ModuleList
 
 from . import MLP, ResidualBlock
-from ..neko_module import NekoModule
 from ..layer import PositionalEmbedding, Concatenate
-from ..util import ModuleFactory, compose, Shape
+from ..neko_module import NekoModule
+from ..util import ModuleFactory, compose, Shape, F
 
 
 class AttentionModule(NekoModule):

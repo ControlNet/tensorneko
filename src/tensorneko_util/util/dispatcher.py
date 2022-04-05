@@ -136,8 +136,8 @@ class DispatcherDecorator:
     def __init__(self):
         self.__doc__ = DispatcherDecorator.__call__.__doc__
 
-    @staticmethod
-    def of(*types: type) -> Callable[[Callable[..., T]], Resolver[T]]:
+    @classmethod
+    def of(cls, *types: type) -> Callable[[Callable[..., T]], Resolver[T]]:
         def wrapper(func: Callable[..., T]) -> Resolver[T]:
             name = ".".join([func.__module__, func.__qualname__])
             return Dispatcher.get(name)(func, types)
@@ -151,7 +151,7 @@ class DispatcherDecorator:
             func(``(...) -> T``): function to be dispatched.
 
         Returns:
-            :class:`~tensorneko.util.dispatcher.Resolver[T]`: Resolver object.
+            :class:`~tensorneko_util.util.dispatcher.Resolver[T]`: Resolver object.
 
         Example::
 

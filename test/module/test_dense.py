@@ -1,11 +1,11 @@
 import unittest
 
-from fn import F
 from torch import randn
 from torch.nn import BatchNorm2d, ReLU
 
 from tensorneko.layer import Conv2d
 from tensorneko.module.dense import DenseBlock
+from tensorneko.util import F
 
 
 class TestDense(unittest.TestCase):

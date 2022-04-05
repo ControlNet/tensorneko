@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from typing import Callable, Union, Tuple
+from typing import Union, Callable, Tuple, Any
 
-from fn import F
-
-from ..util import dict_add
+from .func import F
 
 
 class Args(F):
@@ -20,6 +18,13 @@ class Args(F):
         result = __(20) >> (_ + 1) >> (_ * 2) >> __.get
         print(result)
         # 42
+
+    References:
+        GitHub - fnpy/fp.py: Missing features of fp in Python -- active fork of kachayev/fp.py. (2022).
+        Retrieved 5 April 2022, from https://github.com/fnpy/fn.py
+
+        GitHub - kachayev/fp.py: Functional programming in Python: implementation of missing features to enjoy
+        FP. (2022). Retrieved 5 April 2022, from https://github.com/kachayev/fn.py
 
     """
 
@@ -38,7 +43,8 @@ class Args(F):
     def __rshift__(self, g: Union[Callable, Tuple, Args, F]) -> Union[Args, any]:
         """Overload >> operator for F instances"""
         if type(g) is Args:
-            return Args(*(self.args + g.args), **(dict_add(self.kwargs, g.kwargs)))
+            self.kwargs.update(g.kwargs)
+            return Args(*(self.args + g.args), **self.kwargs)
         elif isinstance(g, tuple):
             return self.__ensure_callable(g)
         elif any(map(lambda getter: g is getter, (Args.get, Args.get_args, Args.get_value, Args.get_kwargs))):
@@ -57,7 +63,7 @@ class Args(F):
 
         return f"({', '.join(map(str, self.args))}{kwargs_str})"
 
-    def get(self) -> any:
+    def get(self) -> Any:
         return self.args[0]
 
     def get_args(self) -> tuple:

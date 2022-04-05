@@ -1,8 +1,8 @@
 import os
 from typing import Callable, List, Dict, Iterable, Sequence, Any
 
-from fn import F, _, Stream
-from fn.uniform import reduce
+from .fp import F, _, Stream
+from functools import reduce
 
 from .type import T, R
 
@@ -26,7 +26,7 @@ def generate_inf_seq(items: Iterable[Any]) -> Stream:
         items [``Iterable[Any]``]: Original items.
 
     Returns:
-        :class:`~fn.stream.Stream`: The infinity sequence.
+        :class:`~fp.stream.Stream`: The infinity sequence.
 
     Examples::
 
@@ -58,7 +58,7 @@ def compose(fs: Sequence[Callable]) -> F:
         fs (``Sequence[Callable]``): The functions input for composition.
 
     Returns:
-        :class:`~fn.func.F`: The composed output function.
+        :class:`~fp.func.F`: The composed output function.
 
     Examples::
 
@@ -147,15 +147,15 @@ def ifelse(predicate: Callable[[T], bool], func_true: Callable[[T], R], func_fal
     return wrapper
 
 
-def dict_add(*dicts: dict):
+def dict_add(*dicts: dict) -> dict:
     """
     Merge multiple dictionaries.
 
     Args:
-        *dicts:
+        *dicts: dictionaries to merge.
 
     Returns:
-
+        ``dict``: The merged dictionary.
     """
     new_dict = {}
     for each in dicts:
