@@ -4,7 +4,7 @@ from enum import Enum
 from functools import reduce
 from itertools import chain, islice
 from sys import maxsize
-from typing import Iterable, Iterator, List, Union, Callable, Optional, Tuple
+from typing import Iterable, Iterator, List, Union, Callable, Optional, Tuple, Generator
 
 from .abstract_seq import AbstractSeq
 from ...type import T, R
