@@ -56,12 +56,14 @@ class Args(F):
         """Overload apply operator"""
         raise TypeError("The 'Args' is not callable")
 
-    def __repr__(self):
+    def __str__(self):
         kwargs_str = ""
         for k, v in self.kwargs.items():
             kwargs_str = f"{kwargs_str}, {k}={v}"
 
         return f"({', '.join(map(str, self.args))}{kwargs_str})"
+
+    __repr__ = __str__
 
     def get(self) -> Any:
         return self.args[0]
