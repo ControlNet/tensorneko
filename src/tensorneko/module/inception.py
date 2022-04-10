@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from fn import F
 from torch import Tensor
 from torch.nn import ModuleList, Sequential, Module
 
-from ..neko_module import NekoModule
 from ..layer import Concatenate
+from ..neko_module import NekoModule
+from ..util import F
 
 
 class InceptionModule(NekoModule):

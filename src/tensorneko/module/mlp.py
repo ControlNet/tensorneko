@@ -3,8 +3,8 @@ from typing import Optional, Union, Iterable, Sequence, Callable
 from torch import Tensor
 from torch.nn import ModuleList
 
-from ..neko_module import NekoModule
 from ..layer import Linear
+from ..neko_module import NekoModule
 from ..util import generate_inf_seq, ModuleFactory, compose
 
 

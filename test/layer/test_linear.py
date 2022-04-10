@@ -1,8 +1,7 @@
 import unittest
 
 import torch
-from fn import F
-from fn.op import apply
+from tensorneko.util import F
 
 from tensorneko.layer import Linear
 from torch.nn import Linear as PtLinear, LeakyReLU, BatchNorm1d, Tanh
@@ -31,7 +30,7 @@ class TestLinear(unittest.TestCase):
         self.assertIs(neko_linear.normalization, None)
         # test feedforward
         x = torch.rand(self.batch, self.in_neurons)  # four 128-dim vectors
-        neko_res, pt_res = map(F(apply, args=[x]), [neko_linear, neko_linear.linear])
+        neko_res, pt_res = map(lambda layer: layer(x), [neko_linear, neko_linear.linear])
         self.assertTrue((pt_res - neko_res).sum() < 1e-8)
 
     def test_linear_with_activation(self):
@@ -43,7 +42,8 @@ class TestLinear(unittest.TestCase):
         self.assertIs(neko_linear.normalization, None)
         # test feedforward
         x = torch.rand(self.batch, self.in_neurons)  # four 128-dim vectors
-        neko_res, pt_res = map(F(apply, args=[x]), [neko_linear, F() >> neko_linear.linear >> neko_linear.activation])
+        neko_res, pt_res = map(lambda layer: layer(x)
+            , [neko_linear, F() >> neko_linear.linear >> neko_linear.activation])
         self.assertTrue((pt_res - neko_res).sum() < 1e-8)
 
     def test_linear_with_activation_after_normalization(self):
@@ -58,7 +58,7 @@ class TestLinear(unittest.TestCase):
         self.assertEqual(str(neko_linear.normalization), str(BatchNorm1d(self.out_neurons)))
         # test feedforward
         x = torch.rand(self.batch, self.in_neurons)  # four 128-dim vectors
-        neko_res, pt_res = map(F(apply, args=[x]), [neko_linear,
+        neko_res, pt_res = map(lambda layer: layer(x), [neko_linear,
             F() >> neko_linear.linear >> neko_linear.normalization >> neko_linear.activation]
         )
         self.assertTrue((pt_res - neko_res).sum() < 1e-8)
@@ -75,7 +75,7 @@ class TestLinear(unittest.TestCase):
         self.assertEqual(str(neko_linear.normalization), str(BatchNorm1d(self.out_neurons)))
         # test feedforward
         x = torch.rand(self.batch, self.in_neurons)  # four 128-dim vectors
-        neko_res, pt_res = map(F(apply, args=[x]), [neko_linear,
+        neko_res, pt_res = map(lambda layer: layer(x), [neko_linear,
             F() >> neko_linear.linear >> neko_linear.activation >> neko_linear.normalization]
         )
         self.assertTrue((pt_res - neko_res).sum() < 1e-8)

@@ -9,7 +9,7 @@ from .video_data import VideoData
 
 
 class VideoReader:
-    """VideoReader for reading video file"""
+    """VideoReader for reading video file. PyAV is required."""
 
     @staticmethod
     def of_array(video: Union[Tensor, ndarray], video_fps: float, audio: Union[Tensor, ndarray] = None,

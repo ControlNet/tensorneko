@@ -3,8 +3,8 @@ from typing import Iterable
 from torch import Tensor
 from torch.nn import Sequential, ModuleList
 
-from ..neko_module import NekoModule
 from ..layer import Concatenate
+from ..neko_module import NekoModule
 from ..util import ModuleFactory
 
 

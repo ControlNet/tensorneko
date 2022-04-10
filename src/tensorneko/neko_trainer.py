@@ -6,12 +6,14 @@ from pathlib import Path
 from time import time
 from typing import Union, Optional, List, Dict
 
-from fn import F
 from pytorch_lightning import Callback
 from pytorch_lightning import Trainer
 from pytorch_lightning.accelerators import Accelerator
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
+
+from .util import F
+
 try:
     from pytorch_lightning.plugins import Plugin  # for pytorch_lightning < 1.5.x
 except ImportError:

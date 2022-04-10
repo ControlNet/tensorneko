@@ -3,8 +3,8 @@ from typing import Callable, Union, List, Tuple, TypeVar
 
 import numpy as np
 import torch
-from torch.nn import Module
 from torch import device, Size
+from torch.nn import Module
 
 ModuleFactory = Union[Callable[[], Module], Callable[[int], Module]]
 """The module builder type of ``() -> torch.nn.Module | (int) -> torch.nn.Module``"""

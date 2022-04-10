@@ -262,4 +262,6 @@ scratch.ipynb
 /src/tensorneko/version.txt
 /src/tensorneko/visualization/watcher/web/public/*
 !/src/tensorneko/visualization/watcher/web/public/index.html
+/src/tensorneko/visualization/watcher/web/package-lock.json
 /watcher
+/src/tensorneko_util/version.txt

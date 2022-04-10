@@ -3,6 +3,7 @@ import unittest
 import torch
 from tensorneko.layer import Reshape
 
+
 class TestReshape(unittest.TestCase):
     """The class for test Reshape layer"""
 

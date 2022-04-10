@@ -1,12 +1,11 @@
 from typing import Union, Optional
 
 from einops.layers.torch import Rearrange
-from fn import F
 from torch import Tensor
 from torch.nn import Conv2d
 
 from ..neko_module import NekoModule
-from ..util import ModuleFactory, Shape
+from ..util import ModuleFactory, Shape, F
 
 
 class Patching(NekoModule):

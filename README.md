@@ -28,6 +28,11 @@ Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lig
 pip install tensorneko
 ```
 
+To use the library without PyTorch and PyTorch Lightning, you can install the util library (support Python 3.7 ~ 3.10) with following command.
+```shell
+pip install tensorneko_util
+```
+
 ## Neko Layers and Modules
 
 Build an MLP with linear layers. The activation and normalization will be placed in the hidden layers.
@@ -71,12 +76,13 @@ conv2d = neko.layer.Conv2d(
 layers:
 
 - `Concatenate`
-- `Conv2d`
+- `Conv`, `Conv1d`, `Conv2d`, `Conv3d`
 - `Linear`
 - `Log`
 - `PatchEmbedding2d`
 - `PositionalEmbedding`
 - `Reshape`
+- `Stack`
 
 modules:
 
@@ -139,7 +145,7 @@ neko.io.write.text.to("path/to/text.txt", text_string)
 
 # read json as DataFrame
 json_df = neko.io.read.text.of_json("path/to/json.json", to_df=True)
-# read json as a object
+# read json as an object
 @json_data
 class JsonData:
     x: int
@@ -213,6 +219,22 @@ import matplotlib.pyplot as plt
 image_tensor = ...  # an image tensor with shape (C, H, W)
 neko.visualization.imshow(image_tensor)
 plt.show()
+```
+
+### Predefined colors
+Several aesthetic colors are predefined.
+
+```python
+import tensorneko as neko
+import matplotlib.pyplot as plt
+
+# use with matplotlib
+plt.plot(..., color=neko.visualization.Colors.RED)
+
+# the palette for seaborn is also available
+from tensorneko_util.visualization.seaborn import palette
+import seaborn as sns
+sns.set_palette(palette)
 ```
 
 ## Neko Model
@@ -322,13 +344,48 @@ import tensorneko as neko
 activation = neko.util.get_activation("leakyRelu")()
 ```
 
-`__`: The arguments to pipe operator
+`__`: The arguments to pipe operator. (Inspired from [fn.py](https://github.com/kachayev/fn.py))
 ```python
 from tensorneko.util import __, _
 result = __(20) >> (_ + 1) >> (_ * 2) >> __.get
 print(result)
 # 42
 ```
+
+`Seq`: A collection wrapper for method chaining.
+```python
+from tensorneko.util import Seq, _
+# using method chaining
+seq = Seq.of(1, 2, 3).map(_ + 1).filter(_ % 2 == 0).map(_ * 2).take(2).to_list()
+# return [4, 8]
+
+# using bit shift operator to chain the sequence
+seq = Seq.of(1, 2, 3) << Seq.of(2, 3, 4) << [3, 4, 5]
+# return Seq(1, 2, 3, 2, 3, 4, 3, 4, 5)
+```
+
+`Option`: A monad for dealing with data.
+```python
+from tensorneko.util import return_option
+
+@return_option
+def get_data():
+    if some_condition:
+        return 1
+    else:
+        return None
+
+def process_data(n: int):
+    if condition(n):
+        return n
+    else:
+        return None
+    
+
+data = get_data()
+data = data.map(process_data).get_or_else(-1)  # if the response is None, return -1
+```
+
 
 `Seed`: The universal seed for `numpy`, `torch` and Python `random`.
 ```python
@@ -388,6 +445,7 @@ def come(x) -> str:
 Utilities list:
 - `reduce_dict_by`
 - `summarize_dict_by`
+- `identity`
 - `generate_inf_seq`
 - `compose`
 - `listdir`
@@ -398,9 +456,13 @@ Utilities list:
 - `dict_add`
 - `count_parameters`
 - `as_list`
-- `Configuration`
+- `list_to_dict`
+- `ref`
 - `get_activation`
 - `get_loss`
 - `Seed`
 - `dispatch`
 - `__`
+- `Seq`
+- `return_option` and `Option`
+- `AverageMeter`

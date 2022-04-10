@@ -1,11 +1,10 @@
 from typing import Union, List
 
-from fn import F
 from torch import Tensor
 from torch.nn import functional as func
 
 from .enum import PaddingPosition, PaddingMethod, get_enum_value
-from ..util import Rearrange
+from ..util import Rearrange, F
 
 
 def _get_padding_pair(padding_size: int, padding_position: Union[PaddingPosition, str]) -> List[int]:

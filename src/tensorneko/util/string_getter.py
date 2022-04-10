@@ -1,12 +1,11 @@
 from typing import Dict
 
-from torch.nn import LeakyReLU, GELU, ELU, ReLU, Mish, Module, ReLU6, PReLU, SELU, Sigmoid, \
-    Tanh, Softplus, Softshrink, Softsign, Softmin, Softmax, LogSoftmax
-
 from torch.nn import CrossEntropyLoss, L1Loss, MSELoss, BCELoss, BCEWithLogitsLoss, NLLLoss, \
     NLLLoss2d, PoissonNLLLoss, KLDivLoss, HingeEmbeddingLoss, MarginRankingLoss, \
     MultiLabelMarginLoss, MultiLabelSoftMarginLoss, MultiMarginLoss, SoftMarginLoss, \
     TripletMarginLoss, CosineEmbeddingLoss, HuberLoss, SmoothL1Loss
+from torch.nn import LeakyReLU, GELU, ELU, ReLU, Mish, Module, ReLU6, PReLU, SELU, Sigmoid, \
+    Tanh, Softplus, Softshrink, Softsign, Softmin, Softmax, LogSoftmax
 
 
 class StringGetter:

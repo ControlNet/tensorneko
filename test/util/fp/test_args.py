@@ -1,9 +1,9 @@
 import unittest
 
-from tensorneko.util import __, _
+from tensorneko_util.util import __, _
 
 
-class UtilPipeTest(unittest.TestCase):
+class UtilArgsTest(unittest.TestCase):
 
     def test_args(self):
         # simple forward
@@ -21,7 +21,3 @@ class UtilPipeTest(unittest.TestCase):
         self.assertEqual(neko_res1, true_res)
         self.assertEqual(neko_res2, true_res)
         self.assertEqual(neko_res3, true_res)
-
-
-if __name__ == '__main__':
-    unittest.main()
