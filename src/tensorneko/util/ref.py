@@ -5,6 +5,7 @@ from typing import Generic, Callable, TYPE_CHECKING, Optional
 
 from tensorneko_util.util import dispatch
 from .type import P
+
 if TYPE_CHECKING:
     from ..visualization.watcher import Component
 

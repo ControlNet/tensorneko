@@ -1,9 +1,8 @@
 import os
+from functools import reduce
 from typing import Callable, List, Dict, Iterable, Sequence, Any
 
 from .fp import F, _, Stream
-from functools import reduce
-
 from .type import T, R
 
 

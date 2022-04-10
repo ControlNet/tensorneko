@@ -5,5 +5,9 @@ from .resize import resize_image, resize_video
 __all__ = [
     "ResizeMethod",
     "PaddingMethod",
-    "PaddingPosition"
+    "PaddingPosition",
+    "padding_video",
+    "padding_audio",
+    "resize_image",
+    "resize_video"
 ]
