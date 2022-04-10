@@ -10,8 +10,8 @@ from . import optim
 from . import preprocess
 from . import util
 from . import visualization
-from .neko_module import NekoModule
 from .neko_model import NekoModel
+from .neko_module import NekoModule
 from .neko_trainer import NekoTrainer
 
 __all__ = [

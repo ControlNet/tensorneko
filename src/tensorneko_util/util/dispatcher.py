@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+import inspect
 import warnings
 from typing import Callable, Dict, List, Generic, Sequence
-
-import inspect
 
 from .type import T
 
