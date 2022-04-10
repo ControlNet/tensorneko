@@ -20,7 +20,7 @@ else:
     __all__.append("matplotlib")
 
 try:
-    from tensorneko_util.visualization import seaborn
+    from tensorneko_util.visualization.seaborn import seaborn
 except ImportError:
     pass
 else:

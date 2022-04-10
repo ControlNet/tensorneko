@@ -42,6 +42,7 @@ __all__ = [
     "Seed",
     "__",
     "Stream",
+    "Seq",
     "return_option",
     "Option",
     "Some",
@@ -53,7 +54,6 @@ __all__ = [
     "AbstractServer",
     "dispatch",
     "AverageMeter",
-    "Seq",
     "AbstractSeq",
     "curry",
 ]
