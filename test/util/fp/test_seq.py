@@ -35,6 +35,16 @@ class UtilSeqTest(unittest.TestCase):
         s = s.map(lambda x: x + 1)
         self.assertEqual(s.to_list(), [2, 3, 4])
 
+    @staticmethod
+    def f(x):
+        return x + 1
+
+    def test_seq_parallel_map(self):
+        s = Seq.of(1, 2, 3)
+        s = s.parallel_map(self.f)
+        self.assertEqual(s.to_list(), [2, 3, 4])
+        self.assertRaises(NotImplementedError, lambda: s.parallel_map(lambda x: x + 1))
+
     def test_seq_filter(self):
         s = Seq.of(1, 2, 3, 4, 5)
         s = s.filter(lambda x: x % 2 == 0)

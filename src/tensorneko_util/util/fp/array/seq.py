@@ -5,6 +5,7 @@ from typing import Collection, List, Callable, Union, Iterator, Iterable
 
 from .abstract_seq import AbstractSeq
 from ...type import T, R
+from ....backend.parallel import ExecutorPool, ParallelType
 
 
 class Seq(AbstractSeq, Collection[T]):
@@ -45,6 +46,16 @@ class Seq(AbstractSeq, Collection[T]):
 
     def map(self, f: Callable[[T], R]) -> Seq[R]:
         return Seq(map(f, self._items))
+
+    def parallel_map(self, f: Callable[[T], R], parallel_type: ParallelType = ParallelType.PROCESS) -> Seq[R]:
+        futures = []
+
+        if f.__name__ == "<lambda>":
+            raise NotImplementedError("lambda function is not supported yet")
+
+        for item in self._items:
+            futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
+        return Seq(map(lambda future: future.result(), futures))
 
     def filter(self, f: Callable[[T], bool]) -> Seq[T]:
         return Seq(filter(f, self._items))
