@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Optional, Dict, Union, Sequence
+from typing import Optional, Dict, Union, Sequence, Any
 
 import torch
 from pytorch_lightning import LightningModule
@@ -120,8 +120,7 @@ class NekoModel(LightningModule, NekoModule):
         """
         ...
 
-    @abstractmethod
-    def predict_step(self, batch: Tensor, batch_idx: int, dataloader_idx: Optional[int] = None) -> Tensor:
+    def predict_step(self, batch: Tensor, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
         """
         Inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.predict_step`.
 
@@ -135,9 +134,16 @@ class NekoModel(LightningModule, NekoModule):
             dataloader_idx (``int``, optional): Index of the current dataloader
 
         Return:
-            :class:`~torch.Tensor`: The predicted output
+            ``Any``: The predicted output
         """
-        ...
+        return self.forward(batch)
+
+    def test_step(self,
+        batch: Optional[Union[Tensor, Sequence[Tensor]]] = None,
+        batch_idx: Optional[int]=None,
+        dataloader_idx: Optional[int]=None
+    ) -> Dict[str, Tensor]:
+        return self.validation_step(batch, batch_idx, dataloader_idx)
 
     @abstractmethod
     def configure_optimizers(self):
