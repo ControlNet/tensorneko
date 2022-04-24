@@ -1,5 +1,6 @@
 import unittest
 
+from tensorneko_util.backend.parallel import ParallelType
 from tensorneko_util.util import Seq
 
 
@@ -39,11 +40,11 @@ class UtilSeqTest(unittest.TestCase):
     def f(x):
         return x + 1
 
-    def test_seq_parallel_map(self):
+    def test_seq_map_in_parallel(self):
         s = Seq.of(1, 2, 3)
-        s = s.parallel_map(self.f)
+        s = s.map(self.f, parallel_type=ParallelType.PROCESS)
         self.assertEqual(s.to_list(), [2, 3, 4])
-        self.assertRaises(NotImplementedError, lambda: s.parallel_map(lambda x: x + 1))
+        self.assertRaises(NotImplementedError, lambda: s.map(lambda x: x + 1, parallel_type=ParallelType.PROCESS))
 
     def test_seq_for_each(self):
         s = Seq.of(1, 2, 3)
