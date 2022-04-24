@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import reduce
 from typing import Collection, List, Callable, Union, Iterator, Iterable
+from tqdm.auto import tqdm
 
 from .abstract_seq import AbstractSeq
 from ...type import T, R
@@ -44,10 +45,18 @@ class Seq(AbstractSeq, Collection[T]):
     def __contains__(self, __x: object) -> bool:
         return self._items.__contains__(__x)
 
-    def map(self, f: Callable[[T], R]) -> Seq[R]:
-        return Seq(map(f, self._items))
+    def map(self, f: Callable[[T], R], progress_bar: bool = False) -> Seq[R]:
+        items = self._items if not progress_bar else tqdm(self._items)
+        return Seq(map(f, items))
 
-    def parallel_map(self, f: Callable[[T], R], parallel_type: ParallelType = ParallelType.PROCESS) -> Seq[R]:
+    def for_each(self, f: Callable[[T], None], progress_bar: bool = False) -> None:
+        items = self._items if not progress_bar else tqdm(self._items)
+        for item in items:
+            f(item)
+
+    def parallel_map(self, f: Callable[[T], R], progress_bar: bool = False,
+        parallel_type: ParallelType = ParallelType.PROCESS
+    ) -> Seq[R]:
         futures = []
 
         if f.__name__ == "<lambda>":
@@ -55,7 +64,14 @@ class Seq(AbstractSeq, Collection[T]):
 
         for item in self._items:
             futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
+
+        futures = tqdm(futures) if progress_bar else futures
         return Seq(map(lambda future: future.result(), futures))
+
+    def parallel_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
+        parallel_type: ParallelType = ParallelType.PROCESS
+    ) -> None:
+        self.parallel_map(f, progress_bar, parallel_type)
 
     def filter(self, f: Callable[[T], bool]) -> Seq[T]:
         return Seq(filter(f, self._items))
@@ -72,8 +88,8 @@ class Seq(AbstractSeq, Collection[T]):
                 new_items.append(item)
         return Seq(new_items)
 
-    def flat_map(self, f: Callable[[T], AbstractSeq[R]]) -> Seq[R]:
-        return self.map(f).flatten()
+    def flat_map(self, f: Callable[[T], AbstractSeq[R]], progress_bar: bool = False) -> Seq[R]:
+        return self.map(f, progress_bar).flatten()
 
     def take(self, n: int) -> Seq[T]:
         return self[:n]
