@@ -35,6 +35,12 @@ class UtilStreamTest(unittest.TestCase):
         s = s.map(lambda x: x + 1)
         self.assertEqual(s.to_list(), [2, 3, 4])
 
+    def test_seq_for_each(self):
+        s = Stream.of(1, 2, 3)
+        out = []
+        s.for_each(lambda x: out.append(x + 1))
+        self.assertEqual(out, [2, 3, 4])
+
     def test_stream_filter(self):
         s = Stream.of(1, 2, 3, 4, 5)
         s = s.filter(lambda x: x % 2 == 0)

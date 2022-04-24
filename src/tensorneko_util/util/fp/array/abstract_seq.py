@@ -21,6 +21,10 @@ class AbstractSeq(ABC, Generic[T]):
         ...
 
     @abstractmethod
+    def for_each(self, f: Callable[[T], None]) -> None:
+        ...
+
+    @abstractmethod
     def filter(self, f: Callable[[T], bool]) -> AbstractSeq[T]:
         ...
 

@@ -111,6 +111,10 @@ class Stream(AbstractSeq, Iterable[T]):
     def map(self, f: Callable[[T], R]) -> Stream[R]:
         return Stream(self._iter, action_pipe=self._action_pipe + [_StreamAction(f, Stream.map)])
 
+    def for_each(self, f: Callable[[T], None]) -> None:
+        for each in self.to_list():
+            f(each)
+
     def filter(self, f: Callable[[T], bool]) -> Stream[T]:
         return Stream(self._iter, action_pipe=self._action_pipe + [_StreamAction(f, Stream.filter)])
 
