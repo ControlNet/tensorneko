@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import reduce
-from typing import Collection, List, Callable, Union, Iterator, Iterable
+from typing import Collection, List, Callable, Union, Iterator, Iterable, Optional
 from tqdm.auto import tqdm
 
 from .abstract_seq import AbstractSeq
@@ -45,33 +45,37 @@ class Seq(AbstractSeq, Collection[T]):
     def __contains__(self, __x: object) -> bool:
         return self._items.__contains__(__x)
 
-    def map(self, f: Callable[[T], R], progress_bar: bool = False) -> Seq[R]:
-        items = self._items if not progress_bar else tqdm(self._items)
-        return Seq(map(f, items))
-
-    def for_each(self, f: Callable[[T], None], progress_bar: bool = False) -> None:
-        items = self._items if not progress_bar else tqdm(self._items)
-        for item in items:
-            f(item)
-
-    def parallel_map(self, f: Callable[[T], R], progress_bar: bool = False,
-        parallel_type: ParallelType = ParallelType.PROCESS
+    def map(self, f: Callable[[T], R], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None
     ) -> Seq[R]:
-        futures = []
+        if parallel_type is None:
+            items = self._items if not progress_bar else tqdm(self._items)
+            return Seq(map(f, items))
+        else:
+            futures = []
 
-        if f.__name__ == "<lambda>":
-            raise NotImplementedError("lambda function is not supported yet")
+            if f.__name__ == "<lambda>":
+                raise NotImplementedError("lambda function is not supported yet")
 
-        for item in self._items:
-            futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
+            for item in self._items:
+                futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
 
-        futures = tqdm(futures) if progress_bar else futures
-        return Seq(map(lambda future: future.result(), futures))
+            futures = tqdm(futures) if progress_bar else futures
+            return Seq(map(lambda future: future.result(), futures))
 
-    def parallel_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
-        parallel_type: ParallelType = ParallelType.PROCESS
+    def for_each(self, f: Callable[[T], None], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None
     ) -> None:
-        self.parallel_map(f, progress_bar, parallel_type)
+        if parallel_type is None:
+            items = self._items if not progress_bar else tqdm(self._items)
+            for item in items:
+                f(item)
+        else:
+            self.map(f, progress_bar, parallel_type)
+
+    def with_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
+        parallel_type: Optional[ParallelType] = None
+    ) -> Seq[T]:
+        self.for_each(f, progress_bar, parallel_type)
+        return self
 
     def filter(self, f: Callable[[T], bool]) -> Seq[T]:
         return Seq(filter(f, self._items))
