@@ -9,6 +9,10 @@ from ...type import T, R
 from ....backend.parallel import ExecutorPool, ParallelType
 
 
+def _identity(x: T) -> T:
+    return x
+
+
 class Seq(AbstractSeq, Collection[T]):
 
     def __init__(self, items: Iterable[T]):
@@ -95,7 +99,7 @@ class Seq(AbstractSeq, Collection[T]):
     def flat_map(self, f: Callable[[T], AbstractSeq[R]], progress_bar: bool = False) -> Seq[R]:
         return self.map(f, progress_bar).flatten()
 
-    def sort(self, key: Callable[[T], Any], reverse: bool = False) -> Seq[T]:
+    def sort(self, key: Callable[[T], Any] = _identity, reverse: bool = False) -> Seq[T]:
         return Seq(sorted(self._items, key=key, reverse=reverse))
 
     def take(self, n: int) -> Seq[T]:
