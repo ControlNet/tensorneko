@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from functools import reduce
-from typing import Collection, List, Callable, Union, Iterator, Iterable, Optional
+from typing import Collection, List, Callable, Union, Iterator, Iterable, Optional, Any
 from tqdm.auto import tqdm
 
 from .abstract_seq import AbstractSeq
 from ...type import T, R
 from ....backend.parallel import ExecutorPool, ParallelType
+
+
+def _identity(x: T) -> T:
+    return x
 
 
 class Seq(AbstractSeq, Collection[T]):
@@ -94,6 +98,9 @@ class Seq(AbstractSeq, Collection[T]):
 
     def flat_map(self, f: Callable[[T], AbstractSeq[R]], progress_bar: bool = False) -> Seq[R]:
         return self.map(f, progress_bar).flatten()
+
+    def sort(self, key: Callable[[T], Any] = _identity, reverse: bool = False) -> Seq[T]:
+        return Seq(sorted(self._items, key=key, reverse=reverse))
 
     def take(self, n: int) -> Seq[T]:
         return self[:n]

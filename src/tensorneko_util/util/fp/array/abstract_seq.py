@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Generic, Union, Callable, List
+from typing import Generic, Union, Callable, List, Optional
 
+from ....backend.parallel import ParallelType
 from ...type import T, R
 
 
@@ -21,7 +22,14 @@ class AbstractSeq(ABC, Generic[T]):
         ...
 
     @abstractmethod
-    def for_each(self, f: Callable[[T], None]) -> None:
+    def for_each(self, f: Callable[[T], None], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def with_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
+        parallel_type: Optional[ParallelType] = None
+    ) -> None:
         ...
 
     @abstractmethod

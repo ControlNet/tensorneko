@@ -5,7 +5,9 @@ from functools import reduce
 from itertools import chain, islice
 from sys import maxsize
 from typing import Iterable, Iterator, List, Union, Callable, Optional
+from tqdm.auto import tqdm
 
+from ....backend.parallel import ParallelType, ExecutorPool
 from .abstract_seq import AbstractSeq
 from ...type import T, R
 
@@ -111,9 +113,31 @@ class Stream(AbstractSeq, Iterable[T]):
     def map(self, f: Callable[[T], R]) -> Stream[R]:
         return Stream(self._iter, action_pipe=self._action_pipe + [_StreamAction(f, Stream.map)])
 
-    def for_each(self, f: Callable[[T], None]) -> None:
-        for each in self.to_list():
-            f(each)
+    def for_each(self, f: Callable[[T], None], progress_bar: bool = False,
+        parallel_type: Optional[ParallelType] = None
+    ) -> None:
+        if parallel_type is None:
+            items = self.to_list() if not progress_bar else tqdm(self.to_list())
+            for item in items:
+                f(item)
+        else:
+            futures = []
+
+            if f.__name__ == "<lambda>":
+                raise NotImplementedError("lambda function is not supported yet")
+
+            for item in self.to_list():
+                futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
+
+            futures = tqdm(futures) if progress_bar else futures
+            for future in futures:
+                future.result()
+
+    def with_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
+        parallel_type: Optional[ParallelType] = None
+    ) -> Stream[T]:
+        self.for_each(f, progress_bar, parallel_type)
+        return self
 
     def filter(self, f: Callable[[T], bool]) -> Stream[T]:
         return Stream(self._iter, action_pipe=self._action_pipe + [_StreamAction(f, Stream.filter)])

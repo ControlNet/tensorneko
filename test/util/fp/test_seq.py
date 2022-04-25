@@ -61,6 +61,15 @@ class UtilSeqTest(unittest.TestCase):
         s = Seq.of(1, 2, 3, 4, 5)
         self.assertEqual(s.reduce(lambda x, y: x + y), 15)
 
+    def test_seq_sort(self):
+        s = Seq.of(5, 3, 1, 4, 2)
+        self.assertEqual(s.sort().to_list(), [1, 2, 3, 4, 5])
+        self.assertEqual(s.sort(reverse=True).to_list(), [5, 4, 3, 2, 1])
+
+        s = Seq.of([1, 9], [0, 4], [7, 6])
+        self.assertEqual(s.sort(key=lambda x: x[0]).to_list(), [[0, 4], [1, 9], [7, 6]])
+        self.assertEqual(s.sort(key=lambda x: x[1]).to_list(), [[0, 4], [7, 6], [1, 9]])
+
     def test_stream_flatten(self):
         s = Seq.of(Seq.of(1, 2, 3), Seq.of(4, 5, 6))
         self.assertEqual(s.flatten().to_list(), [1, 2, 3, 4, 5, 6])
