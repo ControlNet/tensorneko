@@ -210,3 +210,8 @@ class NekoModel(LightningModule, NekoModule):
             history_item[key] = value
             self.log(key, value, on_epoch=False, on_step=True, logger=True)
         self.history.append(history_item)
+
+    def test_step_end(self, output: STEP_OUTPUT) -> Optional[STEP_OUTPUT]:
+        """For each test step end, log the metrics"""
+        self.log_dict(output)
+        return output
