@@ -85,7 +85,7 @@ class TransformerEncoderBlock(NekoModule):
 
         num_heads (``int``): Parallel attention heads.
 
-        has_cls_token (``bool``, optional): The input will concat to a cls token if True. Default ``False``.
+        add_cls_token (``bool``, optional): The input will concat to a cls token if True. Default ``False``.
 
         has_pos_encoding (``bool``, optional): The input will add positional encoding if True. Default ``False``.
 
@@ -114,7 +114,7 @@ class TransformerEncoderBlock(NekoModule):
 
     """
 
-    def __init__(self, input_shape: Shape, num_heads: int, has_cls_token: bool = False,
+    def __init__(self, input_shape: Shape, num_heads: int, add_cls_token: bool = False,
         has_pos_encoding: bool = True,
         linear_drop: float = 0.5, attention_drop: float = 0.5,
         build_normalization: Optional[ModuleFactory] = LayerNorm,
@@ -126,12 +126,14 @@ class TransformerEncoderBlock(NekoModule):
         # num of head
         self.num_head = num_heads
         # positional embedding
-        self.has_cls_token = has_cls_token
-        if self.has_cls_token:
+        self.add_cls_token = add_cls_token
+        if self.add_cls_token:
             # prepare for class token
             self.cls_token = Parameter(zeros(1, d))
             self.token_concat = Concatenate(dim=0)
             input_shape = (n + 1, d)
+        else:
+            self.cls_token = None
         self.has_pos_encoding = has_pos_encoding
         if self.has_pos_encoding:
             self.pos_emb_layer = PositionalEmbedding(input_shape=input_shape, dropout_rate=linear_drop)
@@ -157,7 +159,7 @@ class TransformerEncoderBlock(NekoModule):
 
     def forward(self, x: Tensor) -> Tensor:
         f = F()
-        if self.has_cls_token:
+        if self.add_cls_token:
             f = f >> (map, lambda tokens: self.token_concat([self.cls_token, tokens])) >> list >> torch.stack
         if self.has_pos_encoding:
             f = f >> self.pos_emb_layer
@@ -175,7 +177,7 @@ class TransformerEncoder(NekoModule):
 
         num_heads (``int``): Parallel attention heads.
 
-        has_cls_token (``bool``, optional): The input will concat to a cls token if True. Default ``False``.
+        add_cls_token (``bool``, optional): The input will concat to a cls token if True. Default ``False``.
 
         linear_drop (``float``, optional): The dropout rate for linear layers. Default ``0.5``.
 
@@ -200,7 +202,7 @@ class TransformerEncoder(NekoModule):
 
     """
 
-    def __init__(self, input_shape: Shape, num_heads: int, has_cls_token: bool = False, linear_drop: float = 0.5,
+    def __init__(self, input_shape: Shape, num_heads: int, add_cls_token: bool = False, linear_drop: float = 0.5,
         attention_drop: float = 0.5, build_normalization: Optional[ModuleFactory] = LayerNorm, mlp_ratio: float = 4.0,
         build_mlp_activation: Optional[ModuleFactory] = GELU, pos_encoding: str = "all",
         repeat: int = 1
@@ -209,13 +211,15 @@ class TransformerEncoder(NekoModule):
         if pos_encoding == "all":
             has_pos_encoding = [True] * repeat
         elif pos_encoding == "first":
-            has_cls_token = [True] + (repeat - 1) * [False]
+            has_pos_encoding = [True] + (repeat - 1) * [False]
         elif pos_encoding == "none":
-            has_cls_token = [False] * repeat
+            has_pos_encoding = [False] * repeat
+        else:
+            raise ValueError(f"pos_encoding must be one of 'all', 'first', 'none'. But got {pos_encoding}")
 
         def build_block(i):
             return TransformerEncoderBlock(
-                input_shape, num_heads, has_cls_token,
+                input_shape, num_heads, add_cls_token if i == 0 else False,
                 has_pos_encoding[i],
                 linear_drop, attention_drop,
                 build_normalization, mlp_ratio, build_mlp_activation
