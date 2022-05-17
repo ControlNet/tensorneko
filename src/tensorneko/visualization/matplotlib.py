@@ -5,6 +5,8 @@ from matplotlib import pyplot as plt
 from numpy import ndarray
 from torch import Tensor
 
+from tensorneko_util.visualization.matplotlib import plot_image
+
 
 def imshow(tensor: Union[Tensor, ndarray], *args, **kwargs):
     """
@@ -43,3 +45,6 @@ def plot(tensor: Union[Tensor, ndarray], *args, **kwargs):
         tensor = tensor.detach().cpu().numpy()
     plt.plot(tensor[:, 0], tensor[:, 1], *args, **kwargs)
     plt.show()
+
+
+plot_image = plot_image

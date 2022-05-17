@@ -1,6 +1,8 @@
 from .color import Colors, ContinuousColors
+from . import matplotlib
+from .multi_plots import MultiPlots
 
-__all__ = ["Colors", "ContinuousColors"]
+__all__ = ["Colors", "ContinuousColors", "MultiPlots", "matplotlib"]
 
 try:
     from . import seaborn
