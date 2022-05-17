@@ -6,6 +6,8 @@ import torch
 from torch import device, Size
 from torch.nn import Module
 
+from tensorneko_util.util.type import T, R, E, P, T1, T2, T3
+
 ModuleFactory = Union[Callable[[], Module], Callable[[int], Module]]
 """The module builder type of ``() -> torch.nn.Module | (int) -> torch.nn.Module``"""
 
@@ -19,8 +21,13 @@ Shape = Union[Size, List[int], Tuple[int, ...]]
 
 
 # Generic types
-T = TypeVar('T')  # Any type
-R = TypeVar('R')  # Return type
 A = TypeVar("A", torch.Tensor, np.ndarray)  # Array type
-P = TypeVar("P", int, float, str, bool)  # Primitive type
-E = TypeVar("E", bound=Enum)
+
+# merge package namespace
+T = T
+R = R
+P = P
+E = E
+T1 = T1
+T2 = T2
+T3 = T3
