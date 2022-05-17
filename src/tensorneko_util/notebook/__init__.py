@@ -1,5 +1,5 @@
-from .interact import Display
+from . import display
 
 __all__ = [
-    "Display"
+    "display"
 ]
