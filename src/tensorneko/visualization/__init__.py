@@ -2,6 +2,8 @@ from .log_graph import log_graph
 from tensorneko_util.visualization import Colors, ContinuousColors
 from . import watcher
 from . import tensorboard
+from . import matplotlib
+from tensorneko_util.visualization import MultiPlots
 
 
 __all__ = [
@@ -9,15 +11,10 @@ __all__ = [
     "watcher",
     "tensorboard",
     "Colors",
-    "ContinuousColors"
+    "ContinuousColors",
+    "matplotlib",
+    "MultiPlots"
 ]
-
-try:
-    from . import matplotlib
-except ImportError:
-    pass
-else:
-    __all__.append("matplotlib")
 
 try:
     from tensorneko_util.visualization.seaborn import seaborn

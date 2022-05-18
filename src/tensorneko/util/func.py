@@ -8,7 +8,9 @@ import torch
 from torch import Tensor
 from torch.nn import Module, ModuleList
 
-from tensorneko_util.util import with_printed, ifelse, F, _
+from tensorneko_util.util import F, _
+from tensorneko_util.util.func import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
+    identity, list_to_dict
 from .type import T, A
 
 
@@ -158,7 +160,7 @@ def count_parameters(module: Module) -> int:
     return sum(p.numel() for p in module.parameters())
 
 
-def tensorneko_path() -> str:
+def get_tensorneko_path() -> str:
     """
     Get the `tensorneko` library root path
 
@@ -166,3 +168,14 @@ def tensorneko_path() -> str:
         ``str``: The root path of `tensorneko`
     """
     return dirname(dirname(abspath(__file__)))
+
+
+# merge package namespace
+generate_inf_seq = generate_inf_seq
+listdir = listdir
+with_printed = with_printed
+ifelse = ifelse
+dict_add = dict_add
+as_list = as_list
+identity = identity
+list_to_dict = list_to_dict

@@ -217,7 +217,7 @@ import tensorneko as neko
 import matplotlib.pyplot as plt
 
 image_tensor = ...  # an image tensor with shape (C, H, W)
-neko.visualization.imshow(image_tensor)
+neko.visualization.matplotlib.imshow(image_tensor)
 plt.show()
 ```
 
@@ -324,11 +324,11 @@ Here are some helper functions to better interact with Jupyter Notebook.
 ```python
 import tensorneko as neko
 # display a video
-neko.notebook.Display.video("path/to/video.mp4")
+neko.notebook.display.video("path/to/video.mp4")
 # display an audio
-neko.notebook.Display.audio("path/to/audio.wav")
+neko.notebook.display.audio("path/to/audio.wav")
 # display a code file
-neko.notebook.Display.code("path/to/code.java")
+neko.notebook.display.code("path/to/code.java")
 ```
 
 ## Neko Utilities

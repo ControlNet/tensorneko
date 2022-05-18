@@ -1,5 +1,5 @@
-from tensorneko_util.notebook import Display
+from tensorneko_util.notebook import display
 
 __all__ = [
-    "Display"
+    "display"
 ]
