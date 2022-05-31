@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass, field
 from typing import Union, List
-import os
 
-from ...io import write
 from . import Component
 
 
@@ -17,8 +17,8 @@ class View:
         name (``str``): The name of the view.
 
     Attributes:
-        components (``List[Component]``): The :class:`~tensorneko.visualization.watcher.component.Component` objects in the
-            view.
+        components (``List[Component]``): The :class:`~tensorneko.visualization.watcher.component.Component` objects in
+            the view.
 
     Examples::
 
@@ -40,9 +40,9 @@ class View:
 
     def update(self) -> None:
         """Save the state to the json file."""
-        return self._to_json()
+        return self._save_json()
 
-    def _to_json(self) -> None:
+    def _save_json(self) -> None:
         if not os.path.exists("watcher"):
             os.mkdir("watcher")
 
@@ -50,12 +50,11 @@ class View:
         if not os.path.exists(view_path):
             os.mkdir(view_path)
 
-        write.text.to_json(os.path.join("watcher", self.name, "data.json"),
-            {
+        with open(os.path.join(view_path, "data.json"), "w", encoding="UTF-8") as file:
+            file.write(json.dumps({
                 "view": self.name,
                 "data": list(map(lambda comp: comp.to_dict(), self.components))
-            }
-        )
+            }))
 
     def add(self, *components: Component) -> View:
         """

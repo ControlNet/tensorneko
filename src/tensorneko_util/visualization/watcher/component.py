@@ -1,14 +1,16 @@
 from __future__ import annotations
+
 import os.path
 from abc import ABC, abstractmethod
 from typing import Generic, List, Union, Dict, TYPE_CHECKING, Any, Optional
 
+from einops import rearrange
+from matplotlib import pyplot as plt
 from numpy import ndarray
 from torch import Tensor
 
-from ...io import write
-from ...util.ref import Ref
 from ...util.type import T, P
+from ...util.ref import Ref
 
 if TYPE_CHECKING:
     from .view import View
@@ -189,7 +191,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
 
     Examples::
 
-        # create a Image component
+        # create an Image component
         img_comp = tensorneko.visualization.watcher.Image("img0", img_arr)
         # update image. these 2 ways below are all equivalent.
         img_comp.value = new_img_arr
@@ -213,20 +215,21 @@ class Image(Component[Union[ndarray, Tensor, None]]):
     def update(self) -> None:
         if self.value is not None:
             for view in self.views:
-                img_dir = os.path.join(view.name, "img")
+                img_dir = os.path.join("watcher", view.name, "img")
                 if not os.path.exists(img_dir):
                     os.mkdir(img_dir)
 
                 # remove old image
-                pre_img_path = os.path.join(view.name, self.path) + f"-{self._ver}.jpg"
+                pre_img_path = os.path.join("watcher", view.name, self.path) + f"-{self._ver}.jpg"
                 if os.path.exists(pre_img_path):
                     os.remove(pre_img_path)
 
                 # save new image
                 self._ver += 1
-                img_path = os.path.join(view.name, self.path) + f"-{self._ver}.jpg"
+                img_path = os.path.join("watcher", view.name, self.path) + f"-{self._ver}.jpg"
                 # C, H, W
-                write.image.to_jpeg(img_path, self.value)
+                image = rearrange(self.value, "c h w -> h w c")
+                plt.imsave(img_path, image)
 
 
 class Logger(Component[List[str]]):
@@ -247,6 +250,7 @@ class Logger(Component[List[str]]):
         logger.log("Epoch 1, loss: 0.1234, val_loss: 0.2345")
 
     """
+
     def __init__(self, name: str, value: List[str] = None):
         value = value or []
         super().__init__(name, value)

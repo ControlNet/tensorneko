@@ -6,7 +6,7 @@ import subprocess
 from typing import Optional, Union, List
 
 from .view import View
-from ...util import tensorneko_path, AbstractServer
+from ...util import tensorneko_util_path, AbstractServer
 
 
 class Server(AbstractServer):
@@ -81,7 +81,7 @@ class Server(AbstractServer):
         self._run_blocking()
 
     def _prepare(self) -> None:
-        source_path = os.path.join(tensorneko_path, "visualization", "watcher", "web", "dist")
+        source_path = os.path.join(tensorneko_util_path, "visualization", "watcher", "web", "dist")
         target_path = self.save_dir
         if not os.path.exists(target_path):
             os.mkdir(target_path)
