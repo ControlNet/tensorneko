@@ -2,73 +2,12 @@ from typing import Optional
 
 import torch
 from torch import Tensor, zeros
-from torch.nn import Parameter, LayerNorm, Linear, MultiheadAttention, GELU, Identity, ModuleList
+from torch.nn import Parameter, LayerNorm, GELU, Identity, ModuleList
 
 from . import MLP, ResidualBlock
-from ..layer import PositionalEmbedding, Concatenate
+from ..layer import PositionalEmbedding, Concatenate, SeqAttention
 from ..neko_module import NekoModule
 from ..util import ModuleFactory, compose, Shape, F
-
-
-class AttentionModule(NekoModule):
-    """
-    The AttentionModule is the layer taking the input and calculate Q, K and V and feed them into MultiHeadAttention
-    layers.
-
-    input -> (Q, K, V) -> MultiHeadAttention
-
-    The MultiHeadAttention is proposed by Vaswani, et al. (2017).
-
-    Args:
-        embed_dim (``int``): The embedding dim of input sequence.
-
-        num_heads (``bool``): Parallel attention heads.
-
-        dropout (``float``, optional): A Dropout layer on attn_output_weights. Default: 0.0.
-
-        bias (``bool``, optional): Add bias as module parameter. Default: True.
-
-        add_bias_kv (``bool``, optional): Add bias to the key and value sequences at dim=0.
-
-        add_zero_attn (``bool``, optional): Add a new batch of zeros to the key and value sequences at dim=1.
-
-        kdim (``int``, optional): Total number of features in key. Default: None.
-
-        vdim (``int``, optional): Total number of features in value. Default: None.
-
-        return_attention_weights (``bool``, optional): Return both value output and attention weights if True else
-            return attention value output only.
-
-    Attributes:
-        q_linear (:class:`~torch.nn.Linear`): The PyTorch Linear layer for calculating Q.
-        k_linear (:class:`~torch.nn.Linear`): The PyTorch Linear layer for calculating K.
-        v_linear (:class:`~torch.nn.Linear`): The PyTorch Linear layer for calculating V.
-        attention (:class:`~torch.nn.MultiheadAttention`): The PyTorch MultiheadAttention layer of this module.
-
-    References:
-        Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017).
-        Attention is all you need. In Advances in neural information processing systems (pp. 5998-6008).
-
-    """
-
-    def __init__(self, embed_dim: int, num_heads: int, dropout: float = 0., bias: bool = True,
-        add_bias_kv: bool = False, add_zero_attn: bool = False, kdim: Optional[int] = None, vdim: Optional[int] = None,
-        return_attention_weights: bool = False
-    ):
-        super().__init__()
-        self.kdim = kdim if kdim is not None else embed_dim
-        self.vdim = vdim if vdim is not None else embed_dim
-        self.q_linear = Linear(embed_dim, self.kdim)
-        self.k_linear = Linear(embed_dim, self.kdim)
-        self.v_linear = Linear(embed_dim, self.vdim)
-        self.attention = MultiheadAttention(embed_dim, num_heads, dropout, bias, add_bias_kv, add_zero_attn, kdim, vdim,
-            batch_first=True)
-        self.return_attention_weights = return_attention_weights
-
-    def forward(self, x: Tensor) -> Tensor:
-        f = F() >> (map, lambda linear: linear(x)) >> (lambda xs: self.attention(*xs))
-        x, weight = f([self.q_linear, self.k_linear, self.v_linear])
-        return (x, weight) if self.return_attention_weights else x
 
 
 class TransformerEncoderBlock(NekoModule):
@@ -146,15 +85,15 @@ class TransformerEncoderBlock(NekoModule):
 
         # multi-head attention module with residual connection and normalization
         self.attn_module = ResidualBlock(
-            sub_module_layers=(build_normalization, F(AttentionModule, d, self.num_head, attention_drop)),
+            sub_module_layers=(build_normalization, F(SeqAttention, d, self.num_head, attention_drop)),
             tail_module_layers=None
         )
 
         self.feedforward_module = ResidualBlock((
             build_normalization,
             F(MLP, [d, int(d * mlp_ratio), d],
-                build_activation=build_mlp_activation, dropout_rate=linear_drop
-            ))
+              build_activation=build_mlp_activation, dropout_rate=linear_drop
+              ))
         )
 
     def forward(self, x: Tensor) -> Tensor:

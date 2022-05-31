@@ -257,11 +257,11 @@ Thumbs.db
 # User-defined
 node_modules
 .idea
-scratch.py
-scratch.ipynb
+scratch*.py
+scratch*.ipynb
 /src/tensorneko/version.txt
-/src/tensorneko/visualization/watcher/web/public/*
-!/src/tensorneko/visualization/watcher/web/public/index.html
-/src/tensorneko/visualization/watcher/web/package-lock.json
+/src/tensorneko_util/visualization/watcher/web/public/*
+!/src/tensorneko_util/visualization/watcher/web/public/index.html
+/src/tensorneko_util/visualization/watcher/web/package-lock.json
 /watcher
 /src/tensorneko_util/version.txt

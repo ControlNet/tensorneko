@@ -87,8 +87,8 @@ class NekoModel(LightningModule, NekoModule):
     @abstractmethod
     def validation_step(self,
         batch: Optional[Union[Tensor, Sequence[Tensor]]] = None,
-        batch_idx: Optional[int]=None,
-        dataloader_idx: Optional[int]=None
+        batch_idx: Optional[int] = None,
+        dataloader_idx: Optional[int] = None
     ) -> Dict[str, Tensor]:
         """
         The method inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.validation_step`.
@@ -140,8 +140,8 @@ class NekoModel(LightningModule, NekoModule):
 
     def test_step(self,
         batch: Optional[Union[Tensor, Sequence[Tensor]]] = None,
-        batch_idx: Optional[int]=None,
-        dataloader_idx: Optional[int]=None
+        batch_idx: Optional[int] = None,
+        dataloader_idx: Optional[int] = None
     ) -> Dict[str, Tensor]:
         return self.validation_step(batch, batch_idx, dataloader_idx)
 
@@ -153,8 +153,9 @@ class NekoModel(LightningModule, NekoModule):
     @property
     def logger(self) -> Optional[LightningLoggerBase]:
         """
-        :class:`~pytorch_lightning.loggers.LightningLoggerBase` | ``None``:
-            The training or validation logger for the module.
+        Returns:
+            :class:`~pytorch_lightning.loggers.LightningLoggerBase` | ``None``:
+                The training or validation logger for the module.
         """
         if not self.trainer:
             return None
@@ -215,3 +216,10 @@ class NekoModel(LightningModule, NekoModule):
         """For each test step end, log the metrics"""
         self.log_dict(output)
         return output
+
+    def log_image(self, name: str, image: torch.Tensor) -> None:
+        """Log an image to the logger"""
+        if self.logger is None:
+            return
+
+        self.logger.experiment.add_image(name, torch.clip(image, 0, 1), self.trainer.global_step)

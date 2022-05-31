@@ -1,5 +1,6 @@
 import os
 from functools import reduce
+from os.path import dirname, abspath
 from typing import Callable, List, Dict, Iterable, Sequence, Any
 
 from .fp import F, _, Stream
@@ -186,3 +187,13 @@ def list_to_dict(l: List[T], key: Callable[[T], Any]) -> Dict[Any, T]:
         ``Dict[Any, T]``: The output dictionary.
     """
     return {key(x): x for x in l}
+
+
+def get_tensorneko_util_path() -> str:
+    """
+    Get the `tensorneko_util` library root path
+
+    Returns:
+        ``str``: The root path of `tensorneko`
+    """
+    return dirname(dirname(abspath(__file__)))

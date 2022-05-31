@@ -1,16 +1,18 @@
 from enum import Enum
 from typing import Union, Type
 
+from PIL import Image
+
 from ..util.type import E
 
 
 class ResizeMethod(Enum):
     """Resize methods can be used in :func:`~resize_image` and :func:`~resize_video`"""
-    BICUBIC = "bicubic"
-    BILINEAR = "bilinear"
-    NEAREST = "nearest"
-    LANCZOS = "lanczos"
-    BOX = "box"
+    BICUBIC = Image.BICUBIC
+    BILINEAR = Image.BILINEAR
+    NEAREST = Image.NEAREST
+    LANCZOS = Image.LANCZOS
+    BOX = Image.BOX
 
 
 class PaddingMethod(Enum):
