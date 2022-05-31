@@ -15,7 +15,7 @@ class GaussianNoise(NekoModule):
             noise. Relative means that it will be multiplied by the magnitude of
             the value your are adding the noise to. This means that sigma can be
             the same regardless of the scale of the vector. Default ``0.1``.
-        device (:class:``tensorneko.util.type.Device``): The model running device. Default ``"cuda"``.
+        device (:class:`~tensorneko.util.type.Device`): The model running device. Default ``"cuda"``.
 
     References:
         Writing a simple Gaussian noise layer in Pytorch. (2017). Retrieved

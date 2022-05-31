@@ -2,7 +2,8 @@ import unittest
 
 import torch
 from torch import rand
-from tensorneko.module import AttentionModule, TransformerEncoderBlock
+from tensorneko.module import TransformerEncoderBlock
+from tensorneko.layer.attention import SeqAttention
 from tensorneko.module.transformer import TransformerEncoder
 
 
@@ -11,7 +12,7 @@ class TestAttentionModule(unittest.TestCase):
     def test_shape(self):
         shape = torch.Size((8, 16, 128))
         x = rand(shape)
-        attention = AttentionModule(128, 4)
+        attention = SeqAttention(128, 4)
         self.assertTrue(attention(x).shape == shape)
 
 
