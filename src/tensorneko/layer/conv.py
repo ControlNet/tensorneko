@@ -2,15 +2,15 @@ from typing import Union, Optional, Callable, Tuple, TypeVar, Type
 
 from torch import Tensor
 from torch.nn import Conv1d as PtConv1d, Conv2d as PtConv2d, Conv3d as PtConv3d, Module
-from torch.nn.modules.conv import _ConvNd
+from torch.nn.modules.conv import _ConvNd as PtConvNd
 
 from ..neko_module import NekoModule
 from ..util import F
 
-C = TypeVar("C", bound=_ConvNd)
+C = TypeVar("C", bound=PtConvNd)
 
 
-def _get_Conv(PtConv: Type[C]):
+def _get_Conv(PtConv: Type[C], name: str):
     class _Conv(NekoModule):
         """
         An enhanced Conv version of pytorch version with combining activation and normalization.
@@ -37,6 +37,10 @@ def _get_Conv(PtConv: Type[C]):
 
             padding_mode (``string``, optional): ``'zeros'``, ``'reflect'``,
                 ``'replicate'`` or ``'circular'``. Default: ``'zeros'``
+
+            device: The device to place the layer passed to pytorch Conv layer.
+
+            dtype: The data type of the layer passed to pytorch Conv layer.
 
             build_activation (``() -> torch.nn.Module``): An activation module builder to be used in the Conv layer.
 
@@ -90,14 +94,15 @@ def _get_Conv(PtConv: Type[C]):
         def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, Tuple[int, ...]],
             stride: Union[int, Tuple[int, ...]] = 1, padding: Union[int, Tuple[int, ...], str] = 0,
             dilation: Union[int, Tuple[int, ...]] = 1, groups: int = 1, bias: bool = True, padding_mode: str = 'zeros',
+            device=None, dtype=None,
             build_activation: Optional[Callable[[], Module]] = None,
             build_normalization: Optional[Callable[[], Module]] = None,
             normalization_after_activation: bool = False
         ):
             super().__init__()
 
-            self.conv = PtConv(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias,
-                padding_mode
+            self.conv: C = PtConv(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias,
+                padding_mode, device, dtype
             )
 
             self.has_act = build_activation is not None
@@ -121,12 +126,16 @@ def _get_Conv(PtConv: Type[C]):
             elif not self.has_act and self.has_norm:
                 f = f >> self.normalization
             return f(x)
+
+        def _get_name(self) -> str:
+            return name
+
     return _Conv
 
 
-Conv1d = _get_Conv(PtConv1d)
-Conv2d = _get_Conv(PtConv2d)
-Conv3d = _get_Conv(PtConv3d)
+Conv1d = _get_Conv(PtConv1d, "tensorneko.layer.Conv1d")
+Conv2d = _get_Conv(PtConv2d, "tensorneko.layer.Conv2d")
+Conv3d = _get_Conv(PtConv3d, "tensorneko.layer.Conv3d")
 Conv = {
     "1d": Conv1d,
     "2d": Conv2d,
