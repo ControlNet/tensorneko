@@ -32,10 +32,7 @@ setuptools.setup(
     packages=setuptools.find_packages(where="src", include=["tensorneko", "tensorneko.*"]),
     package_data={
         "tensorneko": [
-            "version.txt",
-            "visualization/watcher/web/dist/index.html",
-            "visualization/watcher/web/dist/css/*",
-            "visualization/watcher/web/dist/js/*"
+            "version.txt"
         ]
     },
     python_requires=">=3.7",
