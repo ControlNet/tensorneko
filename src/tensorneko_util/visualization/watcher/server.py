@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+from pathlib import Path
 from typing import Optional, Union, List
 
 from .view import View
@@ -84,7 +85,7 @@ class Server(AbstractServer):
         source_path = os.path.join(tensorneko_util_path, "visualization", "watcher", "web", "dist")
         target_path = self.save_dir
         if not os.path.exists(target_path):
-            os.mkdir(target_path)
+            Path(target_path).mkdir(parents=True, exist_ok=True)
 
         target_path_css = os.path.join(target_path, "css")
         if os.path.exists(target_path_css):
