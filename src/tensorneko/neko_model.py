@@ -20,7 +20,7 @@ class NekoModel(LightningModule, NekoModule):
         name (``str``): Model name
 
         input_shape (:class:`~tensorneko.util.Shape`, optional):
-            An optional argument can allow it plot a graph for TensorBoard
+            An optional argument can allow it to plot a graph for TensorBoard
 
         *args: Other arguments for :class:`~pytorch_lightning.core.lightning.LightningModule`
 

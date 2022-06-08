@@ -9,7 +9,7 @@ from ..util import F
 
 class Stack(NekoModule):
     """
-    The module version of torch.stack function family.
+    The module version of :meth:`torch.stack` function family.
 
     Args:
         mode (``str``, optional): The mode of the pytorch stack type. Default original stack.

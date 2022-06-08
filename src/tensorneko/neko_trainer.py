@@ -215,7 +215,7 @@ def NekoTrainer(
             To use a different key set a string instead of True with the key name.
 
         replace_sampler_ddp: Explicitly enables or disables sampler replacement. If not specified this
-            will toggled automatically when DDP is used. By default it will add ``shuffle=True`` for
+            will toggle automatically when DDP is used. By default, it will add ``shuffle=True`` for
             train sampler and ``shuffle=False`` for val/test sampler. If you want to customize it,
             you can set ``replace_sampler_ddp=False`` and add your own distributed sampler.
 
@@ -229,7 +229,7 @@ def NekoTrainer(
             a power search or `binsearch` that estimates the batch size through a binary search.
 
         prepare_data_per_node: If True, each LOCAL_RANK=0 will call prepare data.
-            Otherwise only NODE_RANK=0, LOCAL_RANK=0 will prepare data
+            Otherwise, only NODE_RANK=0, LOCAL_RANK=0 will prepare data
 
         plugins: Plugins allow modification of core behavior like ddp and amp, and enable custom lightning plugins.
 

@@ -56,7 +56,7 @@ class TestConv2d(unittest.TestCase):
         return F(nn.BatchNorm2d, self.out_features)
 
     def test_single_layer(self):
-        """The a single layer without batch normalization and activation"""
+        """The single layer without batch normalization and activation"""
         # Create a batch of size 8
         x = torch.rand(self.b, self.c, self.h, self.w)
 
@@ -72,7 +72,7 @@ class TestConv2d(unittest.TestCase):
         self.assertTrue((neko_result == pytorch_result).all())
 
     def test_single_layer_with_activation(self):
-        """The a single layer with activation"""
+        """A single layer with activation"""
         # Create a batch of size 8
         x = torch.rand(self.b, self.c, self.h, self.w)
 
@@ -88,7 +88,7 @@ class TestConv2d(unittest.TestCase):
         self.assertTrue((neko_result == pytorch_result).all())
 
     def test_single_layer_with_normalization(self):
-        """The a single layer with batch normalization"""
+        """A single layer with batch normalization"""
         # Create a batch of size 8
         x = torch.rand(self.b, self.c, self.h, self.w)
 
@@ -104,7 +104,7 @@ class TestConv2d(unittest.TestCase):
         self.assertTrue((neko_result == pytorch_result).all())
 
     def test_single_layer_with_normalization_and_activation(self):
-        """The a single layer with batch normalization and activation"""
+        """A single layer with batch normalization and activation"""
         # Create a batch of size 8
         x = torch.rand(self.b, self.c, self.h, self.w)
 
