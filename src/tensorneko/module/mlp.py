@@ -38,7 +38,7 @@ class MLP(NekoModule):
 
     Examples:
 
-        Create a MLP module with 4 layers, with neurons 768 -> 1024 -> 512 -> 10.
+        Create an MLP module with 4 layers, with neurons 768 -> 1024 -> 512 -> 10.
         Contains ReLU, BatchNorm and 0.5 Dropout.
 
         .. code-block:: python
