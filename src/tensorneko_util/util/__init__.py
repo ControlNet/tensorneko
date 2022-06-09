@@ -6,6 +6,7 @@ from .func import generate_inf_seq, compose, listdir, with_printed, ifelse, dict
     get_tensorneko_util_path
 from .ref import ref
 from .server import AbstractServer
+from .timer import Timer
 
 tensorneko_util_path = get_tensorneko_util_path()
 
@@ -35,5 +36,6 @@ __all__ = [
     "AbstractSeq",
     "Seq",
     "tensorneko_util_path",
-    "ref"
+    "ref",
+    "Timer"
 ]

@@ -2,7 +2,7 @@ from einops.layers.torch import Rearrange as _Rearrange
 
 from tensorneko_util.util import AbstractServer, dispatch, AverageMeter, tensorneko_util_path
 from tensorneko_util.util.fp import Seq, AbstractSeq, curry, Some, Empty, F, Stream, return_option, Option, _, __
-from tensorneko_util.util import ref
+from tensorneko_util.util import ref, Timer
 from . import type
 from .configuration import Configuration
 from .func import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
@@ -57,4 +57,5 @@ __all__ = [
     "AverageMeter",
     "AbstractSeq",
     "curry",
+    "Timer"
 ]
