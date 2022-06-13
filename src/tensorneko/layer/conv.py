@@ -82,8 +82,8 @@ class _Conv(NekoModule, ABC, Generic[C]):
         conv3d = tensorneko.layer.Conv3d(
             in_channels=256,
             out_channels=1024,
-            kernel_size=(3, 3),
-            padding=(1, 1),
+            kernel_size=(3, 3, 3),
+            padding=(1, 1, 1),
             build_activation=torch.nn.ReLU,
             build_normalization=lambda: torch.nn.BatchNorm3d(256),
             normalization_after_activation=False
