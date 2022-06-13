@@ -11,9 +11,9 @@ def iou_1d(proposal: Union[Tensor, ndarray], target: Union[Tensor, ndarray]) -> 
 
     Args:
         proposal (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The predicted array with [M, 2]. First column is
-            begin, second column is end.
-        target (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The label array with [N, 2]. First column is begin,
-            second column is end.
+            beginning, second column is end.
+        target (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The label array with [N, 2]. First column is
+            beginning, second column is end.
 
     Returns:
         :class:`~torch.Tensor`: The iou result with [M, N].

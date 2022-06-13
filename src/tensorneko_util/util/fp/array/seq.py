@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 from functools import reduce
 from typing import Collection, List, Callable, Union, Iterator, Iterable, Optional, Any
 from tqdm.auto import tqdm
@@ -13,7 +14,7 @@ def _identity(x: T) -> T:
     return x
 
 
-class Seq(AbstractSeq, Collection[T]):
+class Seq(AbstractSeq[T], Collection[T]):
 
     def __init__(self, items: Iterable[T]):
         if isinstance(items, Seq):
@@ -49,10 +50,11 @@ class Seq(AbstractSeq, Collection[T]):
     def __contains__(self, __x: object) -> bool:
         return self._items.__contains__(__x)
 
-    def map(self, f: Callable[[T], R], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None
+    def map(self, f: Callable[[T], R], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None,
+        **tqdm_args
     ) -> Seq[R]:
         if parallel_type is None:
-            items = self._items if not progress_bar else tqdm(self._items)
+            items = self._items if not progress_bar else tqdm(self._items, **tqdm_args)
             return Seq(map(f, items))
         else:
             futures = []
@@ -63,22 +65,23 @@ class Seq(AbstractSeq, Collection[T]):
             for item in self._items:
                 futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
 
-            futures = tqdm(futures) if progress_bar else futures
+            futures = tqdm(futures, **tqdm_args) if progress_bar else futures
             return Seq(map(lambda future: future.result(), futures))
 
-    def for_each(self, f: Callable[[T], None], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None
+    def for_each(self, f: Callable[[T], None], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None,
+        **tqdm_args
     ) -> None:
         if parallel_type is None:
-            items = self._items if not progress_bar else tqdm(self._items)
+            items = self._items if not progress_bar else tqdm(self._items, **tqdm_args)
             for item in items:
                 f(item)
         else:
-            self.map(f, progress_bar, parallel_type)
+            self.map(f, progress_bar, parallel_type, **tqdm_args)
 
     def with_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
-        parallel_type: Optional[ParallelType] = None
+        parallel_type: Optional[ParallelType] = None, **tqdm_args
     ) -> Seq[T]:
-        self.for_each(f, progress_bar, parallel_type)
+        self.for_each(f, progress_bar, parallel_type, **tqdm_args)
         return self
 
     def filter(self, f: Callable[[T], bool]) -> Seq[T]:
@@ -107,6 +110,18 @@ class Seq(AbstractSeq, Collection[T]):
 
     def skip(self, n: int) -> Seq[T]:
         return self[n:]
+
+    @property
+    def head(self) -> T:
+        return self._items[0]
+
+    @property
+    def tail(self) -> Seq[T]:
+        return self[1:]
+
+    def repeat(self, n: int) -> Seq[T]:
+        self._items = [item for item in itertools.repeat(self._items, n)]
+        return self
 
     def to_list(self) -> List[T]:
         return self._items

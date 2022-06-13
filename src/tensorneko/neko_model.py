@@ -20,7 +20,7 @@ class NekoModel(LightningModule, NekoModule):
         name (``str``): Model name
 
         input_shape (:class:`~tensorneko.util.Shape`, optional):
-            An optional argument can allow it plot a graph for TensorBoard
+            An optional argument can allow it to plot a graph for TensorBoard
 
         *args: Other arguments for :class:`~pytorch_lightning.core.lightning.LightningModule`
 
@@ -28,10 +28,11 @@ class NekoModel(LightningModule, NekoModule):
     """
 
     def __init__(self, name: str,
-        input_shape: Optional[Shape] = None, *args, **kwargs
+        input_shape: Optional[Shape] = None, distributed=False, *args, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.name = name
+        self.distributed = distributed
         self.can_plot_graph = input_shape is not None
         if self.can_plot_graph:
             self.input_shape = input_shape
@@ -189,7 +190,7 @@ class NekoModel(LightningModule, NekoModule):
             getter = summarize_dict_by(key, torch.mean)
             value = getter(outputs)
             history_item[key] = value
-            self.log(key, value, on_epoch=True, on_step=False, logger=True)
+            self.log(key, value, on_epoch=True, on_step=False, logger=True, sync_dist=self.distributed)
         self.history.append(history_item)
 
     def log_on_validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
@@ -201,15 +202,16 @@ class NekoModel(LightningModule, NekoModule):
             getter = summarize_dict_by(key, torch.mean)
             value = getter(outputs)
             self.history[-1]["val_" + key] = value
-            self.log(key, value, on_epoch=True, on_step=False)
-            self.log(f"val_{key}", value, on_epoch=True, on_step=False, logger=False, prog_bar=True)
+            self.log(key, value, on_epoch=True, on_step=False, sync_dist=self.distributed)
+            self.log(f"val_{key}", value, on_epoch=True, on_step=False, logger=False, prog_bar=True,
+                     sync_dist=self.distributed)
 
     def log_on_training_step_end(self, output: STEP_OUTPUT) -> None:
         """Log the training step outputs"""
         history_item = {}
         for key, value in output.items():
             history_item[key] = value
-            self.log(key, value, on_epoch=False, on_step=True, logger=True)
+            self.log(key, value, on_epoch=False, on_step=True, logger=True, sync_dist=self.distributed)
         self.history.append(history_item)
 
     def test_step_end(self, output: STEP_OUTPUT) -> Optional[STEP_OUTPUT]:

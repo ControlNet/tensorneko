@@ -21,10 +21,10 @@ class Patching(NekoModule):
 
 class PatchEmbedding2d(NekoModule):
     """
-    The patch embedding layer from Vision Transformer (ViT) (Dosovitskiy, et al., 2020). This layer will take a image
-    as input, and divide to patches, and project to a provided number of channels.
+    The patch embedding layer from Vision Transformer (ViT) (Dosovitskiy, et al., 2020). This layer will take an image
+    as input, and divide to several patches, and project to a provided number of channels.
 
-    Here it is implemented by a equivalent convolution layer with same stride length and kernel size.
+    Here it is implemented by an equivalent convolution layer with same stride length and kernel size.
 
     Args:
         image_size (:class:`~tensorneko.util.type.Shape`): The size of input shape. (C, H, W).

@@ -16,7 +16,7 @@ class DenseBlock(NekoModule):
     Args:
         sub_module_layers (``List`` [``(int) -> torch.nn.Module``]):
             A collection of module factory builder to build a "layer" in DenseBlock. In the DenseBlock, there will be a
-            submodule generated repeatedly for several times. The factory function takes an repeat_index as input, and
+            submodule generated repeatedly for several times. The factory function takes a repeat_index as input, and
             build a :class:`~torch.nn.Module`.
 
         repeat (``int``): Number of repeats for each layer in DenseBlock.

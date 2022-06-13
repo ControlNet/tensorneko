@@ -1,30 +1,25 @@
 from __future__ import annotations
 
-from enum import Enum
 from functools import reduce
-from itertools import chain, islice
+from itertools import chain
 from sys import maxsize
-from typing import Iterable, Iterator, List, Union, Callable, Optional
+from typing import List, Callable, Optional, Union, Iterable, Generator
+
 from tqdm.auto import tqdm
 
-from ....backend.parallel import ParallelType, ExecutorPool
 from .abstract_seq import AbstractSeq
 from ...type import T, R
+from ....backend.parallel import ParallelType, ExecutorPool
 
 
-class Stream(AbstractSeq, Iterable[T]):
+class Stream(AbstractSeq[T]):
 
-    def __init__(self, iterable: Iterable[T] = iter(()), action_pipe: List[_StreamAction] = None):
+    def __init__(self, iterable: Iterable[T] = iter(())):
+        self._iter = iter(iterable)
+        self._cache: List[T] = []
+        self._finished = False
         if isinstance(iterable, Stream):
-            self._iter = iterable._iter
-            self._action_pipe = action_pipe or iterable._action_pipe
             self._cache = iterable._cache
-            self._current_index = iterable._current_index
-        else:
-            self._iter = iter(iterable)
-            self._action_pipe = action_pipe or []
-            self._cache = []
-            self._current_index = -1
 
     @staticmethod
     def of(*items: T) -> Stream[T]:
@@ -32,74 +27,17 @@ class Stream(AbstractSeq, Iterable[T]):
 
     @staticmethod
     def from_stream(stream: Stream[T]) -> Stream[T]:
-        return Stream(stream._iter)
+        stream = Stream(stream._iter)
+        stream._cache = stream._cache
+        return stream
 
-    def __lshift__(self, right_iter: Iterable[T]) -> Stream[T]:
-        self._iter = chain(self._iter, right_iter)
-        return self
-
-    def __iter__(self) -> _Iterator:
-        return self._Iterator(self)
-
-    class _Iterator(Iterator[T]):
-
-        def __init__(self, stream: Stream[T]):
-            self._stream = stream
-            self._iter_index = -1
-
-        def __next__(self) -> T:
-            self._iter_index += 1
-            result = self._stream._try_iter_to(self._iter_index)
-            if result in (self._stream._IterStatus.SUCCESS_ITER, self._stream._IterStatus.NO_NEED_ITER):
-                return self._stream._cache[self._iter_index]
-            else:
-                raise StopIteration
-
-    class _IterStatus(Enum):
-        FAIL = 0
-        NO_NEED_ITER = 1
-        SUCCESS_ITER = 2
-
-    def _try_iter_to(self, index: int) -> _IterStatus:
-        if index <= self._current_index:
-            return self._IterStatus.NO_NEED_ITER
-
-        while index > self._current_index:
-            try:
-                item = next(self._iter)
-            except StopIteration:
-                return self._IterStatus.FAIL
-
-            filtered = True
-            flattened = False
-            for i, (f, method) in enumerate(self._action_pipe):
-                if method == Stream.map:
-                    item = f(item)
-                elif method == Stream.filter:
-                    filtered = f(item)
-                    if not filtered:
-                        break
-                elif method == Stream.flatten:
-                    if isinstance(item, Stream):
-                        item = Stream(item, action_pipe=self._action_pipe[i + 1:]).to_list()
-                        flattened = True
-                        break  # the remain actions are already applied in the sub stream to_list
-
-            if filtered:
-                if flattened:
-                    self._cache.extend(item)
-                    self._current_index += len(item)
-                else:
-                    self._cache.append(item)
-                    self._current_index += 1
-
-        return self._IterStatus.SUCCESS_ITER
-
-    def __getitem__(self, item: Union[int, slice]) -> Union[T, Stream[T]]:
+    def __getitem__(self, item: Union[int, slice]) -> Union[T, AbstractSeq[T]]:
         if isinstance(item, int):
             if item < 0:
                 raise ValueError("Negative slice is not allowed in Stream")
-            self._try_iter_to(item)
+            for _ in self._iter_to(item):
+                pass
+
         elif isinstance(item, slice):
             low, high, step = item.indices(maxsize)
             if step == 0:
@@ -110,14 +48,49 @@ class Stream(AbstractSeq, Iterable[T]):
 
         return self._cache.__getitem__(item)
 
-    def map(self, f: Callable[[T], R]) -> Stream[R]:
-        return Stream(self._iter, action_pipe=self._action_pipe + [_StreamAction(f, Stream.map)])
+    def __lshift__(self, right_iter: Iterable[T]) -> Stream[T]:
+        self._iter = chain(self._iter, right_iter)
+        return self
 
-    def for_each(self, f: Callable[[T], None], progress_bar: bool = False,
-        parallel_type: Optional[ParallelType] = None
+    def __iter__(self) -> Generator[T, None, None]:
+        return self._iter_all()
+
+    def _iter_to(self, index: int, start: int = 0) -> Generator[T, None, None]:
+        return self._iter_cond(lambda i: i <= index, start)
+
+    def _iter_all(self) -> Generator[T, None, None]:
+        return self._iter_cond(lambda i: True)
+
+    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+        i = start
+        while cond(i):
+            if self._cache_size > i:
+                yield self._cache[i]
+            elif self._cache_size == i:
+                try:
+                    item = next(self._iter)
+                except StopIteration:
+                    self._finished = True
+                    break
+                self._cache.append(item)
+                yield item
+            else:
+                for item in self._iter_to(i, start=self._cache_size):
+                    yield item
+            i += 1
+
+    @property
+    def _cache_size(self) -> int:
+        return len(self._cache)
+
+    def map(self, f: Callable[[T], R]) -> Stream[R]:
+        return MapStream(self, f)
+
+    def for_each(self, f: Callable[[T], None], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None,
+        **tqdm_args
     ) -> None:
         if parallel_type is None:
-            items = self.to_list() if not progress_bar else tqdm(self.to_list())
+            items = self if not progress_bar else tqdm(self, **tqdm_args)
             for item in items:
                 f(item)
         else:
@@ -126,52 +99,202 @@ class Stream(AbstractSeq, Iterable[T]):
             if f.__name__ == "<lambda>":
                 raise NotImplementedError("lambda function is not supported yet")
 
-            for item in self.to_list():
+            for item in self:
                 futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
 
-            futures = tqdm(futures) if progress_bar else futures
+            futures = tqdm(futures, **tqdm_args) if progress_bar else futures
             for future in futures:
                 future.result()
 
     def with_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
-        parallel_type: Optional[ParallelType] = None
+        parallel_type: Optional[ParallelType] = None, **tqdm_args
     ) -> Stream[T]:
-        self.for_each(f, progress_bar, parallel_type)
+        self.for_each(f, progress_bar, parallel_type, **tqdm_args)
         return self
 
     def filter(self, f: Callable[[T], bool]) -> Stream[T]:
-        return Stream(self._iter, action_pipe=self._action_pipe + [_StreamAction(f, Stream.filter)])
+        return FilterStream(self, f)
 
     def reduce(self, f: Callable[[T, T], T]) -> T:
         return reduce(f, self)
 
     def flatten(self) -> Stream[T]:
-        return Stream(self._iter, action_pipe=self._action_pipe + [_StreamAction(None, Stream.flatten)])
+        return FlattenStream(self)
 
-    def flat_map(self, f: Callable[[T], AbstractSeq[R]]) -> AbstractSeq[R]:
+    def flat_map(self, f: Callable[[T], Stream[R]]) -> Stream[R]:
         return self.map(f).flatten()
 
     def skip(self, n: int) -> Stream[T]:
-        return Stream(islice(self, n, None))
+        return SkipStream(self, n)
 
     def take(self, n: int) -> Stream[T]:
-        return Stream(islice(self, n))
+        return TakeStream(self, n)
+
+    def repeat(self, n: int) -> Stream[T]:
+        return RepeatStream(self, n)
+
+    @property
+    def head(self) -> T:
+        return self[0]
+
+    @property
+    def tail(self) -> Stream[T]:
+        return self.skip(1)
 
     def to_list(self) -> List[T]:
-        return [*self]
+        return [item for item in self]
 
     def __str__(self):
-        return f"Stream({', '.join(map(str, self._cache + ['...']))})"
+        return f"Stream({', '.join(map(str, self._cache + (['...'] if not self._finished else [])))})"
 
 
-class _StreamAction:
+class MapStream(Stream[T]):
 
-    def __init__(self, f: Optional[Callable], method: Callable):
-        self.f = f
-        self.method = method
+    def __init__(self, iterable: Iterable[T], f: Callable[[T], R]):
+        super().__init__(iterable)
+        self._f = f
+        self._cache = []
 
-    def __iter__(self):
-        return iter((self.f, self.method))
+    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+        i = start
+        while cond(i):
+            if self._cache_size > i:
+                yield self._cache[i]
+            elif self._cache_size == i:
+                try:
+                    item = self._f(next(self._iter))
+                except StopIteration:
+                    break
+                self._cache.append(item)
+                yield item
+            else:
+                for item in self._iter_to(i, start=self._cache_size):
+                    yield item
+            i += 1
 
-    def __str__(self):
-        return f"{self.method.__name__}({self.f.__name__ if self.f is not None else ''})"
+
+class FilterStream(Stream[T]):
+
+    def __init__(self, iterable: Iterable[T], f: Callable[[T], bool]):
+        super().__init__(iterable)
+        self._f = f
+        self._cache = []
+
+    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+        i = start
+        while cond(i):
+            if self._cache_size > i:
+                yield self._cache[i]
+                i += 1
+            elif self._cache_size == i:
+                try:
+                    item = next(self._iter)
+                except StopIteration:
+                    break
+                if self._f(item):
+                    self._cache.append(item)
+                    yield item
+                    i += 1
+            else:
+                for item in self._iter_to(i, start=self._cache_size):
+                    yield item
+                    i += 1
+
+
+class FlattenStream(Stream[T]):
+
+    def __init__(self, iterable: Iterable[T]):
+        super().__init__(iterable)
+        self._cache = []
+
+    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+        i = start
+        while cond(i):
+            if self._cache_size > i:
+                yield self._cache[i]
+                i += 1
+            elif self._cache_size == i:
+                try:
+                    item = next(self._iter)
+                except StopIteration:
+                    break
+                if isinstance(item, Stream):
+                    for each in item:
+                        self._cache.append(each)
+                        yield each
+                        i += 1
+                else:
+                    self._cache.append(item)
+                    yield item
+                    i += 1
+            else:
+                for item in self._iter_to(i, start=self._cache_size):
+                    yield item
+                    i += 1
+
+
+class TakeStream(Stream[T]):
+
+    def __init__(self, iterable: Iterable[T], n: int):
+        super().__init__(iterable)
+        self._n = n
+        self._cache = []
+
+    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+        def _cond(i: int) -> bool:
+            return cond(i) and i < self._n
+
+        return super()._iter_cond(_cond, start=start)
+
+
+class SkipStream(Stream[T]):
+
+    def __init__(self, iterable: Iterable[T], n: int):
+        super().__init__(iterable)
+        self._n = n
+        self._cache = []
+        self._skip_applied = False
+
+    def _apply_skip(self) -> None:
+        for _ in range(self._n):
+            next(self._iter)
+        self._skip_applied = True
+
+    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+        if not self._skip_applied:
+            self._apply_skip()
+        return super()._iter_cond(cond, start=start)
+
+
+class RepeatStream(Stream[T]):
+
+    def __init__(self, iterable: Iterable[T], n: int):
+        super().__init__(iterable)
+        self._cache = []
+        self._n = n
+        self._iter_once = False
+
+    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+        i = start
+        while cond(i):
+            if not self._iter_once:
+                if self._cache_size > i:
+                    yield self._cache[i]
+                elif self._cache_size == i:
+                    try:
+                        item = next(self._iter)
+                    except StopIteration:
+                        self._iter_once = True
+                        continue
+                    self._cache.append(item)
+                    yield item
+                else:
+                    for item in self._iter_to(i, start=self._cache_size):
+                        yield item
+
+            else:
+                if i < len(self._cache) * self._n:
+                    yield self._cache[i % self._cache_size]
+                else:
+                    break
+            i += 1

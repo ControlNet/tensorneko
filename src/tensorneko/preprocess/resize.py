@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -18,8 +18,8 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMet
     Resizing an image to determined size.
 
     Args:
-        tensor (:class:`~torch.Tensor`): Image tensor (C, H, W)
-        size ((``int``, ``int``)): Target size (H, W)
+        tensor (:class:`~torch.Tensor`): Image tensor (C, H, W) with value range [0, 1].
+        size ((``int``, ``int``)): Target size (H, W).
         resize_method (:class:`ResizeMethod`, optional): Resize method. Default bicubic.
 
     Returns:

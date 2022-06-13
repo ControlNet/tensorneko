@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Generic, Union, Callable, List, Optional
+from typing import Generic, Union, Callable, List, Optional, Iterable
 
 from ....backend.parallel import ParallelType
 from ...type import T, R
 
 
-class AbstractSeq(ABC, Generic[T]):
+class AbstractSeq(Iterable[T], ABC):
 
     @abstractmethod
     def __getitem__(self, item: Union[int, slice]) -> Union[T, AbstractSeq[T]]:
@@ -29,7 +29,7 @@ class AbstractSeq(ABC, Generic[T]):
     @abstractmethod
     def with_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
         parallel_type: Optional[ParallelType] = None
-    ) -> None:
+    ) -> AbstractSeq[T]:
         ...
 
     @abstractmethod
@@ -54,6 +54,20 @@ class AbstractSeq(ABC, Generic[T]):
 
     @abstractmethod
     def take(self, n: int) -> AbstractSeq[T]:
+        ...
+
+    @property
+    @abstractmethod
+    def head(self) -> T:
+        ...
+
+    @property
+    @abstractmethod
+    def tail(self) -> AbstractSeq[T]:
+        ...
+
+    @abstractmethod
+    def repeat(self, n: int) -> AbstractSeq[T]:
         ...
 
     @abstractmethod

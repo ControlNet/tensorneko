@@ -110,17 +110,17 @@ class UtilStreamTest(unittest.TestCase):
 
     def test_lazy_slicing(self):
         s = Stream() << range(10)
-        self.assertEqual(s._current_index, -1)
+        self.assertEqual(s._cache_size, 0)
 
         s_slice = s[:5]
-        self.assertEqual(s._current_index, -1)
+        self.assertEqual(s._cache_size, 0)
         self.assertEqual(len(list(s_slice)), 5)
 
     def test_lazy_slicing_recursive(self):
         s = Stream() << range(10)
         sf = s[1:3][0:2]
 
-        self.assertEqual(s._current_index, -1)
+        self.assertEqual(s._cache_size, 0)
         self.assertEqual(len(list(sf)), 2)
 
     def test_fib_infinite_stream(self):

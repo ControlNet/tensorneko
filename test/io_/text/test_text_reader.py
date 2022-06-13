@@ -141,7 +141,7 @@ Second line.""")
         self.assertEqual(matrix.values[2][1], 8)
 
     def test_read_json_as_obj_in_list_in_list(self):
-        # test obj in list in list
+        # test obj in list
         matrix_info: MatrixInfo = read.text.of_json(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_obj_in_list_in_list.json"),
             cls=MatrixInfo
