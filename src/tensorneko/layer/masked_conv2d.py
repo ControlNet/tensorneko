@@ -1,11 +1,11 @@
 from abc import abstractmethod
-from typing import Union, Tuple
+from typing import Union, Tuple, Type
 
 import torch
 from torch import Tensor
 from torch.nn import Conv2d
 
-from .conv import _get_Conv
+from .conv import _Conv, C
 
 
 class _MaskedConv2d(Conv2d):
@@ -88,8 +88,27 @@ class _MaskedConv2dB(_MaskedConv2d):
         return mask
 
 
-MaskedConv2dA = _get_Conv(_MaskedConv2dA, "tensorneko.layer.MaskedConv2dA")
-MaskedConv2dB = _get_Conv(_MaskedConv2dB, "tensorneko.layer.MaskedConv2dB")
+class MaskedConv2dA(_Conv[_MaskedConv2dA]):
+
+    @property
+    def _class_name(self) -> str:
+        return "tensorneko.layer.MaskedConv2dA"
+
+    @property
+    def _PtConv(self) -> Type[C]:
+        return _MaskedConv2dA
+
+
+class MaskedConv2dB(_Conv[_MaskedConv2dB]):
+
+    @property
+    def _class_name(self) -> str:
+        return "tensorneko.layer.MaskedConv2dB"
+
+    @property
+    def _PtConv(self) -> Type[C]:
+        return _MaskedConv2dB
+
 
 MaskedConv2d = {
     "A": MaskedConv2dA,
