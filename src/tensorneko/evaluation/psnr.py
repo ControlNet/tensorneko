@@ -12,7 +12,7 @@ from ..preprocess import padding_video, PaddingMethod
 
 
 @dispatch
-def psnr_image(pred: str, real: str) -> float:
+def psnr_image(pred: str, real: str) -> Tensor:
     """
     Calculate PSNR of an image.
 
@@ -21,30 +21,44 @@ def psnr_image(pred: str, real: str) -> float:
         real (``str``): Path to the real image.
 
     Returns:
-        ``float``: The psnr of the image.
+        :class:`~torch.Tensor`: The psnr of the image.
     """
-    pred_image = read.image(pred).image
-    real_image = read.image(real).image
-    return float(psnr(pred_image, real_image, data_range=1.0))
+    pred_image = read.image(pred).unsqueeze(0)
+    real_image = read.image(real).unsqueeze(0)
+    return psnr(pred_image, real_image, data_range=1.0, reduction="mean")
 
 
 @dispatch
-def psnr_image(pred: Tensor, real: Tensor) -> float:
+def psnr_image(pred: Tensor, real: Tensor, reduction: str = "mean") -> Tensor:
     """
     Calculate PSNR of an image.
 
     Args:
-        pred (:class:`~torch.Tensor`): Predicted image tensor. (C, H, W)
-        real (:class:`~torch.Tensor`): Real image tensor. (C, H, W)
+        pred (:class:`~torch.Tensor`): Predicted images tensor. (B, C, H, W) or (C, H, W)
+        real (:class:`~torch.Tensor`): Real images tensor. (B, C, H, W) or (C, H, W)
+        reduction: (``str``, optional): Reduction method "mean", "sum" and "none". Default: ``"mean"``.
 
     Returns:
-        ``float``: The psnr of the image.
+        :class:`~torch.Tensor`: The ssim of the images.
     """
-    return float(psnr(pred, real, data_range=1.0))
+    if pred.dim() == 3:
+        pred = pred.unsqueeze(0)
+
+    if real.dim() == 3:
+        real = real.unsqueeze(0)
+
+    assert pred.shape[0] == real.shape[0], "The number of images in pred and real must be equal."
+    if reduction == "mean":
+        reduction = "elementwise_mean"
+        dim = None
+    else:
+        dim = (1, 2, 3)
+
+    return psnr(pred, real, data_range=1.0, reduction=reduction, dim=dim)
 
 
 @dispatch
-def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> float:
+def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> Tensor:
     """
     Calculate PSNR of a video.
 
@@ -54,7 +68,7 @@ def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> float:
         use_ffmpeg (``bool``, optional): Whether to use ffmpeg to calculate psnr.
 
     Returns:
-        ``float``: The psnr of the video.
+        :class:`~torch.Tensor`: The psnr of the video.
     """
     if use_ffmpeg:
         if not ffmpeg_available:
@@ -63,7 +77,7 @@ def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> float:
         p = subprocess.run(["-i", pred, "-i", real, "-filter_complex", "psnr", "-f", "null", "/dev/null"],
                            capture_output=True)
         psnr_out = p.stdout.decode().split("\n")[-2]
-        return float(re.search(r" average:([\d.]+) ", psnr_out)[1])
+        return Tensor(float(re.search(r" average:([\d.]+) ", psnr_out)[1]))
     else:
         pred_video = read.video(pred).video  # (T, C, H, W)
         real_video = read.video(real).video
@@ -71,7 +85,7 @@ def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> float:
 
 
 @dispatch
-def psnr_video(pred: Tensor, real: Tensor) -> float:
+def psnr_video(pred: Tensor, real: Tensor) -> Tensor:
     """
     Calculate PSNR of a video.
 
@@ -80,10 +94,7 @@ def psnr_video(pred: Tensor, real: Tensor) -> float:
         real (:class:`~torch.Tensor`): Real video tensor. (T, C, H, W)
 
         Returns:
-            ``float``: The psnr of the video.
+            :class:`~torch.Tensor`: The psnr of the video.
     """
     real_video = padding_video(real, pred.shape[0], PaddingMethod.SAME)
-    psnr_results = []
-    for i in range(pred.shape[0]):
-        psnr_results.append(psnr_image(pred[i], real_video[i]))
-    return sum(psnr_results) / len(psnr_results)
+    return psnr_image(pred, real_video, reduction="mean")
