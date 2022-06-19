@@ -6,7 +6,7 @@ from torchmetrics.functional import psnr
 
 from tensorneko_util.preprocess import ffmpeg_available
 from tensorneko_util.util import dispatch
-
+from .enum import Reduction
 from ..io import read
 from ..preprocess import padding_video, PaddingMethod
 
@@ -29,7 +29,7 @@ def psnr_image(pred: str, real: str) -> Tensor:
 
 
 @dispatch
-def psnr_image(pred: Tensor, real: Tensor, reduction: str = "mean") -> Tensor:
+def psnr_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN) -> Tensor:
     """
     Calculate PSNR of an image.
 
@@ -48,13 +48,16 @@ def psnr_image(pred: Tensor, real: Tensor, reduction: str = "mean") -> Tensor:
         real = real.unsqueeze(0)
 
     assert pred.shape[0] == real.shape[0], "The number of images in pred and real must be equal."
-    if reduction == "mean":
-        reduction = "elementwise_mean"
+
+    reduction_method = reduction.value
+
+    if reduction_method == "mean":
+        reduction_method = "elementwise_mean"
         dim = None
     else:
         dim = (1, 2, 3)
 
-    return psnr(pred, real, data_range=1.0, reduction=reduction, dim=dim)
+    return psnr(pred, real, data_range=1.0, reduction=reduction_method, dim=dim)
 
 
 @dispatch
@@ -97,4 +100,4 @@ def psnr_video(pred: Tensor, real: Tensor) -> Tensor:
             :class:`~torch.Tensor`: The psnr of the video.
     """
     real_video = padding_video(real, pred.shape[0], PaddingMethod.SAME)
-    return psnr_image(pred, real_video, reduction="mean")
+    return psnr_image(pred, real_video, reduction=Reduction.MEAN)

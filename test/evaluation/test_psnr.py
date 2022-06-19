@@ -3,6 +3,7 @@ import unittest
 import torch
 
 from tensorneko.evaluation import psnr_image, psnr_video
+from tensorneko.evaluation.enum import Reduction
 
 
 class TestPsnr(unittest.TestCase):
@@ -25,8 +26,15 @@ class TestPsnr(unittest.TestCase):
         x = torch.rand(10, 3, 256, 256)
         y = torch.rand(10, 3, 256, 256)
 
-        psnr = psnr_image(x, y, reduction="none")
+        psnr = psnr_image(x, y, reduction=Reduction.NONE)
         self.assertTrue(psnr.shape == torch.Size([10]))
+
+    def test_psnr_video_from_tensor(self):
+        x = torch.rand(10, 3, 256, 256)
+        y = torch.rand(10, 3, 256, 256)
+
+        psnr = psnr_video(x, y)
+        self.assertTrue(psnr.shape == torch.Size([]))
 
 
 if __name__ == '__main__':

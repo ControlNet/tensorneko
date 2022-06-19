@@ -7,7 +7,7 @@ from torchmetrics.functional import ssim
 
 from tensorneko_util.preprocess import ffmpeg_available
 from tensorneko_util.util import dispatch
-
+from .enum import Reduction
 from ..io import read
 from ..preprocess import padding_video, PaddingMethod
 
@@ -30,14 +30,15 @@ def ssim_image(pred: str, real: str) -> Tensor:
 
 
 @dispatch
-def ssim_image(pred: Tensor, real: Tensor, reduction: str = "mean") -> Tensor:
+def ssim_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN) -> Tensor:
     """
     Calculate SSIM of an image or a batch of images.
 
     Args:
         pred (:class:`~torch.Tensor`): Predicted images tensor. (B, C, H, W) or (C, H, W)
         real (:class:`~torch.Tensor`): Real images tensor. (B, C, H, W) or (C, H, W)
-        reduction: (``str``, optional): Reduction method "mean", "sum" and "none". Default: ``"mean"``.
+        reduction: (:class:`tensorneko.evaluation.enum.Reduction`, optional): Reduction method.
+            Default: ``Reduction.MEAN``.
 
     Returns:
         :class:`~torch.Tensor`: The ssim of the images.
@@ -49,11 +50,14 @@ def ssim_image(pred: Tensor, real: Tensor, reduction: str = "mean") -> Tensor:
         real = real.unsqueeze(0)
 
     assert pred.shape[0] == real.shape[0], "The number of images in pred and real must be equal."
-    if reduction == "mean":
-        reduction = "elementwise_mean"
 
-    if reduction != "none":
-        return ssim(pred, real, data_range=1.0, reduction=reduction)
+    reduction_method = reduction.value
+
+    if reduction_method == "mean":
+        reduction_method = "elementwise_mean"
+
+    if reduction_method != "none":
+        return ssim(pred, real, data_range=1.0, reduction=reduction_method)
     else:
         result = ssim(pred, real, data_range=1.0, reduction="none")
         return result.mean(dim=(1, 2, 3))
@@ -99,4 +103,4 @@ def ssim_video(pred: Tensor, real: Tensor) -> Tensor:
             ``float``: The ssim of the video.
     """
     real_video = padding_video(real, pred.shape[0], PaddingMethod.SAME)
-    return ssim_image(pred, real_video, reduction="mean")
+    return ssim_image(pred, real_video, reduction=Reduction.MEAN)

@@ -3,6 +3,7 @@ import unittest
 import torch
 
 from tensorneko.evaluation import ssim_image, ssim_video
+from tensorneko.evaluation.enum import Reduction
 
 
 class TestSsim(unittest.TestCase):
@@ -25,8 +26,15 @@ class TestSsim(unittest.TestCase):
         x = torch.rand(10, 3, 256, 256)
         y = torch.rand(10, 3, 256, 256)
 
-        ssim = ssim_image(x, y, reduction="none")
+        ssim = ssim_image(x, y, reduction=Reduction.NONE)
         self.assertTrue(ssim.shape == torch.Size([10]))
+
+    def test_ssim_video_from_tensor(self):
+        x = torch.rand(10, 3, 256, 256)
+        y = torch.rand(10, 3, 256, 256)
+
+        ssim = ssim_video(x, y)
+        self.assertTrue(ssim.shape == torch.Size([]))
 
 
 if __name__ == '__main__':

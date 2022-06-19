@@ -2,13 +2,15 @@ from typing import overload
 
 from torch import Tensor
 
+from .enum import Reduction
+
 
 @overload
 def psnr_image(pred: str, real: str) -> Tensor: ...
 
 
 @overload
-def psnr_image(pred: Tensor, real: Tensor, reduction: str = "mean") -> Tensor: ...
+def psnr_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN) -> Tensor: ...
 
 
 @overload
