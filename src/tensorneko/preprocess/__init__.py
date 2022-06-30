@@ -14,6 +14,6 @@ __all__ = [
 ]
 
 if ffmpeg_available:
-    from tensorneko_util.preprocess import video2frames, ffmpeg_command, merge_video_audio
-    __all__.extend(["video2frames", "ffmpeg_command", "merge_video_audio"])
+    from tensorneko_util.preprocess import video2frames, ffmpeg_command, merge_video_audio, resample_video_fps
+    __all__.extend(["video2frames", "ffmpeg_command", "merge_video_audio", "resample_video_fps"])
 

@@ -81,3 +81,26 @@ def merge_video_audio(video_path: str, audio_path: str, output_path: str, shorte
     ]
 
     return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def resample_video_fps(video_path: str, output_path: str, fps: float, ffmpeg_args: List[str] = None) -> Popen:
+    """
+    Run ffmpeg to resample video to a specified FPS.
+
+    Args:
+        video_path (``str``): Path to the video.
+        output_path (``str``): Path to the output video.
+        fps (``float``): FPS of the output video.
+        ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
+
+    Returns:
+        ``Popen``: The subprocess of ffmpeg.
+    """
+
+    ffmpeg_args = ffmpeg_args or []
+
+    args = [
+        "-i", video_path, "-filter:v", f"fps={fps}", output_path, *ffmpeg_args
+    ]
+
+    return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
