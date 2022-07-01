@@ -1,16 +1,19 @@
 from typing import Union
 
-import torchaudio
-from torchaudio.backend.common import AudioMetaData
-
 from .audio_data import AudioData
+
+try:
+    import torchaudio
+    from torchaudio.backend.common import AudioMetaData
+except ImportError:
+    pass
 
 
 class AudioReader:
     """AudioReader for reading audio file"""
 
     @staticmethod
-    def of(path: str, return_info: bool = False) -> Union[AudioData, AudioMetaData]:
+    def of(path: str, return_info: bool = False) -> Union[AudioData, "AudioMetaData"]:
         """
         Read audio tensor from given file.
 
@@ -27,6 +30,6 @@ class AudioReader:
         else:
             return AudioData(*torchaudio.load(path))
 
-    def __new__(cls, path: str, return_info: bool = False) -> Union[AudioData, AudioMetaData]:
+    def __new__(cls, path: str, return_info: bool = False) -> Union[AudioData, "AudioMetaData"]:
         """Alias of :meth:`~AudioReader.of`"""
         return cls.of(path, return_info)

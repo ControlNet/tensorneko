@@ -1,9 +1,7 @@
-from typing import overload, Union
+from typing import overload
 
-from numpy import ndarray
-from torch import Tensor
-
-from ...io.audio import AudioData
+from .audio_data import AudioData
+from ...util.type import T_ARRAY
 
 
 class AudioWriter:
@@ -14,4 +12,4 @@ class AudioWriter:
 
     @staticmethod
     @overload
-    def to(path: str, audio: Union[Tensor, ndarray], sample_rate: int = 16000) -> None: ...
+    def to(path: str, audio: T_ARRAY, sample_rate: int = 16000) -> None: ...

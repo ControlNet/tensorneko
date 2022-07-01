@@ -1,8 +1,11 @@
-import torchaudio
-
 from .audio_data import AudioData
 from ...util import dispatch
 from ...util.type import T_ARRAY
+
+try:
+    import torchaudio
+except ImportError:
+    pass
 
 
 class AudioWriter:
