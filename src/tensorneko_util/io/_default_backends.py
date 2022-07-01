@@ -20,3 +20,10 @@ def _default_video_io_backend():
         return VisualLib.FFMPEG
     else:
         raise ValueError("No backend available. Please install OpenCV, Torchvision or FFMPEG.")
+
+
+def _default_audio_io_backend():
+    if VisualLib.pytorch_available():
+        return VisualLib.PYTORCH
+    else:
+        raise ValueError("No backend available. Please install Torchaudio.")

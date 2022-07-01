@@ -8,6 +8,7 @@ from .video import VideoReader
 
 
 class Reader:
+
     def __init__(self):
         self.image = ImageReader
         self.text = TextReader

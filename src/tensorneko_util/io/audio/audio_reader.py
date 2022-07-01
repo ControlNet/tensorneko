@@ -1,35 +1,37 @@
-from typing import Union
+from typing import Optional
 
 from .audio_data import AudioData
-
-try:
-    import torchaudio
-    from torchaudio.backend.common import AudioMetaData
-except ImportError:
-    pass
+from .._default_backends import _default_audio_io_backend
+from ...backend.audio_lib import AudioLib
 
 
 class AudioReader:
     """AudioReader for reading audio file"""
 
     @staticmethod
-    def of(path: str, return_info: bool = False) -> Union[AudioData, "AudioMetaData"]:
+    def of(path: str, backend: Optional[AudioLib] = None) -> AudioData:
         """
         Read audio tensor from given file.
 
         Args:
             path (``str``): Path to the audio file.
-            return_info (``bool``, optional): True will return info rather than audio itself. Default ``False``.
+            backend (:class:`~tensorneko.io.audio.audio_lib.AudioLib`, optional): The audio library to use.
+                Default: pytorch.
 
         Returns:
             :class:`~.audio_data.AudioData` | :class:`~torchaudio.backend.common.AudioMetaData`:
                 The Audio data in the file.
         """
-        if return_info:
-            return torchaudio.info(path)
-        else:
-            return AudioData(*torchaudio.load(path))
+        backend = backend or _default_audio_io_backend()
 
-    def __new__(cls, path: str, return_info: bool = False) -> Union[AudioData, "AudioMetaData"]:
+        if backend == AudioLib.PYTORCH:
+            if not AudioLib.pytorch_available():
+                raise ValueError("Torchaudio is not available.")
+            import torchaudio
+            return AudioData(*torchaudio.load(path))
+        else:
+            raise ValueError("Unknown audio library: {}".format(backend))
+
+    def __new__(cls, path: str, backend: Optional[AudioLib] = None) -> AudioData:
         """Alias of :meth:`~AudioReader.of`"""
-        return cls.of(path, return_info)
+        return cls.of(path, backend)
