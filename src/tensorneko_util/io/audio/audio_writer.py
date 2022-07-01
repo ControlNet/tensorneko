@@ -24,15 +24,7 @@ class AudioWriter:
             backend (:class:`~tensorneko.io.audio.audio_lib.AudioLib`, optional): The audio library to use.
                 Default: pytorch.
         """
-        backend = backend or _default_audio_io_backend()
-
-        if backend == AudioLib.PYTORCH:
-            if not AudioLib.pytorch_available():
-                raise ValueError("Torchaudio is not available.")
-            import torchaudio
-            torchaudio.save(path, audio.audio, audio.sample_rate, channels_first=channel_first)
-        else:
-            raise ValueError("Unknown audio library: {}".format(backend))
+        return cls.to(path, audio.audio, audio.sample_rate, channel_first, backend)
 
     @classmethod
     @dispatch
