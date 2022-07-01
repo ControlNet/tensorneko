@@ -4,21 +4,11 @@ import numpy as np
 from einops import rearrange
 
 from .video_data import VideoData
+from .._default_backends import _default_video_io_backend
 from ...backend.visual_lib import VisualLib
 
 
 class VideoReader:
-
-    @classmethod
-    def _default_backend(cls):
-        if VisualLib.opencv_available():
-            return VisualLib.OPENCV
-        elif VisualLib.pytorch_available():
-            return VisualLib.PYTORCH
-        elif VisualLib.ffmpeg_available():
-            return VisualLib.FFMPEG
-        else:
-            raise ValueError("No backend available. Please install OpenCV, Torchvision or FFMPEG.")
 
     @classmethod
     def of(cls, path: str, channel_first: bool = False, backend: Optional[VisualLib] = None) -> VideoData:
@@ -37,7 +27,7 @@ class VideoReader:
                 A VideoData object contains a float tensor of video, with value range of 0. to 1,
                 an audio tensor of (T, C) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
         """
-        backend = backend or cls._default_backend()
+        backend = backend or _default_video_io_backend()
         if backend == VisualLib.OPENCV:
             if not VisualLib.opencv_available():
                 raise ValueError("OpenCV is not installed.")

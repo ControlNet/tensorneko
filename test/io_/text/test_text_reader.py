@@ -4,8 +4,7 @@ from typing import List
 
 import numpy
 
-from tensorneko.io import read
-from tensorneko.io.text.text_reader import json_data
+from tensorneko.io import read, json_data
 
 
 @json_data
@@ -58,26 +57,26 @@ class TestTextReader(unittest.TestCase):
 Second line.""")
 
     def test_read_json_as_dict(self):
-        data = read.text.of_json(os.path.join("test", "resource", "test_read_file", "test_read_json_as_dict.json"))
+        data = read.json.of(os.path.join("test", "resource", "test_read_file", "test_read_json_as_dict.json"))
         self.assertEqual(data, {"x": 1, "y": 2})
 
     def test_read_json_as_list(self):
-        data = read.text.of_json(os.path.join("test", "resource", "test_read_file", "test_read_json_as_list.json"))
+        data = read.json.of(os.path.join("test", "resource", "test_read_file", "test_read_json_as_list.json"))
         self.assertEqual(data, [{"x": 1, "y": 2}, {"x": 3, "y": 2}])
 
     def test_read_json_as_obj(self):
-        data: Point = read.text.of_json(
+        data: Point = read.json.of(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_dict.json"),
-            cls=Point
+            clazz=Point
         )
         self.assertEqual(str(data), "Point(x=1, y=2)")
         self.assertEqual(data.x, 1)
         self.assertEqual(data.y, 2)
 
     def test_read_json_as_list_of_objs(self):
-        data: List[Point] = read.text.of_json(
+        data: List[Point] = read.json.of(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_list.json"),
-            cls=List[Point]
+            clazz=List[Point]
         )
         self.assertEqual(str(data), "[Point(x=1, y=2), Point(x=3, y=2)]")
         self.assertEqual(data[0].x, 1)
@@ -87,9 +86,9 @@ Second line.""")
 
     def test_read_json_as_obj_in_obj(self):
         # test obj in obj with method
-        line: Line = read.text.of_json(
+        line: Line = read.json.of(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_obj_in_obj.json"),
-            cls=Line
+            clazz=Line
         )
 
         self.assertEqual(str(line), "Line(start=Point(x=1, y=1), end=Point(x=4, y=5))")
@@ -101,9 +100,9 @@ Second line.""")
 
     def test_read_json_as_list_in_obj(self):
         # test obj in list in obj
-        points: Points = read.text.of_json(
+        points: Points = read.json.of(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_list_in_obj.json"),
-            cls=Points
+            clazz=Points
         )
 
         self.assertEqual(str(points), "Points(instances=[Point(x=1, y=2), Point(x=3, y=2)])")
@@ -114,9 +113,9 @@ Second line.""")
 
     def test_read_json_as_obj_in_obj_in_obj(self):
         # test obj in obj in obj
-        triangle: Triangle = read.text.of_json(
+        triangle: Triangle = read.json.of(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_obj_in_obj_in_obj.json"),
-            cls=Triangle
+            clazz=Triangle
         )
 
         self.assertEqual(str(triangle), "Triangle(line1=Line(start=Point(x=1, y=1), end=Point(x=4, y=5)), "
@@ -132,9 +131,9 @@ Second line.""")
 
     def test_read_json_as_list_in_list(self):
         # test list in list
-        matrix: Matrix = read.text.of_json(
+        matrix: Matrix = read.json.of(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_list_in_list.json"),
-            cls=Matrix
+            clazz=Matrix
         )
         self.assertEqual(matrix.values[0][0], 1)
         self.assertEqual(matrix.values[1][2], 6)
@@ -142,9 +141,9 @@ Second line.""")
 
     def test_read_json_as_obj_in_list_in_list(self):
         # test obj in list
-        matrix_info: MatrixInfo = read.text.of_json(
+        matrix_info: MatrixInfo = read.json.of(
             os.path.join("test", "resource", "test_read_file", "test_read_json_as_obj_in_list_in_list.json"),
-            cls=MatrixInfo
+            clazz=MatrixInfo
         )
 
         self.assertEqual(matrix_info.values[0][0].name, "A")

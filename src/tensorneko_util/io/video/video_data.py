@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from torch import Tensor
+from ...util.type import T_ARRAY
 
 
 @dataclass
@@ -20,12 +20,12 @@ class VideoData:
     A dataclass for output of :class:`~.video_reader.VideoReader`
 
     Attributes:
-        video (:class:`~torch.Tensor`): video float tensor of (T, C, H, W)
-        audio (:class:`~torch.Tensor`): audio float tensor of (C, T)
+        video (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): video float tensor of (T, C, H, W)
+        audio (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): audio float tensor of (C, T)
         info (:class:`VideoInfo`): video and audio fps info
     """
-    video: Tensor
-    audio: Tensor
+    video: T_ARRAY
+    audio: T_ARRAY
     info: VideoInfo
 
     def __init__(self, video, audio, info):

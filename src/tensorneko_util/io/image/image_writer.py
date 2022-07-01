@@ -5,22 +5,13 @@ import numpy as np
 from einops import rearrange
 from numpy import ndarray
 
+from .._default_backends import _default_image_io_backend
 from ...backend.visual_lib import VisualLib
 from ...util.type import T_ARRAY
 
 
 class ImageWriter:
     """ImageWriter for saving images from :class:`~torch.Tensor` or :class:`~numpy.ndarray`"""
-
-    @classmethod
-    def _default_backend(cls):
-        if VisualLib.opencv_available():
-            backend = VisualLib.OPENCV
-        elif VisualLib.matplotlib_available():
-            backend = VisualLib.MATPLOTLIB
-        else:
-            raise ValueError("No image reader backend available.")
-        return backend
 
     @classmethod
     def _convert_img_format(cls, img_in: T_ARRAY, backend: VisualLib, channel_first: bool):
@@ -62,7 +53,7 @@ class ImageWriter:
             backend (:class:`~tensorneko_util.backend.visual_lib.VisualLib`, optional): The backend library for saving.
                 Default: "opencv" if installed else "matplotlib".
         """
-        backend = backend or cls._default_backend()
+        backend = backend or _default_image_io_backend()
         image = cls._convert_img_format(image, backend, channel_first)
 
         if backend == VisualLib.OPENCV:
@@ -98,7 +89,7 @@ class ImageWriter:
             backend (:class:`~tensorneko_util.backend.visual_lib.VisualLib`, optional): The backend library for saving.
                 Default: "opencv" if installed else "matplotlib".
         """
-        backend = backend or cls._default_backend()
+        backend = backend or _default_image_io_backend()
         image = cls._convert_img_format(image, backend, channel_first)
         if backend == VisualLib.OPENCV:
             if not VisualLib.opencv_available():

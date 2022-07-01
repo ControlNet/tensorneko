@@ -1,6 +1,6 @@
 from typing import Union
 
-import torchaudio.backend.sox_io_backend
+import torchaudio
 from torchaudio.backend.common import AudioMetaData
 
 from .audio_data import AudioData

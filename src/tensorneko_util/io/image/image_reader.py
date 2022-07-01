@@ -5,37 +5,28 @@ from einops import rearrange
 
 from ...backend.visual_lib import VisualLib
 from ...util.type import T_ARRAY
+from .._default_backends import _default_image_io_backend
 
 
 class ImageReader:
     """ImageReader for reading images as :class:`~torch.Tensor`"""
 
     @classmethod
-    def _default_backend(cls):
-        if VisualLib.opencv_available():
-            backend = VisualLib.OPENCV
-        elif VisualLib.matplotlib_available():
-            backend = VisualLib.MATPLOTLIB
-        else:
-            raise ValueError("No image reader backend available.")
-        return backend
-
-    @classmethod
-    def of(cls, path: str, channel_first: bool = True, backend: Optional[VisualLib] = None) -> T_ARRAY:
+    def of(cls, path: str, channel_first: bool = False, backend: Optional[VisualLib] = None) -> T_ARRAY:
         """
         Read image tensor of given file.
 
         Args:
             path (``str``): Path of the JPEG or PNG image.
             channel_first (``bool``, optional): Get image dimension (H, W, C) if False or (C, H, W) if True.
-                Default: True.
+                Default: False.
             backend (:class:`~tensorneko_util.backend.visual_lib.VisualLib`, optional): The backend library for saving.
                 Default: "opencv" if installed else "matplotlib".
 
         Returns:
             :class:`~numpy.ndarray` | :class:`~torch.Tensor`: A float tensor of image, with value range of 0. to 1.
         """
-        backend = backend or cls._default_backend()
+        backend = backend or _default_image_io_backend()
 
         if backend == VisualLib.OPENCV:
             if not VisualLib.opencv_available():

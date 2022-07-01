@@ -2,12 +2,14 @@ from .reader import Reader
 from .writer import Writer
 
 from .json import json_data
+from ..backend.visual_lib import VisualLib
 
 read = Reader()
-writer = Writer()
+write = Writer()
 
 __all__ = [
     "read",
-    "writer",
-    "json_data"
+    "write",
+    "json_data",
+    "VisualLib"
 ]
