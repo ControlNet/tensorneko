@@ -99,6 +99,11 @@ jobs:
           pip install wheel
           python setup_util.py sdist bdist_wheel
 
+      - name: Try importing package
+        run: |
+          cd src
+          python -c "import tensorneko_util"
+
   build-tensorneko:
     needs: [build-web, unittest]
     runs-on: ubuntu-20.04
@@ -138,3 +143,8 @@ jobs:
 
       - name: Build package
         run: python setup.py sdist bdist_wheel
+
+      - name: Try importing package
+        run: |
+          cd src
+          python -c "import tensorneko"

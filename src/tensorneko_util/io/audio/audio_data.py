@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from torch import Tensor
+from ...util.type import T_ARRAY
 
 
 @dataclass
@@ -9,11 +9,11 @@ class AudioData:
     Output audio data for :class:`~.audio_reader.AudioReader`.
 
     Attributes:
-        audio (:class:`~torch.Tensor`): audio float tensor of (C, T)
+        audio (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): audio float tensor of (C, T)
         sample_rate (``int``): sample rate of the audio
 
     """
-    audio: Tensor
+    audio: T_ARRAY
     sample_rate: int
 
     def __iter__(self):

@@ -6,10 +6,8 @@ from typing import Generic, List, Union, Dict, TYPE_CHECKING, Any, Optional
 
 from einops import rearrange
 from matplotlib import pyplot as plt
-from numpy import ndarray
-from torch import Tensor
 
-from ...util.type import T, P
+from ...util.type import T, P, T_ARRAY
 from ...util.ref import Ref
 
 if TYPE_CHECKING:
@@ -175,7 +173,7 @@ class BindableProgressBar(Bindable[int], ProgressBar):
         self.ref.bound_comp = self
 
 
-class Image(Component[Union[ndarray, Tensor, None]]):
+class Image(Component[Optional[T_ARRAY]]):
     """
     The component of image for display.
 
@@ -199,7 +197,7 @@ class Image(Component[Union[ndarray, Tensor, None]]):
 
     """
 
-    def __init__(self, name: str, value: Union[ndarray, Tensor, None] = None):
+    def __init__(self, name: str, value: Optional[T_ARRAY] = None):
         super().__init__(name, value)
         self.path = os.path.join("img", self.name)
         self._ver = 0

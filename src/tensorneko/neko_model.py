@@ -216,7 +216,7 @@ class NekoModel(LightningModule, NekoModule):
 
     def test_step_end(self, output: STEP_OUTPUT) -> Optional[STEP_OUTPUT]:
         """For each test step end, log the metrics"""
-        self.log_dict(output)
+        self.log_dict(output, sync_dist=self.distributed)
         return output
 
     def log_image(self, name: str, image: torch.Tensor) -> None:

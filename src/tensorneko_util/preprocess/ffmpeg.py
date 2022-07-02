@@ -53,3 +53,54 @@ def video2frames(video_path: str, output_dir: Optional[str] = None, frame_name_p
     ]
 
     return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def merge_video_audio(video_path: str, audio_path: str, output_path: str, shortest: bool = False,
+    ffmpeg_args: List[str] = None) -> Popen:
+    """
+    Run ffmpeg to merge video and audio.
+
+    Args:
+        video_path (``str``): Path to the video.
+        audio_path (``str``): Path to the audio.
+        output_path (``str``): Path to the output video.
+        shortest (``bool``, optional): If True, the output video will be the shortest possible.
+        ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
+
+    Returns:
+        ``Popen``: The subprocess of ffmpeg.
+    """
+
+    ffmpeg_args = ffmpeg_args or []
+
+    if shortest:
+        ffmpeg_args.append("-shortest")
+
+    args = [
+        "-i", video_path, "-i", audio_path, "-c:v", "copy", "-c:a", "aac", output_path, *ffmpeg_args
+    ]
+
+    return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def resample_video_fps(video_path: str, output_path: str, fps: float, ffmpeg_args: List[str] = None) -> Popen:
+    """
+    Run ffmpeg to resample video to a specified FPS.
+
+    Args:
+        video_path (``str``): Path to the video.
+        output_path (``str``): Path to the output video.
+        fps (``float``): FPS of the output video.
+        ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
+
+    Returns:
+        ``Popen``: The subprocess of ffmpeg.
+    """
+
+    ffmpeg_args = ffmpeg_args or []
+
+    args = [
+        "-i", video_path, "-filter:v", f"fps={fps}", output_path, *ffmpeg_args
+    ]
+
+    return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
