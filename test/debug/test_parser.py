@@ -1,3 +1,4 @@
+import sys
 import unittest
 from argparse import ArgumentParser
 
@@ -73,6 +74,8 @@ class ArgumentParserTest(unittest.TestCase):
         self.assertTrue("version" not in args.__dict__)
 
     def test_parser_with_extend_arg(self):
+        if sys.version_info[1] < 8:
+            return
         parser = ArgumentParser()
         parser.add_argument("--extend", action="extend", nargs="+", type=str)
         args = get_parser_default_args(parser)
