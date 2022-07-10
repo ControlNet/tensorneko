@@ -1,9 +1,7 @@
 from .log_graph import log_graph
-from tensorneko_util.visualization import Colors, ContinuousColors
+from tensorneko_util.visualization import Colors, ContinuousColors, MultiPlots, tensorboard
 from . import watcher
-from . import tensorboard
 from . import matplotlib
-from tensorneko_util.visualization import MultiPlots
 
 
 __all__ = [
