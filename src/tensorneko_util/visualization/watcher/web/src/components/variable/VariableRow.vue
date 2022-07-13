@@ -1,21 +1,32 @@
+<script setup lang="ts">
+import { type VariableData, variables } from "@/data";
+import { onMounted, ref } from 'vue';
+
+interface Props {
+  k: string
+}
+const props = defineProps<Props>()
+
+const name = ref("")
+const value = ref("")
+let d: VariableData | null = null
+
+function update(): void {
+  d = variables[props.k];
+  name.value = d.name
+  value.value = d.value
+}
+
+onMounted(() => {
+  update()
+})
+
+defineExpose({update})
+
+</script>
+
 <template>
-  <th scope="row">{{ d.name }}</th>
-  <td>{{ d.value }}</td>
+  <th scope="row">{{ name }}</th>
+  <td>{{ value }}</td>
 </template>
 
-<script lang="ts">
-import { Vue } from 'vue-class-component';
-import { variables } from "@/data";
-import { Prop } from "vue-property-decorator";
-
-
-export default class VariableRow extends Vue {
-  @Prop(String) k!: string
-
-  d = variables[this.k]
-
-  update(): void {
-    this.d = variables[this.k];
-  }
-}
-</script>

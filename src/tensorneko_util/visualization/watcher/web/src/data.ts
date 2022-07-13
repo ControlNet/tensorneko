@@ -1,3 +1,5 @@
+import { reactive } from "vue";
+
 export declare abstract class ComponentData {
     name: string
     type: string
@@ -42,8 +44,8 @@ export type Images = { [name: string]: ImageData }
 export type Logs = { [name: string]: LoggerData }
 export type LineCharts = { [name: string]: LineChartData }
 
-export const variables: Variables = {};
-export const progressbars: Progressbars = {};
-export const images: Images = {};
-export const logs: Logs = {};
-export const lineCharts: LineCharts = {};
+export const variables: Variables = reactive({});
+export const progressbars: Progressbars = reactive({});
+export const images: Images = reactive({});
+export const logs: Logs = reactive({});
+export const lineCharts: LineCharts = reactive({});

@@ -1,3 +1,11 @@
+<script setup lang="ts">
+import { variables } from "@/data";
+import VariableRow from "@/components/variable/VariableRow.vue";
+
+const subs = new Map<string, any>()
+defineExpose({subs})
+</script>
+
 <template>
   <h6 class="display-6">Variables</h6>
   <table class="table table-striped table-hover">
@@ -9,23 +17,8 @@
     </thead>
     <tbody>
     <tr v-for="k of Object.keys(variables)" :key="k">
-      <VariableRow :k="k" :ref="k"/>
+      <VariableRow :k="k" :ref="r => subs.set(k, r)"/>
     </tr>
     </tbody>
   </table>
 </template>
-
-<script lang="ts">
-import { Options, Vue } from "vue-class-component";
-import { variables } from "@/data";
-import VariableRow from "@/components/variable/VariableRow.vue";
-
-@Options({
-  components: { VariableRow }
-})
-export default class VariableTable extends Vue {
-  variables = variables
-
-  $refs!: Record<string, VariableRow>
-}
-</script>
