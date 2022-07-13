@@ -33,8 +33,7 @@ setuptools.setup(
         "tensorneko_util": [
             "version.txt",
             "visualization/watcher/web/dist/index.html",
-            "visualization/watcher/web/dist/css/*",
-            "visualization/watcher/web/dist/js/*"
+            "visualization/watcher/web/dist/assets/*",
         ]
     },
     python_requires=">=3.7",

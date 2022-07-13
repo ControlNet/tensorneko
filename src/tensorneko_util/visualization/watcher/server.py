@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import http.server
 import os
 import shutil
 import subprocess
+from http.server import HTTPServer
 from pathlib import Path
+from threading import Thread
 from typing import Optional, Union, List
 
 from .view import View
@@ -54,7 +57,21 @@ class Server(AbstractServer):
 
         self.save_dir = save_dir or os.path.join("watcher", self.view_name)
         self.port = port
-        self.process: Optional[subprocess.Popen] = None
+        self.process: Optional[Thread] = None
+        self.httpd: Optional[HTTPServer] = None
+        server_dir = os.path.join("watcher", self.view_name)
+
+        class HTTPHandler(http.server.SimpleHTTPRequestHandler):
+
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, directory=server_dir, **kwargs)
+
+            def log_message(self, format: str, *args) -> None:
+                return
+
+        self.Handler = HTTPHandler
+        self.Handler.extensions_map[".js"] = "application/javascript"
+        self.Handler.extensions_map[".mjs"] = "application/javascript"
         Server.servers.append(self)
 
     def start(self) -> None:
@@ -87,41 +104,35 @@ class Server(AbstractServer):
         if not os.path.exists(target_path):
             Path(target_path).mkdir(parents=True, exist_ok=True)
 
-        target_path_css = os.path.join(target_path, "css")
-        if os.path.exists(target_path_css):
-            shutil.rmtree(target_path_css)
-
-        target_path_js = os.path.join(target_path, "js")
-        if os.path.exists(target_path_js):
-            shutil.rmtree(target_path_js)
+        target_path_assets = os.path.join(target_path, "assets")
+        if os.path.exists(target_path_assets):
+            shutil.rmtree(target_path_assets)
 
         target_path_html = os.path.join(target_path, "index.html")
         if os.path.exists(target_path_html):
             os.remove(target_path_html)
 
         shutil.copy(os.path.join(source_path, "index.html"), target_path_html)
-        shutil.copytree(os.path.join(source_path, "css"), target_path_css)
-        shutil.copytree(os.path.join(source_path, "js"), target_path_js)
+        shutil.copytree(os.path.join(source_path, "assets"), target_path_assets)
 
     def _run(self) -> None:
-        self.process = subprocess.Popen(["python", "-m", "http.server", "--directory",
-            os.path.join("watcher", self.view_name), str(self.port)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT
-        )
-        print(f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\".")
+        self.httpd = http.server.HTTPServer(("", self.port), self.Handler)
+        self.process = Thread(target=self.httpd.serve_forever)
+        self.process.start()
+        print(self.server_start_string)
 
     def _run_blocking(self):
-        self.process = subprocess.run(["python", "-m", "http.server", "--directory",
-            os.path.join("watcher", self.view_name), str(self.port)])
-        print(f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\".")
+        with http.server.HTTPServer(("", self.port), self.Handler) as httpd:
+            print(self.server_start_string)
+            httpd.serve_forever()
 
     def stop(self) -> None:
         """
         Stop the server.
         """
         if self.process is not None:
-            self.process.terminate()
+            self.httpd.shutdown()
+            self.process.join()
             print("Server stopped")
             self.process = None
         else:
@@ -134,3 +145,7 @@ class Server(AbstractServer):
         """
         for server in cls.servers:
             server.stop()
+
+    @property
+    def server_start_string(self) -> str:
+        return f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\"."

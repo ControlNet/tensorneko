@@ -1,3 +1,11 @@
+<script lang="ts" setup>
+import { progressbars } from "@/data";
+import ProgressBarRow from "@/components/progressbar/ProgressBarRow.vue";
+
+const subs = new Map<string, any>()
+defineExpose({subs})
+</script>
+
 <template>
   <h6 class="display-6">ProgressBars</h6>
   <table class="table table-striped table-hover">
@@ -9,25 +17,8 @@
     </thead>
     <tbody>
     <tr v-for="k of Object.keys(progressbars)" :key="k" class="table-secondary">
-      <ProgressBarRow :k="k" :ref="k"/>
+      <ProgressBarRow :k="k" :ref="r => subs.set(k, r)"/>
     </tr>
     </tbody>
   </table>
 </template>
-
-<script lang="ts">
-import { Options, Vue } from "vue-class-component";
-
-import { progressbars } from "@/data";
-import ProgressBarRow from "@/components/progressbar/ProgressBarRow.vue";
-
-
-@Options({
-  components: { ProgressBarRow }
-})
-export default class ProgressBarTable extends Vue {
-  progressbars = progressbars;
-
-  $refs!: Record<string, ProgressBarRow>
-}
-</script>

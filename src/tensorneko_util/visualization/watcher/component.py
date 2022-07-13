@@ -253,7 +253,7 @@ class Logger(Component[List[str]]):
         value = value or []
         super().__init__(name, value)
 
-    def log(self, msg) -> None:
+    def log(self, msg: str) -> None:
         self._value.append(msg)
         self.update_view()
 

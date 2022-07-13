@@ -23,19 +23,13 @@ jobs:
         env:
           CI: true
 
-      - name: Eslint check
-        working-directory: ./src/tensorneko_util/visualization/watcher/web
-        run: npm run lint
-
       - name: Print dist path
         working-directory: ./src/tensorneko_util/visualization/watcher/web
         run: |
           echo ----------dist-------
           ls -l dist
-          echo ----------dist/js-------
-          ls -l dist/js
-          echo ----------dist/css-------
-          ls -l dist/css
+          echo ----------dist/assets-------
+          ls -l dist/assets
 
   unittest:
     runs-on: ubuntu-20.04
