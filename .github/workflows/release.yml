@@ -28,10 +28,8 @@ jobs:
         run: |
           echo ----------dist-------
           ls -l dist
-          echo ----------dist/js-------
-          ls -l dist/js
-          echo ----------dist/css-------
-          ls -l dist/css
+          echo ----------dist/assets-------
+          ls -l dist/assets
 
   unittest:
     runs-on: ubuntu-20.04
