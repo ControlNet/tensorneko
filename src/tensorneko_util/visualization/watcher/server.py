@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+import http.server
 import os
 import shutil
 import subprocess
+from http.server import HTTPServer
 from pathlib import Path
 from threading import Thread
 from typing import Optional, Union, List
-import http.server
-from http.server import HTTPServer
 
 from .view import View
 from ...util import tensorneko_util_path, AbstractServer
@@ -119,11 +119,11 @@ class Server(AbstractServer):
         self.httpd = http.server.HTTPServer(("", self.port), self.Handler)
         self.process = Thread(target=self.httpd.serve_forever)
         self.process.start()
-        print(f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\".")
+        print(self.server_start_string)
 
     def _run_blocking(self):
         with http.server.HTTPServer(("", self.port), self.Handler) as httpd:
-            print(f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\".")
+            print(self.server_start_string)
             httpd.serve_forever()
 
     def stop(self) -> None:
@@ -145,3 +145,7 @@ class Server(AbstractServer):
         """
         for server in cls.servers:
             server.stop()
+
+    @property
+    def server_start_string(self) -> str:
+        return f"Server started at http://127.0.0.1:{self.port}/, view \"{self.view_name}\"."

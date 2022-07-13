@@ -23,10 +23,6 @@ jobs:
         env:
           CI: true
 
-      - name: Eslint check
-        working-directory: ./src/tensorneko_util/visualization/watcher/web
-        run: npm run lint
-
       - name: Print dist path
         working-directory: ./src/tensorneko_util/visualization/watcher/web
         run: |
