@@ -104,3 +104,24 @@ def resample_video_fps(video_path: str, output_path: str, fps: float, ffmpeg_arg
     ]
 
     return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def mp32wav(mp3_path: str, wav_path: str, ffmpeg_args: List[str] = None) -> Popen:
+    """
+    Run ffmpeg to convert mp3 to wav.
+
+    Args:
+        mp3_path (``str``): Path to the mp3.
+        wav_path (``str``): Path to the wav.
+        ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
+
+    Returns:
+        ``Popen``: The subprocess of ffmpeg.
+    """
+
+    ffmpeg_args = ffmpeg_args or []
+
+    args = [
+        "-i", mp3_path, wav_path, *ffmpeg_args
+    ]
+    return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
