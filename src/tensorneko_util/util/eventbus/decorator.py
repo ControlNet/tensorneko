@@ -1,17 +1,17 @@
-from .bus import bus, EmitType
+from .bus import EventBus
 
 
 def subscribe(func):
-    return bus.subscribe(func)
+    return EventBus.default.subscribe(func)
 
 
 def subscribe_async(func):
-    return bus.subscribe(func, emit_type=EmitType.ASYNC)
+    return EventBus.default.subscribe_async(func)
 
 
 def subscribe_thread(func):
-    return bus.subscribe(func, emit_type=EmitType.THREAD)
+    return EventBus.default.subscribe_thread(func)
 
 
 def subscribe_process(func):
-    return bus.subscribe(func, emit_type=EmitType.PROCESS)
+    return EventBus.default.subscribe_process(func)

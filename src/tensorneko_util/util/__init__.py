@@ -7,7 +7,7 @@ from .func import generate_inf_seq, compose, listdir, with_printed, ifelse, dict
 from .ref import ref
 from .server import AbstractServer
 from .timer import Timer
-from .eventbus import Event, EventBus, subscribe, subscribe_async, subscribe_process, subscribe_thread
+from .eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, subscribe_process, subscribe_thread
 
 tensorneko_util_path = get_tensorneko_util_path()
 
