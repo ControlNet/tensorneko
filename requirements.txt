@@ -15,5 +15,4 @@ pygments >= 2.9.0
 matplotlib >= 3.3.0
 tqdm >= 4.49.0
 protobuf <= 3.19.0
-ffmpeg-python >= 0.2.0
 scipy>=1.0.0
