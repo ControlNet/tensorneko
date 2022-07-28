@@ -405,7 +405,7 @@ DataLoader(
 To my knowledge, 3 popular multi-dispatch libraries still have critical limitations. 
 [plum](https://github.com/wesselb/plum) doesn't support static methods, 
 [mutipledispatch](https://github.com/mrocklin/multipledispatch) doesn't support Python type annotation syntax and 
-[multimethod](https://github.com/coady/multimethod) doesn't support default augments. TensorNeko can do it all.
+[multimethod](https://github.com/coady/multimethod) doesn't support default argument. TensorNeko can do it all.
 
 ```python
 from tensorneko.util import dispatch
