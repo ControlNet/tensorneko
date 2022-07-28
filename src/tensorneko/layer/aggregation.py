@@ -3,7 +3,7 @@ from typing import Sequence, Union
 import torch
 from torch import Tensor
 
-from .. import NekoModule
+from ..neko_module import NekoModule
 from ..util import F
 
 
