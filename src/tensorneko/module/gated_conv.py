@@ -4,7 +4,7 @@ from torch import Tensor
 from torch.nn import Conv2d
 from torch.nn import functional as F
 
-from .. import NekoModule
+from ..neko_module import NekoModule
 from ..layer.masked_conv2d import _VerticalStackConv2dA, _VerticalStackConv2dB, \
     _HorizontalStackConv2dA, _HorizontalStackConv2dB
 

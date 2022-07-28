@@ -37,7 +37,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9"]
+        torch-version: ["1.9.0", "1.10.0", "1.11.0"]
 
     steps:
       - uses: actions/checkout@v2
@@ -50,6 +51,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install torch==${{ matrix.torch-version }}
           pip install -r requirements.txt
           pip install -r requirements_util.txt
           python init.py

@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from ..preprocess import ffmpeg_available
+from ..preprocess._ffmpeg_check import ffmpeg_available
 
 
 class VisualLib(Enum):

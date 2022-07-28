@@ -2,7 +2,7 @@ from einops.layers.torch import Rearrange as _Rearrange
 
 from tensorneko_util.util import AbstractServer, dispatch, AverageMeter, tensorneko_util_path
 from tensorneko_util.util.fp import Seq, AbstractSeq, curry, Some, Empty, F, Stream, return_option, Option, _, __
-from tensorneko_util.util import ref, Timer
+from tensorneko_util.util import ref, Timer, Singleton
 from tensorneko_util.util.eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, \
     subscribe_process, subscribe_thread
 from . import type
@@ -67,4 +67,5 @@ __all__ = [
     "subscribe_async",
     "subscribe_process",
     "subscribe_thread",
+    "Singleton",
 ]

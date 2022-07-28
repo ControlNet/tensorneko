@@ -5,6 +5,7 @@ from functools import partial, wraps
 from operator import eq, is_not
 from typing import Callable, Generic, Union, Optional, Any, Tuple, List
 
+from ...singleton import Singleton
 from ...type import T, R, T1, T2, T3
 
 
@@ -21,7 +22,7 @@ class Option(ABC, Generic[T]):
             # Option(Empty) -> Empty
             return value
 
-        return Some(value) if checker(value) else Empty()
+        return Some.__new__(Some, value) if checker(value) else Empty
 
     def is_empty(self) -> bool:
         return self.empty
@@ -106,13 +107,16 @@ class Option(ABC, Generic[T]):
         ...
 
 
-class Some(Option[T], Generic[T]):
+class Some(Option[T]):
 
     empty = False
 
-    def __init__(self, value: T):
+    def __init__(self, value: T, checker=None):
         # Option(Some) -> Some
         self.x: T = value.get() if isinstance(value, Some) else value
+
+    def __new__(cls, value: T):
+        return object.__new__(cls)
 
     def flatten(self: Some[Option[T]]) -> Option[T]:
         return self.x
@@ -130,10 +134,10 @@ class Some(Option[T], Generic[T]):
         f(self.x)
 
     def filter(self, f: Callable[[T], bool]) -> Some[T]:
-        return self if f(self.x) else Empty()
+        return self if f(self.x) else Empty
 
     def filter_not(self, f: Callable[[T], bool]) -> Option[T]:
-        return self if not f(self.x) else Empty()
+        return self if not f(self.x) else Empty
 
     def exists(self, f: Callable[[T], bool]) -> bool:
         return f(self.x)
@@ -146,7 +150,7 @@ class Some(Option[T], Generic[T]):
 
     def zip(self, other: Option[R]) -> Option[Tuple[T, R]]:
         if other.is_empty():
-            return Empty()
+            return Empty
         return Some((self.x, other.get()))
 
     def unzip(self: Some[Tuple[T1, T2]]) -> Tuple[Option[T1], Option[T2]]:
@@ -188,37 +192,34 @@ class Some(Option[T], Generic[T]):
         return eq(self.x, other.x)
 
 
+@Singleton
 class Empty(Option[None]):
-
-    __object: Optional[Empty] = None  # singleton
 
     empty = True
 
     def __new__(cls) -> Empty:
-        if Empty.__object is None:
-            Empty.__object = object.__new__(cls)
-        return Empty.__object
+        return object.__new__(cls)
 
     def flatten(self: Empty) -> Empty:
-        return Empty()
+        return Empty
 
     def map(self, f: Callable[[T], R]) -> Empty:
-        return Empty()
+        return Empty
 
     def flat_map(self, f: Callable[[T], Option[R]]) -> Option[R]:
-        return Empty()
+        return Empty
 
     def fold(self, f: Callable[[T], R], if_empty: R) -> R:
         return if_empty
 
     def for_each(self, f: Callable[[T], None]) -> None:
-        pass
+        return None
 
     def filter(self, f: Callable[[T], bool]) -> Empty:
-        return Empty()
+        return Empty
 
     def filter_not(self, f: Callable[[T], bool]) -> Option[T]:
-        return Empty()
+        return Empty
 
     def exists(self, f: Callable[[T], bool]) -> bool:
         return False
@@ -230,13 +231,13 @@ class Empty(Option[None]):
         return False
 
     def zip(self, other: Option[R]) -> Empty:
-        return Empty()
+        return Empty
 
     def unzip(self: Empty) -> Tuple[Empty, Empty]:
-        return Empty(), Empty()
+        return Empty, Empty
 
     def unzip3(self: Empty) -> Tuple[Empty, Empty, Empty]:
-        return Empty(), Empty(), Empty()
+        return Empty, Empty, Empty
 
     def get_or_else(self, default: T) -> T:
         return default
@@ -257,12 +258,12 @@ class Empty(Option[None]):
         return []
 
     def __str__(self) -> str:
-        return "Empty()"
+        return "Empty"
 
     __repr__ = __str__
 
     def __eq__(self, other: Option[Any]) -> bool:
-        return isinstance(other, Empty)
+        return other is Empty
 
 
 class ReturnOptionDecorator:
@@ -300,12 +301,13 @@ class ReturnOptionDecorator:
             def f2(x: int) -> int:
                 return x - 10
 
-            print(f2(1))  # Empty()
+            print(f2(1))  # Empty
 
         """
         @wraps(func)
         def wrapper(*args, **kwargs) -> Option[T]:
-            return Option(func(*args, **kwargs), checker=self._checker)
+            res = func(*args, **kwargs)
+            return Option(res, checker=self._checker)
 
         return wrapper
 

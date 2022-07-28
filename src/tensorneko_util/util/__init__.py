@@ -8,6 +8,7 @@ from .ref import ref
 from .server import AbstractServer
 from .timer import Timer
 from .eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, subscribe_process, subscribe_thread
+from .singleton import Singleton
 
 tensorneko_util_path = get_tensorneko_util_path()
 
@@ -45,4 +46,5 @@ __all__ = [
     "subscribe_async",
     "subscribe_process",
     "subscribe_thread",
+    "Singleton",
 ]

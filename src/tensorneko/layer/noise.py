@@ -2,7 +2,7 @@ from typing import Union
 
 import torch
 
-from .. import NekoModule
+from ..neko_module import NekoModule
 from ..util import Device
 
 
