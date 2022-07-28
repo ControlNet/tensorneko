@@ -1,7 +1,8 @@
 from .enum import ResizeMethod, PaddingMethod, PaddingPosition
 from .pad import padding_video, padding_audio
 from .resize import resize_image, resize_video
-from tensorneko_util.preprocess import ffmpeg_available
+from .crop import crop_with_padding
+from tensorneko_util.preprocess import ffmpeg_available, frames2video
 
 __all__ = [
     "ResizeMethod",
@@ -10,7 +11,9 @@ __all__ = [
     "padding_video",
     "padding_audio",
     "resize_image",
-    "resize_video"
+    "resize_video",
+    "crop_with_padding",
+    "frames2video"
 ]
 
 if ffmpeg_available:

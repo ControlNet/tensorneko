@@ -6,11 +6,11 @@ import numpy
 import numpy as np
 import torch
 from torch import Tensor
-from torch.nn import Module, ModuleList
+from torch.nn import Module
 
 from tensorneko_util.util import F, _
 from tensorneko_util.util.func import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
-    identity, list_to_dict
+    identity, list_to_dict, compose
 from .type import T, A
 
 
@@ -90,29 +90,6 @@ def summarize_dict_by(key: str, op: Callable[[Union[Sequence[T], T]], T]
     ) >> op
 
 
-def compose(fs: Union[ModuleList, Sequence[Callable]]) -> F:
-    """
-    Compose functions as a pipeline function.
-
-    Args:
-        fs (``Sequence[Callable]`` | :class:`~torch.nn.ModuleList`): The functions input for composition.
-
-    Returns:
-        :class:`~fp.func.F`: The composed output function.
-
-    Examples::
-
-        >>> f = lambda x: x + 1
-        >>> g = lambda x: x * 2
-        >>> h = lambda x: x ** 2
-        >>> x = 1
-        >>> h(g(f(x))) == compose([f, g, h])(x)
-        True
-
-    """
-    return reduce(_ >> _, fs, F())
-
-
 def with_printed_shape(x: A) -> A:
     """
     An identity function but with shape printed .
@@ -171,6 +148,7 @@ def get_tensorneko_path() -> str:
 
 
 # merge package namespace
+compose = compose
 generate_inf_seq = generate_inf_seq
 listdir = listdir
 with_printed = with_printed

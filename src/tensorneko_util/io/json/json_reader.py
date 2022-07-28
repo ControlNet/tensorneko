@@ -54,4 +54,4 @@ class JsonReader:
 
     def __new__(cls, path: str, clazz: T = None, encoding: str = "UTF-8") -> Union[T, dict, list]:
         """Alias of :meth:`~tensorneko_util.io.json.json_reader.JsonReader.of`."""
-        return JsonReader.of(path, clazz, encoding)
+        return cls.of(path, clazz, encoding)
