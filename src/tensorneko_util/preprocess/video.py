@@ -1,7 +1,5 @@
 from typing import Iterable, Optional
 
-import torch
-
 from ..backend.visual_lib import VisualLib
 from ..io._default_backends import _default_video_io_backend
 
@@ -47,6 +45,7 @@ def frames2video(frame_paths: Iterable[str], output_path: str, fps: int, backend
             raise ValueError("Torchvision is not installed.")
 
         import torchvision
+        import torch
 
         frames = []
 
