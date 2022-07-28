@@ -11,7 +11,7 @@ from ...backend.visual_lib import VisualLib
 class VideoReader:
 
     @classmethod
-    def of(cls, path: str, channel_first: bool = False, backend: Optional[VisualLib] = None) -> VideoData:
+    def of(cls, path: str, channel_first: bool = True, backend: Optional[VisualLib] = None) -> VideoData:
         """
         Read video array from given file.
 
