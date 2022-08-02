@@ -9,6 +9,9 @@ R = TypeVar('R')  # Return type
 P = TypeVar("P", int, float, str, bool)  # Primitive type
 E = TypeVar("E", bound=Enum)
 
+K = TypeVar("K")  # Key type
+V = TypeVar("V")  # Value type
+
 T1 = TypeVar("T1")
 T2 = TypeVar("T2")
 T3 = TypeVar("T3")
