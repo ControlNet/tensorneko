@@ -10,16 +10,44 @@ from ..util import ModuleFactory, Shape, F
 
 class Patching(NekoModule):
     """
-    Patching images or videos.
+    Patching input tensor with specified patch size.
 
-    If the input is an image (B, C, H, W), the output is a tensor of shape (B, C, N_H, N_W, P_H, P_W).
-    If the input is a video (B, C, T, H, W), the output is a tensor of shape (B, C, N_T, N_H, N_W, P_T, P_H, P_W).
+    If the `patch_size` is tuple of dims, it will patch last same number of dims. E.g. if `patch_size=(16, 16)`, and the
+        input tensor has shape `(b, c, h, w)`, it will patch `(b, c, h // 16, w // 16, 16, 16)`.
+
+    If the `patch_size` is int, it will patch from dim 2 to last. E.g. if `patch_size=16`, and the input tensor has
+        shape `(a, b, c, d, e, f)`, it will patch `(a, b, c // 16, d // 16, e // 16, f // 16)`.
+
+    Args:
+        patch_size (``int`` | :class:`~tensorneko.util.type.Shape`): The patch size.
+
+    Examples::
+
+        import torch
+        x = torch.rand(2, 3, 224, 224)
+        patching = Patching(patch_size=16)
+
+        print(patching(x).shape)  # (2, 3, 14, 14, 16, 16)
+
     """
 
     def __init__(self, patch_size: Union[int, Shape]):
         super().__init__()
+        self.patch_size = patch_size
 
     def forward(self, x: Tensor) -> Tensor:
+        x_dim = x.dim()
+
+        assert x_dim > 2, "The input must be at least 3-dimensional."
+        if type(self.patch_size) is int:
+            patch_dims = range(2, x_dim)
+            self.patch_size = (self.patch_size,) * len(patch_dims)
+        else:
+            patch_dims = range(x_dim - len(self.patch_size), x_dim)
+
+        for i, patch_dim in enumerate(patch_dims):
+            x = x.unfold(patch_dim, self.patch_size[i], self.patch_size[i])
+
         return x
 
 

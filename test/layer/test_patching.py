@@ -2,12 +2,46 @@ import unittest
 
 from torch import rand
 
-from tensorneko.layer import PatchEmbedding2d, PatchEmbedding3d
+from tensorneko.layer import Patching, PatchEmbedding2d, PatchEmbedding3d
 
 
 class TestPatching(unittest.TestCase):
-    # TODO
-    pass
+
+    def test_seq_patching(self):
+        x = rand(2, 128, 32)
+        patch = Patching(patch_size=16)
+
+        self.assertEqual(patch(x).shape, (2, 128, 2, 16))
+
+    def test_image_patching(self):
+        x = rand(2, 3, 224, 224)
+        patch = Patching(patch_size=16)
+
+        self.assertEqual(patch(x).shape, (2, 3, 14, 14, 16, 16))
+
+    def test_image_patching_tuple_size(self):
+        x = rand(2, 3, 224, 224)
+        patch = Patching(patch_size=(16, 32))
+
+        self.assertEqual(patch(x).shape, (2, 3, 14, 7, 16, 32))
+
+    def test_video_patching(self):
+        x = rand(2, 3, 32, 224, 224)
+        patch = Patching(patch_size=16)
+
+        self.assertEqual(patch(x).shape, (2, 3, 2, 14, 14, 16, 16, 16))
+
+    def test_video_patching_tuple_size(self):
+        x = rand(2, 3, 16, 224, 224)
+        patch = Patching(patch_size=(2, 16, 16))
+
+        self.assertEqual(patch(x).shape, (2, 3, 8, 14, 14, 2, 16, 16))
+
+    def test_video_patching_spatial(self):
+        x = rand(2, 3, 16, 224, 224)
+        patch = Patching(patch_size=(16, 16))
+
+        self.assertEqual(patch(x).shape, (2, 3, 16, 14, 14, 16, 16))
 
 
 class TestPatchEmbedding2d(unittest.TestCase):
