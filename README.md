@@ -12,7 +12,7 @@
 <div align="center">    
     <a href="https://www.python.org/"><img src="https://img.shields.io/pypi/pyversions/tensorneko?style=flat-square"></a>
     <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-%3E%3D1.9.0-EE4C2C?style=flat-square&logo=pytorch"></a>
-    <a href="https://www.pytorchlightning.ai/"><img src="https://img.shields.io/badge/Pytorch%20Lightning-%3E%3D1.4.0-792EE5?style=flat-square&logo=pytorch-lightning"></a>
+    <a href="https://www.pytorchlightning.ai/"><img src="https://img.shields.io/badge/Pytorch%20Lightning-%3E%3D1.7.0-792EE5?style=flat-square&logo=pytorch-lightning"></a>
 </div>
 
 <div align="center">
@@ -342,10 +342,10 @@ model = MnistClassifier("mnist_mlp_classifier", [784, 1024, 512, 10], "ReLU", 0.
 
 dm = ...  # The MNIST datamodule from PyTorch Lightning
 
-trainer = neko.NekoTrainer(log_every_n_steps=0, gpus=1, logger=model.name, precision=32,
-    checkpoint_callback=ModelCheckpoint(dirpath="./ckpt",
+trainer = neko.NekoTrainer(log_every_n_steps=100, gpus=1, logger=model.name, precision=32,
+    callbacks=[ModelCheckpoint(dirpath="./ckpt",
         save_last=True, filename=model.name + "-{epoch}-{val_acc:.3f}", monitor="val_acc", mode="max"
-    ))
+    )])
 
 trainer.fit(model, dm)
 ```
