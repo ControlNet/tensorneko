@@ -77,7 +77,8 @@ class GAN(NekoModel, ABC):
     def d_loss_fn(pred, target) -> Tensor:
         return binary_cross_entropy_with_logits(pred, target)
 
-    def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None) -> Dict[str, Tensor]:
+    def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
+        hiddens: Optional[Tensor] = None) -> Dict[str, Tensor]:
         if isinstance(batch, Tensor):
             x = batch
         else:
