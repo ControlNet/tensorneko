@@ -3,7 +3,7 @@ import subprocess
 
 import torch
 from torch import Tensor
-from torchmetrics.functional import ssim
+from torchmetrics.functional import structural_similarity_index_measure as ssim
 
 from tensorneko_util.preprocess import ffmpeg_available
 from tensorneko_util.util import dispatch
@@ -26,7 +26,7 @@ def ssim_image(pred: str, real: str) -> Tensor:
     """
     pred_image = read.image(pred).unsqueeze(0)
     real_image = read.image(real).unsqueeze(0)
-    return ssim(pred_image, real_image, data_range=1.0, reduction="mean")
+    return ssim(pred_image, real_image, data_range=1.0, reduction="elementwise_mean")
 
 
 @dispatch
@@ -56,11 +56,7 @@ def ssim_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN
     if reduction_method == "mean":
         reduction_method = "elementwise_mean"
 
-    if reduction_method != "none":
-        return ssim(pred, real, data_range=1.0, reduction=reduction_method)
-    else:
-        result = ssim(pred, real, data_range=1.0, reduction="none")
-        return result.mean(dim=(1, 2, 3))
+    return ssim(pred, real, data_range=1.0, reduction=reduction_method)
 
 
 @dispatch

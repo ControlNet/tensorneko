@@ -78,8 +78,7 @@ class GAN(NekoModel, ABC):
         return binary_cross_entropy_with_logits(pred, target)
 
     def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
-        optimizer_idx: Optional[int] = None, hiddens: Optional[Tensor] = None
-    ) -> Dict[str, Tensor]:
+        hiddens: Optional[Tensor] = None) -> Dict[str, Tensor]:
         if isinstance(batch, Tensor):
             x = batch
         else:

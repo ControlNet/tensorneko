@@ -17,7 +17,7 @@ class EarlyStoppingLR(Callback):
         self._run_early_stop_checking(trainer)
 
     def _run_early_stop_checking(self, trainer: "pl.Trainer") -> None:
-        metrics = trainer.logger_connector.callback_metrics
+        metrics = trainer._logger_connector.callback_metrics
         if len(metrics) == 0:
             return
         all_lr = []
