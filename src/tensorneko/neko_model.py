@@ -7,7 +7,8 @@ from pytorch_lightning.loggers import LightningLoggerBase
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
 from torch import Tensor
 
-from . import NekoModule
+from .neko_module import NekoModule
+from .neko_trainer import NekoTrainer
 from .util import summarize_dict_by, Shape
 
 
@@ -26,6 +27,7 @@ class NekoModel(LightningModule, NekoModule):
 
         **kwargs: Other arguments for :class:`~pytorch_lightning.core.lightning.LightningModule`
     """
+    trainer: NekoTrainer
 
     def __init__(self, name: str,
         input_shape: Optional[Shape] = None, distributed=False, *args, **kwargs
@@ -160,10 +162,8 @@ class NekoModel(LightningModule, NekoModule):
         """
         if not self.trainer:
             return None
-        elif self.training:
-            return self.trainer.logger_train
         else:
-            return self.trainer.logger_val
+            return self.trainer.logger
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         """For each training epoch end, log the metrics"""
@@ -179,7 +179,7 @@ class NekoModel(LightningModule, NekoModule):
         """For each training step end, log the metrics"""
         if self.trainer.log_on_step \
             and self.logger is not None \
-            and (self.trainer.global_step + 1) % self.trainer.log_every_n_steps == 0:
+            and self.trainer.global_step % self.trainer.log_every_n_steps == 0:
             self.log_on_training_step_end(output)
         return output
 
@@ -190,7 +190,8 @@ class NekoModel(LightningModule, NekoModule):
             getter = summarize_dict_by(key, torch.mean)
             value = getter(outputs)
             history_item[key] = value
-            self.log(key, value, on_epoch=True, on_step=False, logger=True, sync_dist=self.distributed)
+            self.logger.log_metrics({key: value}, step=self.trainer.global_step)
+            self.log(key, value, on_epoch=True, on_step=False, logger=False, sync_dist=self.distributed)
         self.history.append(history_item)
 
     def log_on_validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
@@ -202,7 +203,8 @@ class NekoModel(LightningModule, NekoModule):
             getter = summarize_dict_by(key, torch.mean)
             value = getter(outputs)
             self.history[-1]["val_" + key] = value
-            self.log(key, value, on_epoch=True, on_step=False, sync_dist=self.distributed)
+            self.logger.log_metrics({key: value}, step=self.trainer.global_step)
+            self.log(key, value, on_epoch=True, on_step=False, logger=False, sync_dist=self.distributed)
             self.log(f"val_{key}", value, on_epoch=True, on_step=False, logger=False, prog_bar=True,
                      sync_dist=self.distributed)
 
@@ -211,7 +213,8 @@ class NekoModel(LightningModule, NekoModule):
         history_item = {}
         for key, value in output.items():
             history_item[key] = value
-            self.log(key, value, on_epoch=False, on_step=True, logger=True, sync_dist=self.distributed)
+            self.logger.log_metrics({key: value}, step=self.trainer.global_step)
+            self.log(key, value, on_epoch=False, on_step=True, logger=False, sync_dist=self.distributed)
         self.history.append(history_item)
 
     def test_step_end(self, output: STEP_OUTPUT) -> Optional[STEP_OUTPUT]:

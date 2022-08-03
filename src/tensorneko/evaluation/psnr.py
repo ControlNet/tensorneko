@@ -2,7 +2,7 @@ import re
 import subprocess
 
 from torch import Tensor
-from torchmetrics.functional import psnr
+from torchmetrics.functional import peak_signal_noise_ratio as psnr
 
 from tensorneko_util.preprocess import ffmpeg_available
 from tensorneko_util.util import dispatch
