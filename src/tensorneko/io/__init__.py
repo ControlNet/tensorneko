@@ -1,4 +1,9 @@
-from tensorneko_util.io import json_data, read, write, VisualLib
+from .reader import Reader
+from .writer import Writer
+from tensorneko_util.io import json_data, VisualLib
+
+read = Reader()
+write = Writer()
 
 __all__ = [
     "read",
