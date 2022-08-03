@@ -3,14 +3,19 @@ from typing import Type
 from .audio import AudioWriter
 from .image import ImageWriter
 from .json import JsonWriter
-from .matlab import MatWriter
 from .pickle import PickleWriter
 from .text import TextWriter
 from .video import VideoWriter
 
 try:
-    from .yaml import YamlWriter
+    from .matlab import MatWriter
+    scipy_available = True
+except ImportError:
+    scipy_available = False
+    MatWriter = None
 
+try:
+    from .yaml import YamlWriter
     yaml_available = True
 except ImportError:
     YamlWriter = object
@@ -25,15 +30,23 @@ class Writer:
         self.json = JsonWriter
         self.video = VideoWriter
         self.audio = AudioWriter
-        self.mat = MatWriter
         self.pickle = PickleWriter
+        self._mat = None
         self._yaml = None
+
+    @property
+    def mat(self) -> Type[MatWriter]:
+        if scipy_available:
+            if self._mat is None:
+                self._mat = MatWriter
+            return self._mat
+        else:
+            raise ImportError("Scipy is not available to write mat file.")
 
     @property
     def yaml(self) -> Type[YamlWriter]:
         if yaml_available:
             if self._yaml is None:
-                from .yaml import YamlWriter
                 self._yaml = YamlWriter
             return self._yaml
         else:

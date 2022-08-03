@@ -3,10 +3,16 @@ from typing import Type
 from .audio import AudioReader
 from .image import ImageReader
 from .json import JsonReader
-from .matlab import MatReader
 from .pickle import PickleReader
 from .text import TextReader
 from .video import VideoReader
+
+try:
+    from .matlab import MatReader
+    scipy_available = True
+except ImportError:
+    scipy_available = False
+    MatReader = None
 
 try:
     from .yaml import YamlReader
@@ -24,15 +30,23 @@ class Reader:
         self.json = JsonReader
         self.video = VideoReader
         self.audio = AudioReader
-        self.mat = MatReader
         self.pickle = PickleReader
+        self._mat = None
         self._yaml = None
+
+    @property
+    def mat(self) -> Type[MatReader]:
+        if scipy_available:
+            if self._mat is None:
+                self._mat = MatReader
+            return self._mat
+        else:
+            raise ImportError("Scipy is not available to read mat file.")
 
     @property
     def yaml(self) -> Type[YamlReader]:
         if yaml_available:
             if self._yaml is None:
-                from .yaml import YamlReader
                 self._yaml = YamlReader
             return self._yaml
         else:
