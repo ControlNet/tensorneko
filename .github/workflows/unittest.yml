@@ -63,7 +63,7 @@ jobs:
       - name: Run Test
         run: python -m unittest discover test
 
-  tensorneko-util-minimum-import-test:
+  tensorneko-util-import-test:
     needs: [build-web, unittest]
     runs-on: ubuntu-20.04
 
@@ -101,7 +101,7 @@ jobs:
           cd src
           python -c "import tensorneko_util"
 
-  tensorneko-minimum-import-test:
+  tensorneko-import-test:
     needs: [build-web, unittest]
     runs-on: ubuntu-20.04
 
