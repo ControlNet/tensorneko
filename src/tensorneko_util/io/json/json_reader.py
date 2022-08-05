@@ -9,7 +9,7 @@ class JsonReader:
     @classmethod
     def of(cls, path: str, clazz: Optional[T] = None, encoding: str = "UTF-8") -> Union[T, dict, list]:
         """
-        Read json files to :class:`~pandas.DataFrame` or ``list`` or ``dict``.
+        Read json files to ``list`` or ``dict``.
 
         Args:
             path (``str``): Json file path.

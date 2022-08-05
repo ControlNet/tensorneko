@@ -13,13 +13,13 @@ from pytorch_lightning.profilers import Profiler
 from pytorch_lightning.strategies import Strategy
 from pytorch_lightning.trainer.connectors.accelerator_connector import _LITERAL_WARN
 
-from tensorneko.callback import NilCallback, LrLogger
+from .callback import NilCallback, LrLogger, EpochNumLogger, EpochTimeLogger
 
 
 class NekoTrainer(Trainer):
 
     def __init__(self,
-        logger: str,
+        logger: Optional[str],
         enable_checkpointing: bool = True,
         callbacks: Optional[Union[List[Callback], Callback]] = None,
         log_every_n_steps: int = 50,
@@ -75,6 +75,8 @@ class NekoTrainer(Trainer):
 
         # define a random logger name
         self.log_name = f"{logger}_{int(time())}"
+        if callbacks is None:
+            callbacks = []
         # build checkpoint callback or from user defined
         if enable_checkpointing and len([c for c in callbacks if isinstance(c, Checkpoint)]) == 0:
             # use default checkpoint callback
@@ -102,7 +104,7 @@ class NekoTrainer(Trainer):
             cbs = callbacks + [new_callback]
 
         # set learning rate logger
-        cbs.append(LrLogger())
+        cbs.extend([LrLogger(), EpochNumLogger(), EpochTimeLogger()])
 
         # setup the log mode
         self.log_every_n_steps = log_every_n_steps

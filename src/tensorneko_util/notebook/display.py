@@ -1,7 +1,5 @@
 import IPython
 from IPython.display import Audio, Video, YouTubeVideo, Code
-from pygments import highlight
-from pygments.formatters.html import HtmlFormatter
 
 
 def audio(path: str):
@@ -17,6 +15,8 @@ def youtube_video(id_: str):
 
 
 def code(path: str, language: str = None):
+    from pygments import highlight
+    from pygments.formatters.html import HtmlFormatter
     # fix JupyterLab from https://github.com/ipython/ipython/issues/11747
     def _jupyterlab_repr_html_(self):
         fmt = HtmlFormatter()
