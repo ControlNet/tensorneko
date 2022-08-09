@@ -21,6 +21,13 @@ except ImportError:
     YamlWriter = object
     yaml_available = False
 
+try:
+    from .hdf5 import Hdf5Writer
+    h5py_available = True
+except ImportError:
+    Hdf5Writer = object
+    h5py_available = False
+
 
 class Writer:
 
@@ -33,6 +40,7 @@ class Writer:
         self.pickle = PickleWriter
         self._mat = None
         self._yaml = None
+        self._h5 = None
 
     @property
     def mat(self) -> Type[MatWriter]:
@@ -51,3 +59,12 @@ class Writer:
             return self._yaml
         else:
             raise ImportError("To use the yaml writer, please install pyyaml.")
+
+    @property
+    def h5(self) -> Type[Hdf5Writer]:
+        if h5py_available:
+            if self._h5 is None:
+                self._h5 = Hdf5Writer
+            return self._h5
+        else:
+            raise ImportError("To use the hdf5 writer, please install h5py.")

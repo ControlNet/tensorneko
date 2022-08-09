@@ -4,7 +4,7 @@ from ..backend.visual_lib import VisualLib
 from ..io._default_backends import _default_video_io_backend
 
 
-def frames2video(frame_paths: Iterable[str], output_path: str, fps: int, backend: Optional[VisualLib] = None):
+def frames2video(frame_paths: Iterable[str], output_path: str, fps: int, backend: Optional[VisualLib] = None) -> None:
     """
     Convert frames to video.
 
