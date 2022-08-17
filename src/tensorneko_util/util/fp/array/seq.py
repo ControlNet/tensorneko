@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 from functools import reduce
 from typing import Collection, List, Callable, Union, Iterator, Iterable, Optional, Any
+
 from tqdm.auto import tqdm
 
 from .abstract_seq import AbstractSeq
@@ -16,7 +17,7 @@ def _identity(x: T) -> T:
 
 class Seq(AbstractSeq[T], Collection[T]):
 
-    def __init__(self, items: Iterable[T]):
+    def __init__(self, items: Iterable[T] = iter(())):
         if isinstance(items, Seq):
             self._items = items.to_list()
         else:
@@ -128,5 +129,13 @@ class Seq(AbstractSeq[T], Collection[T]):
 
     def __str__(self):
         return f"Seq({', '.join(map(str, self._items))})"
+
+    @property
+    def length(self):
+        return len(self._items)
+
+    @property
+    def size(self):
+        return self.length
 
     __repr__ = __str__
