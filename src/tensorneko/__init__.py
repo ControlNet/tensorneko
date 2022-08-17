@@ -1,6 +1,9 @@
 import os.path
 
+from tensorneko_util import io
+from . import backend
 from . import callback
+from . import debug
 from . import evaluation
 from . import layer
 from . import module
@@ -9,14 +12,13 @@ from . import optim
 from . import preprocess
 from . import util
 from . import visualization
-from . import debug
-from .neko_module import NekoModule
 from .neko_model import NekoModel
+from .neko_module import NekoModule
 from .neko_trainer import NekoTrainer
-from tensorneko_util import io
 
 __all__ = [
     "callback",
+    "backend",
     "evaluation",
     "io",
     "layer",
