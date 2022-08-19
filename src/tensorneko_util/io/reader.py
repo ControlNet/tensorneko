@@ -21,6 +21,13 @@ except ImportError:
     YamlReader = object
     yaml_available = False
 
+try:
+    from .hdf5 import Hdf5Reader
+    h5py_available = True
+except ImportError:
+    Hdf5Reader = object
+    h5py_available = False
+
 
 class Reader:
 
@@ -33,6 +40,7 @@ class Reader:
         self.pickle = PickleReader
         self._mat = None
         self._yaml = None
+        self._h5 = None
 
     @property
     def mat(self) -> Type[MatReader]:
@@ -51,3 +59,12 @@ class Reader:
             return self._yaml
         else:
             raise ImportError("To use the yaml reader, please install pyyaml.")
+
+    @property
+    def h5(self) -> Type[Hdf5Reader]:
+        if h5py_available:
+            if self._h5 is None:
+                self._h5 = Hdf5Reader
+            return self._h5
+        else:
+            raise ImportError("To use the hdf5 reader, please install h5py.")

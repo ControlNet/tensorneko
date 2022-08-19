@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Generic, Union, Callable, List, Optional, Iterable
+from typing import Union, Callable, List, Optional, Iterable
 
-from ....backend.parallel import ParallelType
 from ...type import T, R
+from ....backend.parallel import ParallelType
 
 
 class AbstractSeq(Iterable[T], ABC):

@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import Optional
 
-from ..preprocess._ffmpeg_check import ffmpeg_available
-
 
 class VisualLib(Enum):
     OPENCV = 1
@@ -15,7 +13,7 @@ class VisualLib(Enum):
     _is_torchvision_available: Optional[bool] = None
     _is_matplotlib_available: bool = True  # already included in the requirements.txt
     _is_pil_available: Optional[bool] = None
-    _is_ffmpeg_available: bool = ffmpeg_available
+    _is_ffmpeg_available: bool = None
 
     @classmethod
     def opencv_available(cls) -> bool:
@@ -53,4 +51,7 @@ class VisualLib(Enum):
 
     @classmethod
     def ffmpeg_available(cls) -> bool:
+        if cls._is_ffmpeg_available is None:
+            from ..preprocess._ffmpeg_check import ffmpeg_available
+            cls._is_ffmpeg_available = ffmpeg_available
         return cls._is_ffmpeg_available

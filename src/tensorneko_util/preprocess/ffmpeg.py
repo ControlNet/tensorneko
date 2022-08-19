@@ -14,7 +14,7 @@ def ffmpeg_command(ffmpeg_args: List[str] = None, **kwargs) -> Popen:
         **kwargs: Keyword arguments for ~:class:`subprocess.Popen`.
 
     Returns:
-        ``Popen``: The subprocess of ffmpeg.
+        :class:`subprocess.Popen`: The subprocess of ffmpeg.
     """
 
     ffmpeg_args = ffmpeg_args or []
@@ -36,7 +36,7 @@ def video2frames(video_path: str, output_dir: Optional[str] = None, frame_name_p
         ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
 
     Returns:
-        ``Popen``: The subprocess of ffmpeg.
+        :class:`subprocess.Popen`: The subprocess of ffmpeg.
     """
 
     if output_dir is None:
@@ -56,7 +56,8 @@ def video2frames(video_path: str, output_dir: Optional[str] = None, frame_name_p
 
 
 def merge_video_audio(video_path: str, audio_path: str, output_path: str, shortest: bool = False,
-    ffmpeg_args: List[str] = None) -> Popen:
+    ffmpeg_args: List[str] = None
+) -> Popen:
     """
     Run ffmpeg to merge video and audio.
 
@@ -68,7 +69,7 @@ def merge_video_audio(video_path: str, audio_path: str, output_path: str, shorte
         ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
 
     Returns:
-        ``Popen``: The subprocess of ffmpeg.
+        :class:`subprocess.Popen`: The subprocess of ffmpeg.
     """
 
     ffmpeg_args = ffmpeg_args or []
@@ -94,7 +95,7 @@ def resample_video_fps(video_path: str, output_path: str, fps: float, ffmpeg_arg
         ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
 
     Returns:
-        ``Popen``: The subprocess of ffmpeg.
+        :class:`subprocess.Popen`: The subprocess of ffmpeg.
     """
 
     ffmpeg_args = ffmpeg_args or []
@@ -116,7 +117,7 @@ def mp32wav(mp3_path: str, wav_path: str, ffmpeg_args: List[str] = None) -> Pope
         ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
 
     Returns:
-        ``Popen``: The subprocess of ffmpeg.
+        :class:`subprocess.Popen`: The subprocess of ffmpeg.
     """
 
     ffmpeg_args = ffmpeg_args or []
@@ -124,4 +125,37 @@ def mp32wav(mp3_path: str, wav_path: str, ffmpeg_args: List[str] = None) -> Pope
     args = [
         "-i", mp3_path, wav_path, *ffmpeg_args
     ]
+    return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def clip_video(video_path: str, output_path: str, start_time: float, end_time: float,
+    precise: bool = False,
+    ffmpeg_args: List[str] = None
+) -> Popen:
+    """
+    Run ffmpeg to clip video.
+
+    Args:
+        video_path (``str``): Path to the video.
+        output_path (``str``): Path to the output video.
+        start_time (``float``): Start time of the output video.
+        end_time (``float``): End time of the output video.
+        precise (``bool``, optional): Choose fast or precise. Pass True will use precise mode.
+        ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
+
+    Returns:
+        :class:`subprocess.Popen`: The subprocess of ffmpeg.
+    """
+
+    ffmpeg_args = ffmpeg_args or []
+
+    if precise:
+        args = [
+            "-ss", str(start_time), "-to", str(end_time), "-i", video_path, "-c", "copy", output_path, *ffmpeg_args
+        ]
+    else:
+        args = [
+            "-i", video_path, "-ss", str(start_time), "-to", str(end_time), "-c", "copy", output_path, *ffmpeg_args
+        ]
+
     return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
