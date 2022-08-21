@@ -72,6 +72,8 @@ class Server(AbstractServer):
         self.Handler = HTTPHandler
         self.Handler.extensions_map[".js"] = "application/javascript"
         self.Handler.extensions_map[".mjs"] = "application/javascript"
+        http.server.HTTPServer.allow_reuse_address = True
+        http.server.HTTPServer.allow_reuse_port = True
         Server.servers.append(self)
 
     def start(self) -> None:
