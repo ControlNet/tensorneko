@@ -1,7 +1,7 @@
 from . import type
 from .average_meter import AverageMeter
 from .dispatcher import dispatch
-from .fp import __, F, _, Stream, return_option, Option, Some, Empty, Seq, AbstractSeq, curry
+from .fp import __, F, _, Stream, return_option, Option, Monad, Eval, Seq, AbstractSeq, curry
 from .func import generate_inf_seq, compose, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, \
     get_tensorneko_util_path
 from .ref import ref
@@ -29,8 +29,8 @@ __all__ = [
     "Stream",
     "return_option",
     "Option",
-    "Some",
-    "Empty",
+    "Monad",
+    "Eval",
     "AbstractServer",
     "dispatch",
     "AverageMeter",
