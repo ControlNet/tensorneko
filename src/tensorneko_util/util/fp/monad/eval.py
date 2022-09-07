@@ -75,7 +75,7 @@ class Eval(Monad[T], ABC):
             print(y.value)  # Eval x, Eval f1, 2
     """
 
-    def __init__(self: T_E, eval_func: Callable[[], T]):
+    def __init__(self, eval_func: Callable[[], T]):
         self._getter = eval_func
         self._value: Optional[T] = None
 
@@ -83,6 +83,22 @@ class Eval(Monad[T], ABC):
     @abstractmethod
     def value(self) -> T:
         ...
+
+    @property
+    def evaluated(self) -> bool:
+        return self._value is not None
+
+    @classmethod
+    def always(cls, eval_func: Callable[[], T]) -> Always[T]:
+        return Always(eval_func)
+
+    @classmethod
+    def later(cls, eval_func: Callable[[], T]) -> Later[T]:
+        return Later(eval_func)
+
+    @classmethod
+    def now(cls, eval_func: Callable[[], T]) -> Now[T]:
+        return Now(eval_func)
 
     @classmethod
     def pure(cls, value: T) -> Eval[T]:
@@ -96,6 +112,12 @@ class Eval(Monad[T], ABC):
 
     def flatten(self: Eval[Eval[T]]) -> Eval[T]:
         return self.value
+
+    def __str__(self):
+        return f"{self.__class__.__name__}({self._getter.__name__ if not self.evaluated else self._value})"
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class Always(Eval[T]):
@@ -126,21 +148,3 @@ class Now(Eval[T]):
     @property
     def value(self) -> T:
         return self._value
-
-
-def _always(eval_func: Callable[[], T]) -> Always[T]:
-    return Always(eval_func)
-
-
-def _later(eval_func: Callable[[], T]) -> Later[T]:
-    return Later(eval_func)
-
-
-def _now(eval_func: Callable[[], T]) -> Now[T]:
-    return Now(eval_func)
-
-
-# force these factory function does not appear in these subclasses
-Eval.always = _always
-Eval.later = _later
-Eval.now = _now
