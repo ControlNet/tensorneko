@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import warnings
-from typing import Callable, Dict, List, Generic, Sequence
+from typing import Callable, Dict, List, Generic, Sequence, Optional
 
 from .type import T
 
@@ -136,10 +136,20 @@ class DispatcherDecorator:
         self.__doc__ = DispatcherDecorator.__call__.__doc__
 
     @classmethod
-    def of(cls, *types: type) -> Callable[[Callable[..., T]], Resolver[T]]:
+    def of(cls, *types: type, base: Optional[Resolver] = None) -> Callable[[Callable[..., T]], Resolver[T]]:
         def wrapper(func: Callable[..., T]) -> Resolver[T]:
-            name = ".".join([func.__module__, func.__qualname__])
+            if base is None:
+                name = ".".join([func.__module__, func.__qualname__])
+            else:
+                name = base._dispatcher.name
             return Dispatcher.get(name)(func, types)
+
+        return wrapper
+
+    @classmethod
+    def base(cls, base: Resolver) -> Callable[[Callable[..., T]], Resolver[T]]:
+        def wrapper(func: Callable[..., T]) -> Resolver[T]:
+            return Dispatcher.get(base._dispatcher.name)(func)
 
         return wrapper
 
@@ -152,24 +162,60 @@ class DispatcherDecorator:
         Returns:
             :class:`~tensorneko_util.util.dispatcher.Resolver[T]`: Resolver object.
 
-        Example::
+        Example:
 
-            @dispatch
-            def add(x: int, y: int) -> int:
-                return x + y
+            Use the basic `dispatch` in the same module (.py file).
 
-            @dispatch
-            def add(x: List[int], y: List[int]) -> List[int]:
-                assert len(x) == len(y)
-                return [x[i] + y[i] for i in range(len(x))]
+            .. code-block:: python
+                from tensorneko.util import dispatch
 
-            @dispatch.of(float, float)
-            def add(x, y) -> float:
-                return x + y
+                @dispatch
+                def add(x: int, y: int) -> int:
+                    return x + y
 
-            add(1, 2)  # get 3
-            add([1, 2], [3, 4])  # get [4, 6]
-            add(1.0, 2.0)  # get 3.0
+                @dispatch
+                def add(x: List[int], y: List[int]) -> List[int]:
+                    assert len(x) == len(y)
+                    return [x[i] + y[i] for i in range(len(x))]
+
+                @dispatch.of(float, float)
+                def add(x, y) -> float:
+                    return x + y
+
+                add(1, 2)  # get 3
+                add([1, 2], [3, 4])  # get [4, 6]
+                add(1.0, 2.0)  # get 3.0
+
+            Use `dispatch` in the different module (.py file).
+
+            .. code-block:: python
+
+                # file: a.py
+                from tensorneko_util.util import dispatch
+
+                @dispatch
+                def add(x: int, y: int) -> int:
+                    return x + y
+
+            .. code-block:: python
+
+                # file: b.py
+                from tensorneko_util.util import dispatch
+                import a
+
+                @dispatch.base(a.add)
+                def add(x: str, y: str) -> str:
+                    return x + " " + y
+
+            .. code-block:: python
+
+                # file: main.py
+
+                from a import add
+                import b  # both a.py and b.py should be imported to register the dispatcher
+
+                print(add(1, 2))  # 3
+                print(add("hello", "world"))  # "hello world"
 
         """
         name = ".".join([func.__module__, func.__qualname__])

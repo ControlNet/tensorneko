@@ -1,8 +1,10 @@
-from .option import Option, Some, Empty, return_option
+from .option import Option, return_option
+from .monad import Monad
+from .eval import Eval
 
 __all__ = [
     'Option',
-    'Some',
-    'Empty',
     'return_option',
+    'Monad',
+    'Eval',
 ]

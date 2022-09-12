@@ -16,6 +16,8 @@ T1 = TypeVar("T1")
 T2 = TypeVar("T2")
 T3 = TypeVar("T3")
 
+T_CO = TypeVar("T_CO", covariant=True)  # Covariant type
+
 # array union type
 try:
     import torch

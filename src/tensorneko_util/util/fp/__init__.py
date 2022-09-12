@@ -6,6 +6,6 @@ from .array import Stream, Seq, AbstractSeq
 from .underscore import shortcut as _
 from .args import Args as __
 from . import monad
-from .monad import return_option, Option, Some, Empty
+from .monad import return_option, Option, Eval, Monad
 
-__all__ = ["F", "Stream", "_", "curry", "monad", "__", "return_option", "Option", "Some", "Empty", "AbstractSeq", "Seq"]
+__all__ = ["F", "Stream", "_", "curry", "monad", "__", "return_option", "Option", "Eval", "Monad", "AbstractSeq", "Seq"]

@@ -3,13 +3,14 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from functools import partial, wraps
 from operator import eq, is_not
-from typing import Callable, Generic, Union, Optional, Any, Tuple, List
+from typing import Callable, Union, Optional, Any, Tuple, List
 
+from .monad import Monad
 from ...singleton import Singleton
-from ...type import T, R, T1, T2, T3
+from ...type import T_CO as T, R, T1, T2, T3
 
 
-class Option(ABC, Generic[T]):
+class Option(Monad[T], ABC):
     """
     ``Option`` represents optional values, each instance of ``Option``
     can be either instance of ``Some`` or ``Empty``.

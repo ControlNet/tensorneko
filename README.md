@@ -448,6 +448,26 @@ data = get_data()
 data = data.map(process_data).get_or_else(-1)  # if the response is None, return -1
 ```
 
+`Eval`: A monad for lazy evaluation.
+```python
+from tensorneko.util import Eval
+
+@Eval.always
+def call_by_name_var():
+    return 42
+
+@Eval.later
+def call_by_need_var():
+    return 43
+
+@Eval.now
+def call_by_value_var():
+    return 44
+
+
+print(call_by_name_var.value)  # 42
+```
+
 ### Reactive
 This library provides event bus based reactive tools. The API integrates the Python type annotation syntax.
 
