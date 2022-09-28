@@ -4,6 +4,7 @@ from .dispatcher import dispatch
 from .fp import __, F, _, Stream, return_option, Option, Monad, Eval, Seq, AbstractSeq, curry
 from .func import generate_inf_seq, compose, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, \
     get_tensorneko_util_path
+from .dispatched_func import sparse2binary
 from .ref import ref
 from .server import AbstractServer
 from .timer import Timer
@@ -38,6 +39,7 @@ __all__ = [
     "AbstractSeq",
     "Seq",
     "tensorneko_util_path",
+    "sparse2binary",
     "ref",
     "Timer",
     "Event",
