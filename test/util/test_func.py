@@ -9,7 +9,8 @@ import numpy as np
 import torch
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
-    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path, as_list, identity, _, F
+    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path, as_list, identity, _, F, sparse2binary, \
+    binary2sparse
 from itertools import islice
 
 
@@ -35,8 +36,8 @@ class UtilFuncTest(unittest.TestCase):
         self.assertEqual(summarize_dict_by("a", sum)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
         self.assertEqual(summarize_dict_by("b", torch.mean)(x), (x[0]["b"] + x[1]["b"] + x[2]["b"]) / 3)
         self.assertEqual(summarize_dict_by("c", F(map, str) >> "".join >> float)(x),
-            (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"]
-        )
+                         (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"]
+                         )
         self.assertEqual(summarize_dict_by("d", F(np.sum, axis=0))(x), x[0]["d"] + x[1]["d"] + x[2]["d"])
 
     def test_generate_inf_seq(self):
@@ -44,6 +45,7 @@ class UtilFuncTest(unittest.TestCase):
 
         def take(n, iterable):
             return islice(iterable, n)
+
         # test on single atomic types
         take_length_of = lambda l: F() >> generate_inf_seq >> F(take, l) >> list
         self.assertEqual(take_length_of(length)([3]), [3] * length)
@@ -169,3 +171,57 @@ class UtilFuncTest(unittest.TestCase):
         self.assertEqual(identity(1), 1)
         self.assertEqual(identity(1, 2, 3), (1, 2, 3))
         self.assertRaises(AssertionError, identity, 1, 2, 3, 4, k=1)
+
+    def test_sparse2binary_numpy(self):
+        sparse = np.array([2, 4])
+        binary = np.array([0, 0, 1, 0, 1])
+        self.assertTrue(type(sparse2binary(sparse)) is np.ndarray)
+        self.assertTrue((sparse2binary(sparse, 5) == binary).all())
+
+    def test_sparse2binary_numpy_default_length(self):
+        sparse = np.array([2, 5])
+        binary = np.array([0, 0, 1, 0, 0, 1])
+        self.assertTrue(type(sparse2binary(sparse)) is np.ndarray)
+        self.assertTrue((sparse2binary(sparse) == binary).all())
+
+    def test_sparse2binary_tensor(self):
+        sparse = torch.tensor([2, 4])
+        binary = torch.tensor([0, 0, 1, 0, 1])
+        self.assertTrue(type(sparse2binary(sparse)) is torch.Tensor)
+        self.assertTrue((sparse2binary(sparse, 5) == binary).all())
+
+    def test_sparse2binary_tensor_default_length(self):
+        sparse = torch.tensor([2, 5])
+        binary = torch.tensor([0, 0, 1, 0, 0, 1])
+        self.assertTrue(type(sparse2binary(sparse)) is torch.Tensor)
+        self.assertTrue((sparse2binary(sparse) == binary).all())
+
+    def test_sparse2binary_list(self):
+        sparse = [2, 4]
+        binary = [0, 0, 1, 0, 1]
+        self.assertTrue(type(sparse2binary(sparse)) is list)
+        self.assertTrue(sparse2binary(sparse, 5) == binary)
+
+    def test_sparse2binary_list_default_length(self):
+        sparse = [2, 5]
+        binary = [0, 0, 1, 0, 0, 1]
+        self.assertTrue(type(sparse2binary(sparse)) is list)
+        self.assertTrue(sparse2binary(sparse) == binary)
+
+    def test_binary2sparse_numpy(self):
+        sparse = np.array([2, 4])
+        binary = np.array([0, 0, 1, 0, 1])
+        self.assertTrue(type(binary2sparse(binary)) is np.ndarray)
+        self.assertTrue((binary2sparse(binary) == sparse).all())
+
+    def test_binary2sparse_tensor(self):
+        sparse = torch.tensor([2, 4])
+        binary = torch.tensor([0, 0, 1, 0, 1])
+        self.assertTrue(type(binary2sparse(binary)) is torch.Tensor)
+        self.assertTrue((binary2sparse(binary) == sparse).all())
+
+    def test_binary2sparse_list(self):
+        sparse = [2, 4]
+        binary = [0, 0, 1, 0, 1]
+        self.assertTrue(type(binary2sparse(binary)) is list)
+        self.assertTrue(binary2sparse(binary) == sparse)

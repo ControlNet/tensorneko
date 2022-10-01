@@ -10,6 +10,7 @@ from .configuration import Configuration
 from .func import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
     generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict
 from .func import get_tensorneko_path
+from .dispatched_func import sparse2binary, binary2sparse
 from .reproducibility import Seed
 from .string_getter import get_activation, get_loss
 from .type import ModuleFactory, Shape, Device
@@ -54,6 +55,7 @@ __all__ = [
     "F",
     "tensorneko_path",
     "tensorneko_util_path",
+    "sparse2binary",
     "AbstractServer",
     "dispatch",
     "AverageMeter",

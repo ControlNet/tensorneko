@@ -8,12 +8,14 @@ class VisualLib(Enum):
     MATPLOTLIB = 3
     PIL = 4
     FFMPEG = 5
+    SKIMAGE = 6
 
     _is_opencv_available: Optional[bool] = None
     _is_torchvision_available: Optional[bool] = None
     _is_matplotlib_available: bool = True  # already included in the requirements.txt
     _is_pil_available: Optional[bool] = None
     _is_ffmpeg_available: bool = None
+    _is_skimage_available: Optional[bool] = None
 
     @classmethod
     def opencv_available(cls) -> bool:
@@ -55,3 +57,13 @@ class VisualLib(Enum):
             from ..preprocess._ffmpeg_check import ffmpeg_available
             cls._is_ffmpeg_available = ffmpeg_available
         return cls._is_ffmpeg_available
+
+    @classmethod
+    def skimage_available(cls) -> bool:
+        if cls._is_skimage_available is None:
+            try:
+                import skimage
+                cls._is_skimage_available = True
+            except ImportError:
+                cls._is_skimage_available = False
+        return cls._is_skimage_available
