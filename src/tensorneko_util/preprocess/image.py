@@ -26,18 +26,26 @@ def rgb2gray(img: ndarray, channel_first: bool = False, backend: Optional[Visual
         if not VisualLib.pil_available():
             raise ValueError("Pillow is not installed.")
         from PIL import Image
-        return np.asarray(Image.fromarray(img).convert('L'))
+        # should ensure the format is uint8
+        if img.max() <= 1:
+            img = (img * 255).astype(np.uint8)
+        return np.asarray(Image.fromarray(img).convert('L')) / 255
 
     elif backend == VisualLib.OPENCV:
         if not VisualLib.opencv_available():
             raise ValueError("OpenCV is not installed.")
         import cv2
-        return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        # should ensure the format is uint8
+        if img.max() <= 1:
+            img = (img * 255).astype(np.uint8)
+        return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY) / 255
 
     elif backend == VisualLib.SKIMAGE:
         if not VisualLib.skimage_available():
             raise ValueError("scikit-image is not installed.")
         import skimage.color
+        if img.dtype == np.uint8 or img.max() > 1:
+            img = img / 255
         return skimage.color.rgb2gray(img)
 
     else:
