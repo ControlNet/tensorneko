@@ -135,7 +135,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements_util.txt
           pip install -r requirements.txt
           python init.py
 
@@ -173,7 +172,6 @@ jobs:
         run: |
           pip install torch==${{ matrix.torch-version }}
           pip install -r requirements.txt
-          pip install -r requirements_util.txt
           python init.py
 
       - name: Set PYTHONPATH
@@ -208,7 +206,6 @@ jobs:
         run: |
           pip install torch==${{ matrix.torch-version }}
           pip install -r requirements.txt
-          pip install -r requirements_util.txt
           python init.py
 
       - name: Set PYTHONPATH
