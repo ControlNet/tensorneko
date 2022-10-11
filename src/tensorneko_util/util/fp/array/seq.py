@@ -4,8 +4,6 @@ import itertools
 from functools import reduce
 from typing import Collection, List, Callable, Union, Iterator, Iterable, Optional, Any
 
-from tqdm.auto import tqdm
-
 from .abstract_seq import AbstractSeq
 from ...type import T, R
 from ....backend.parallel import ExecutorPool, ParallelType
@@ -55,7 +53,7 @@ class Seq(AbstractSeq[T], Collection[T]):
         **tqdm_args
     ) -> Seq[R]:
         if parallel_type is None:
-            items = self._items if not progress_bar else tqdm(self._items, **tqdm_args)
+            items = self._items if not progress_bar else self._tqdm(self._items, **tqdm_args)
             return Seq(map(f, items))
         else:
             futures = []
@@ -66,14 +64,14 @@ class Seq(AbstractSeq[T], Collection[T]):
             for item in self._items:
                 futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
 
-            futures = tqdm(futures, **tqdm_args) if progress_bar else futures
+            futures = self._tqdm(futures, **tqdm_args) if progress_bar else futures
             return Seq(map(lambda future: future.result(), futures))
 
     def for_each(self, f: Callable[[T], None], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None,
         **tqdm_args
     ) -> None:
         if parallel_type is None:
-            items = self._items if not progress_bar else tqdm(self._items, **tqdm_args)
+            items = self._items if not progress_bar else self._tqdm(self._items, **tqdm_args)
             for item in items:
                 f(item)
         else:

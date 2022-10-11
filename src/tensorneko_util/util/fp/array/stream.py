@@ -5,8 +5,6 @@ from itertools import chain
 from sys import maxsize
 from typing import List, Callable, Optional, Union, Iterable, Generator
 
-from tqdm.auto import tqdm
-
 from .abstract_seq import AbstractSeq
 from ...type import T, R
 from ....backend.parallel import ParallelType, ExecutorPool
@@ -90,7 +88,7 @@ class Stream(AbstractSeq[T]):
         **tqdm_args
     ) -> None:
         if parallel_type is None:
-            items = self if not progress_bar else tqdm(self, **tqdm_args)
+            items = self if not progress_bar else self._tqdm(self, **tqdm_args)
             for item in items:
                 f(item)
         else:
@@ -102,7 +100,7 @@ class Stream(AbstractSeq[T]):
             for item in self:
                 futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
 
-            futures = tqdm(futures, **tqdm_args) if progress_bar else futures
+            futures = self._tqdm(futures, **tqdm_args) if progress_bar else futures
             for future in futures:
                 future.result()
 
