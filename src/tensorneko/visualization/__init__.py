@@ -1,7 +1,6 @@
 from .log_graph import log_graph
 from tensorneko_util.visualization import Colors, ContinuousColors, tensorboard
 from . import watcher
-from . import matplotlib
 from ..backend import VisualLib
 
 __all__ = [
