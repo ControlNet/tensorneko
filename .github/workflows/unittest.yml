@@ -57,6 +57,7 @@ jobs:
           pip install torch==${{ matrix.torch-version }}
           pip install -r requirements.txt
           pip install -r requirements_util.txt
+          pip install matplotlib
           pip install pyyaml==6.0
           python init.py
 
