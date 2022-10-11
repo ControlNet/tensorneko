@@ -76,16 +76,19 @@ class Linear(NekoModule):
             self.dropout = Dropout(dropout_rate)
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> self.linear
+        x = self.linear(x)
         if self.has_act and self.has_norm:
             if self.norm_after_act:
-                f = f >> self.activation >> self.normalization
+                x = self.activation(x)
+                x = self.normalization(x)
             else:
-                f = f >> self.normalization >> self.activation
+                x = self.normalization(x)
+                x = self.activation(x)
         elif self.has_act and not self.has_norm:
-            f = f >> self.activation
+            x = self.activation(x)
         elif not self.has_act and self.has_norm:
-            f = f >> self.normalization
+            x = self.normalization(x)
+
         if self.has_dropout:
-            f = f >> self.dropout
-        return f(x)
+            x = self.dropout(x)
+        return x

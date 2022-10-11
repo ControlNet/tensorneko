@@ -102,8 +102,8 @@ class _Conv(NekoModule, ABC, Generic[C]):
     ):
         super().__init__()
         self.conv: C = self._PtConv(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size,
-                              stride=stride, padding=padding, dilation=dilation,
-                              groups=groups, bias=bias, padding_mode=padding_mode, device=device, dtype=dtype)
+            stride=stride, padding=padding, dilation=dilation,
+            groups=groups, bias=bias, padding_mode=padding_mode, device=device, dtype=dtype)
 
         self.has_act = build_activation is not None
         if self.has_act:
@@ -115,17 +115,19 @@ class _Conv(NekoModule, ABC, Generic[C]):
             self.norm_after_act = normalization_after_activation
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> self.conv
+        x = self.conv(x)
         if self.has_act and self.has_norm:
             if self.norm_after_act:
-                f = f >> self.activation >> self.normalization
+                x = self.activation(x)
+                x = self.normalization(x)
             else:
-                f = f >> self.normalization >> self.activation
+                x = self.normalization(x)
+                x = self.activation(x)
         elif self.has_act and not self.has_norm:
-            f = f >> self.activation
+            x = self.activation(x)
         elif not self.has_act and self.has_norm:
-            f = f >> self.normalization
-        return f(x)
+            x = self.normalization(x)
+        return x
 
     def _get_name(self) -> str:
         return self._class_name
