@@ -2,8 +2,8 @@ _is_tqdm_available = None
 
 
 def import_tqdm():
+    global _is_tqdm_available
     if _is_tqdm_available is None:
-        global _is_tqdm_available
         try:
             import tqdm
             _is_tqdm_available = True
@@ -20,8 +20,8 @@ def import_tqdm():
 
 
 def import_tqdm_auto():
+    global _is_tqdm_available
     if _is_tqdm_available is None:
-        global _is_tqdm_available
         try:
             from tqdm import auto
             _is_tqdm_available = True
