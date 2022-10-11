@@ -12,7 +12,7 @@ class VisualLib(Enum):
 
     _is_opencv_available: Optional[bool] = None
     _is_torchvision_available: Optional[bool] = None
-    _is_matplotlib_available: bool = True  # already included in the requirements.txt
+    _is_matplotlib_available: Optional[bool] = None
     _is_pil_available: Optional[bool] = None
     _is_ffmpeg_available: bool = None
     _is_skimage_available: Optional[bool] = None
@@ -39,6 +39,12 @@ class VisualLib(Enum):
 
     @classmethod
     def matplotlib_available(cls) -> bool:
+        if cls._is_matplotlib_available is None:
+            try:
+                import matplotlib
+                cls._is_matplotlib_available = True
+            except ImportError:
+                cls._is_matplotlib_available = False
         return cls._is_matplotlib_available
 
     @classmethod
