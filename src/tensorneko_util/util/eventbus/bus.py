@@ -185,7 +185,7 @@ class EventBus:
             self.listeners[event_type] = set()
         self.listeners[event_type].add(Listener(func, func_name, emit_type))
 
-    def emit(self, event: E):
+    def emit(self, event: E, blocking: bool = True) -> None:
         event_type: Type[E] = type(event)
         if event_type in self.listeners:
             normal_listeners = set()
@@ -216,7 +216,8 @@ class EventBus:
             for listener in normal_listeners:
                 listener.func(event)
 
-            wait(futures)
+            if blocking:
+                wait(futures)
 
     @staticmethod
     async def emit_async(async_listeners: Set[Listener], event: E) -> None:
