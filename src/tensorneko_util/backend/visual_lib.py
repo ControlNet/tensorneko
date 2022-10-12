@@ -1,3 +1,4 @@
+import subprocess
 from enum import Enum
 from typing import Optional
 
@@ -53,7 +54,8 @@ class VisualLib(Enum):
     @staticmethod
     def ffmpeg_available() -> bool:
         if _VisualLibAvailability.is_ffmpeg_available is None:
-            from ..preprocess._ffmpeg_check import ffmpeg_available
+            ffmpeg_available = subprocess.run('ffmpeg -version', stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL, shell=True).returncode == 0
             _VisualLibAvailability.is_ffmpeg_available = ffmpeg_available
         return _VisualLibAvailability.is_ffmpeg_available
 
@@ -73,5 +75,5 @@ class _VisualLibAvailability:
     is_torchvision_available: Optional[bool] = None
     is_matplotlib_available: Optional[bool] = None
     is_pil_available: Optional[bool] = None
-    is_ffmpeg_available: bool = None
+    is_ffmpeg_available: Optional[bool] = None
     is_skimage_available: Optional[bool] = None
