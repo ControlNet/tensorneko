@@ -4,7 +4,7 @@ import subprocess
 from torch import Tensor
 from torchmetrics.functional import peak_signal_noise_ratio as psnr
 
-from tensorneko_util.preprocess import ffmpeg_available
+from tensorneko_util.backend.visual_lib import VisualLib
 from tensorneko_util.util import dispatch
 from .enum import Reduction
 from ..io import read
@@ -74,7 +74,7 @@ def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> Tensor:
         :class:`~torch.Tensor`: The psnr of the video.
     """
     if use_ffmpeg:
-        if not ffmpeg_available:
+        if not VisualLib.ffmpeg_available():
             raise RuntimeError("ffmpeg is not found.")
 
         p = subprocess.run(["-i", pred, "-i", real, "-filter_complex", "psnr", "-f", "null", "/dev/null"],

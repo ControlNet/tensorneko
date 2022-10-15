@@ -52,7 +52,7 @@ def frames2video(frame_paths: Iterable[str], output_path: str, fps: int, backend
         for frame_path in frame_paths:
             frames.append(torchvision.io.read_image(frame_path))
 
-        torchvision.io.write_video(output_path, torch.stack(frames, dim=0), fps=fps)
+        torchvision.io.write_video(output_path, torch.stack(frames, dim=0).permute(0, 2, 3, 1), fps=fps)
 
     elif backend == VisualLib.FFMPEG:
         raise NotImplementedError("FFMPEG is not implemented yet.")

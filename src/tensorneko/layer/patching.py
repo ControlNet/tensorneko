@@ -114,10 +114,11 @@ class PatchEmbedding2d(NekoModule):
         self.rearrange = Rearrange("b d nh nw -> b (nh nw) d")
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> self.projection >> self.rearrange
+        x = self.projection(x)
+        x = self.rearrange(x)
         if self.has_norm:
-            f = f >> self.normalization
-        return f(x)
+            x = self.normalization(x)
+        return x
 
 
 class PatchEmbedding3d(NekoModule):
@@ -171,7 +172,8 @@ class PatchEmbedding3d(NekoModule):
         self.rearrange = Rearrange("b d nt nh nw -> b (nt nh nw) d")
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> self.projection >> self.rearrange
+        x = self.projection(x)
+        x = self.rearrange(x)
         if self.has_norm:
-            f = f >> self.normalization
-        return f(x)
+            x = self.normalization(x)
+        return x

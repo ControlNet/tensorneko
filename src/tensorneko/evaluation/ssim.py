@@ -5,7 +5,7 @@ import torch
 from torch import Tensor
 from torchmetrics.functional import structural_similarity_index_measure as ssim
 
-from tensorneko_util.preprocess import ffmpeg_available
+from tensorneko_util.backend import VisualLib
 from tensorneko_util.util import dispatch
 from .enum import Reduction
 from ..io import read
@@ -73,7 +73,7 @@ def ssim_video(pred: str, real: str, use_ffmpeg: bool = False) -> Tensor:
         :class:`~torch.Tensor`: The ssim of the video.
     """
     if use_ffmpeg:
-        if not ffmpeg_available:
+        if not VisualLib.ffmpeg_available():
             raise RuntimeError("ffmpeg is not found.")
 
         p = subprocess.run(["-i", pred, "-i", real, "-filter_complex", "ssim", "-f", "null", "/dev/null"],

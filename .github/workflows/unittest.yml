@@ -4,70 +4,7 @@ on:
     branches-ignore:
       - "master"
 jobs:
-  build-web:
-    runs-on: ubuntu-20.04
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
-
-      - name: npm install and build
-        working-directory: ./src/tensorneko_util/visualization/watcher/web
-        run: |
-          npm install
-          npm run build
-        env:
-          CI: true
-
-      - name: Print dist path
-        working-directory: ./src/tensorneko_util/visualization/watcher/web
-        run: |
-          echo ----------dist-------
-          ls -l dist
-          echo ----------dist/assets-------
-          ls -l dist/assets
-
-  unittest:
-    runs-on: ubuntu-20.04
-
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.7", "3.8", "3.9"]
-        torch-version: ["1.9.0", "1.10.0", "1.11.0"]
-        include:
-          - python-version: "3.10"
-            torch-version: "1.11.0"
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
-
-      - name: Install dependencies
-        run: |
-          pip install torch==${{ matrix.torch-version }}
-          pip install -r requirements.txt
-          pip install -r requirements_util.txt
-          pip install pyyaml==6.0
-          python init.py
-
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
-
-      - name: Run Test
-        run: python -m unittest discover test
-
   tensorneko-util-import-test:
-    needs: [build-web, unittest]
     runs-on: ubuntu-20.04
 
     strategy:
@@ -105,7 +42,6 @@ jobs:
           python -c "import tensorneko_util"
 
   tensorneko-import-test:
-    needs: [build-web, unittest]
     runs-on: ubuntu-20.04
 
     strategy:
@@ -137,7 +73,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements_util.txt
           pip install -r requirements.txt
           python init.py
 
@@ -149,8 +84,71 @@ jobs:
           cd src
           python -c "import tensorneko"
 
+  unittest:
+    runs-on: ubuntu-20.04
+    needs: [tensorneko-util-import-test, tensorneko-import-test]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9"]
+        torch-version: ["1.9.0", "1.10.0", "1.11.0", "1.12.0"]
+        include:
+          - python-version: "3.10"
+            torch-version: "1.11.0"
+          - python-version: "3.10"
+            torch-version: "1.12.0"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install dependencies
+        run: |
+          pip install torch==${{ matrix.torch-version }}
+          pip install -r requirements_test.txt
+          python init.py
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
+
+      - name: Run Test
+        run: python -m unittest discover test
+
+  build-web:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: npm install and build
+        working-directory: ./src/tensorneko_util/visualization/watcher/web
+        run: |
+          npm install
+          npm run build
+        env:
+          CI: true
+
+      - name: Print dist path
+        working-directory: ./src/tensorneko_util/visualization/watcher/web
+        run: |
+          echo ----------dist-------
+          ls -l dist
+          echo ----------dist/assets-------
+          ls -l dist/assets
+
   simulate-training-classifier:
-    needs: [tensorneko-import-test]
+    needs: [unittest, build-web]
     runs-on: ubuntu-20.04
 
     strategy:
@@ -175,7 +173,6 @@ jobs:
         run: |
           pip install torch==${{ matrix.torch-version }}
           pip install -r requirements.txt
-          pip install -r requirements_util.txt
           python init.py
 
       - name: Set PYTHONPATH
@@ -185,7 +182,7 @@ jobs:
         run: python test/simulate/simulate_train_mnist_cla.py
 
   simulate-training-gan:
-    needs: [tensorneko-import-test]
+    needs: [unittest, build-web]
     runs-on: ubuntu-20.04
 
     strategy:
@@ -210,7 +207,6 @@ jobs:
         run: |
           pip install torch==${{ matrix.torch-version }}
           pip install -r requirements.txt
-          pip install -r requirements_util.txt
           python init.py
 
       - name: Set PYTHONPATH

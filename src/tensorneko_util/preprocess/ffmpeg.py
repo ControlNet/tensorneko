@@ -55,6 +55,31 @@ def video2frames(video_path: str, output_dir: Optional[str] = None, frame_name_p
     return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def frames2video(frames_dir: str, output_path: str, frame_name_pattern: str, fps: float, ffmpeg_args: List[str] = None
+) -> Popen:
+    """
+    Run ffmpeg to convert frames to a video.
+
+    Args:
+        frames_dir (``str``): Path to the frames directory.
+        output_path (``str``): Path to the output video.
+        frame_name_pattern (``str``): Pattern of the frame name used in ffmpeg command.
+        fps (``float``): FPS of the output video.
+        ffmpeg_args (``list``, optional): Additional arguments for ffmpeg.
+
+    Returns:
+        :class:`subprocess.Popen`: The subprocess of ffmpeg.
+    """
+
+    ffmpeg_args = ffmpeg_args or []
+
+    args = [
+        "-framerate", str(fps), "-i", os.path.join(frames_dir, frame_name_pattern), output_path, *ffmpeg_args
+    ]
+
+    return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
 def merge_video_audio(video_path: str, audio_path: str, output_path: str, shortest: bool = False,
     ffmpeg_args: List[str] = None
 ) -> Popen:

@@ -265,3 +265,4 @@ scratch*.ipynb
 /src/tensorneko_util/visualization/watcher/web/package-lock.json
 /watcher
 /src/tensorneko_util/version.txt
+/test/resource/temp_output

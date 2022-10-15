@@ -1,8 +1,7 @@
 from .log_graph import log_graph
-from tensorneko_util.visualization import Colors, ContinuousColors, MultiPlots, tensorboard
+from tensorneko_util.visualization import Colors, ContinuousColors, tensorboard
 from . import watcher
-from . import matplotlib
-
+from ..backend import VisualLib
 
 __all__ = [
     "log_graph",
@@ -10,9 +9,12 @@ __all__ = [
     "tensorboard",
     "Colors",
     "ContinuousColors",
-    "matplotlib",
-    "MultiPlots"
 ]
+
+if VisualLib.matplotlib_available():
+    from . import matplotlib
+    from tensorneko_util.visualization import MultiPlots
+    __all__.extend(["matplotlib", "MultiPlots"])
 
 try:
     from tensorneko_util.visualization.seaborn import seaborn

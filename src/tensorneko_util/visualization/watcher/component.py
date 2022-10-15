@@ -5,10 +5,10 @@ from abc import ABC, abstractmethod
 from typing import Generic, List, Union, Dict, TYPE_CHECKING, Any, Optional
 
 from einops import rearrange
-from matplotlib import pyplot as plt
 
-from ...util.type import T, P, T_ARRAY
+from ...backend import VisualLib
 from ...util.ref import Ref
+from ...util.type import T, P, T_ARRAY
 
 if TYPE_CHECKING:
     from .view import View
@@ -201,6 +201,11 @@ class Image(Component[Optional[T_ARRAY]]):
         super().__init__(name, value)
         self.path = os.path.join("img", self.name)
         self._ver = 0
+        if VisualLib.matplotlib_available():
+            import matplotlib.pyplot as plt
+            self._plt = plt
+        else:
+            raise ImportError("matplotlib is required for Image component.")
 
     def to_dict(self) -> Dict[str, Any]:
         self.update()
@@ -227,7 +232,7 @@ class Image(Component[Optional[T_ARRAY]]):
                 img_path = os.path.join("watcher", view.name, self.path) + f"-{self._ver}.jpg"
                 # C, H, W
                 image = rearrange(self.value, "c h w -> h w c")
-                plt.imsave(img_path, image)
+                self._plt.imsave(img_path, image)
 
 
 class Logger(Component[List[str]]):

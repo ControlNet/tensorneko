@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Union, Callable, List, Optional, Iterable
 
 from ...type import T, R
+from ....backend._tqdm import import_tqdm_auto
 from ....backend.parallel import ParallelType
 
 
@@ -73,3 +74,7 @@ class AbstractSeq(Iterable[T], ABC):
     @abstractmethod
     def to_list(self) -> List[T]:
         ...
+
+    @property
+    def _tqdm(self):
+        return import_tqdm_auto().tqdm
