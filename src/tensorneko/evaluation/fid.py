@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Union, List, Literal
+from typing import Union, List
 
 import torch
 import torchvision.io
@@ -11,6 +11,12 @@ from torchvision.transforms.functional import resize
 
 from tensorneko_util.backend import VisualLib
 from tensorneko_util.backend._tqdm import import_tqdm_auto
+
+try:
+    from typing import Literal
+    TypeOption = Literal["video", "image"]
+except ImportError:
+    TypeOption = str
 
 
 class FID:
@@ -52,7 +58,7 @@ class FID:
 
 @dataclass
 class _FIDEntry:
-    type: Literal["video", "image"]
+    type: TypeOption
     path: str
 
 
