@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Union, List
 
@@ -38,6 +40,17 @@ class FID:
 
     def add_true_video(self, path: str) -> None:
         self.true_data.add_video(path)
+
+    def to(self, device: Union[str, Device]) -> FID:
+        self.device = torch.device(device)
+        self.fid.to(self.device)
+        return self
+
+    def cpu(self) -> FID:
+        return self.to("cpu")
+
+    def cuda(self) -> FID:
+        return self.to("cuda")
 
     def compute(self, batch_size=128, num_workers=8, progress_bar: bool = True) -> float:
         pred = torch.utils.data.DataLoader(self.pred_data, batch_size=batch_size, num_workers=num_workers)
