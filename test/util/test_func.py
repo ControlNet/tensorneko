@@ -10,7 +10,7 @@ import torch
 
 from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
     with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path, as_list, identity, _, F, sparse2binary, \
-    binary2sparse
+    binary2sparse, circular_pad
 from itertools import islice
 
 
@@ -225,3 +225,17 @@ class UtilFuncTest(unittest.TestCase):
         binary = [0, 0, 1, 0, 1]
         self.assertTrue(type(binary2sparse(binary)) is list)
         self.assertTrue(binary2sparse(binary) == sparse)
+
+    def test_circular_pad_list(self):
+        a = [1, 2, 5]
+        self.assertEqual(circular_pad(a, 0), [])
+        self.assertEqual(circular_pad(a, 1), [1])
+        self.assertEqual(circular_pad(a, 2), [1, 2])
+        self.assertEqual(circular_pad(a, 3), [1, 2, 5])
+        self.assertEqual(circular_pad(a, 4), [1, 2, 5, 1])
+        self.assertEqual(circular_pad(a, 5), [1, 2, 5, 1, 2])
+        self.assertEqual(circular_pad(a, 6), [1, 2, 5, 1, 2, 5])
+        self.assertEqual(circular_pad(a, 7), [1, 2, 5, 1, 2, 5, 1])
+        self.assertEqual(circular_pad(a, 8), [1, 2, 5, 1, 2, 5, 1, 2])
+        self.assertEqual(circular_pad(a, 9), [1, 2, 5, 1, 2, 5, 1, 2, 5])
+        self.assertEqual(circular_pad(a, 10), [1, 2, 5, 1, 2, 5, 1, 2, 5, 1])

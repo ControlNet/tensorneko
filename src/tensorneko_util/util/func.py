@@ -197,3 +197,24 @@ def get_tensorneko_util_path() -> str:
         ``str``: The root path of `tensorneko`
     """
     return dirname(dirname(abspath(__file__)))
+
+
+def circular_pad(x: List, target: int) -> List:
+    """
+    Circular padding a list to the target length.
+
+    Args:
+        x(``List``): Input list.
+        target(``int``): Target length.
+
+    Returns:
+        ``List``: The padded list.
+    """
+    if len(x) == target:
+        return x
+    elif len(x) > target:
+        return x[:target]
+    elif 2 * len(x) > target:
+        return x + x[:target - len(x)]
+    else:
+        return circular_pad(x + x, target)
