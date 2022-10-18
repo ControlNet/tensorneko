@@ -3,6 +3,7 @@ import os.path
 from tensorneko_util import io
 from . import backend
 from . import callback
+from . import dataset
 from . import debug
 from . import evaluation
 from . import layer
@@ -18,6 +19,7 @@ from .neko_trainer import NekoTrainer
 
 __all__ = [
     "callback",
+    "dataset",
     "backend",
     "evaluation",
     "io",
