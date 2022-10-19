@@ -14,4 +14,3 @@ class EpochTimeLogger(Callback):
         elapsed_time = time() - self.start_time
         pl_module.logger.log_metrics({"epoch_time": elapsed_time}, step=trainer.global_step)
         pl_module.log("epoch_time", elapsed_time, logger=False, sync_dist=pl_module.distributed)
-
