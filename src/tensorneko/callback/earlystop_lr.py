@@ -16,7 +16,7 @@ class EarlyStoppingLR(Callback):
     def on_train_epoch_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
         self._run_early_stop_checking(trainer)
 
-    def _run_early_stop_checking(self, trainer: "pl.Trainer") -> None:
+    def _run_early_stop_checking(self, trainer: Trainer) -> None:
         metrics = trainer._logger_connector.callback_metrics
         if len(metrics) == 0:
             return

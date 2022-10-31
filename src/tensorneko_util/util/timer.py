@@ -35,25 +35,27 @@ class Timer:
     def __init__(self):
         self.times = []
         self.names = []
+        self.total_time = None
 
     def __enter__(self):
-        self.times.append(time.time())
+        self.times.append(time.perf_counter())
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        print(self._make_str("Total", time.time() - self.times[0]))
+        self.total_time = time.perf_counter() - self.times[0]
+        print(self._make_str("Total", self.total_time))
 
     def time(self, name: Optional[str] = None):
-        self.times.append(time.time())
+        self.times.append(time.perf_counter())
         name = name or ""
-        print(self._make_str(name, time.time() - self.times[-2]))
+        print(self._make_str(name, time.perf_counter() - self.times[-2]))
 
     def __call__(self, f: Callable):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            self.times.append(time.time())
+            self.times.append(time.perf_counter())
             result = f(*args, **kwargs)
-            print(self._make_str(f.__name__, time.time() - self.times[-1]))
+            print(self._make_str(f.__name__, time.perf_counter() - self.times[-1]))
             return result
 
         return wrapper
