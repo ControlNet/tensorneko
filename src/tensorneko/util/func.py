@@ -10,7 +10,7 @@ from torch.nn import Module
 
 from tensorneko_util.util import F, _
 from tensorneko_util.util.func import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
-    identity, list_to_dict, compose
+    identity, list_to_dict, compose, circular_pad
 from .type import T, A
 
 
@@ -157,3 +157,4 @@ dict_add = dict_add
 as_list = as_list
 identity = identity
 list_to_dict = list_to_dict
+circular_pad = circular_pad

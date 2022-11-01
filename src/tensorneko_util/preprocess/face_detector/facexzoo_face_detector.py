@@ -21,7 +21,7 @@ class FaceXZooFaceDetector(AbstractFaceDetector):
 
         from tensorneko_util.preprocess.face_detector import FaceXZooFaceDetector
 
-        detector = FaceXZooFaceDetector("../../Forked/FaceX-Zoo", "cuda:0")
+        detector = FaceXZooFaceDetector(FaceXZooFaceDetector.install(), "cuda:0")
 
         # process image, save to facexzoo_face_detector_out.jpg
         detector.process_image("test/resource/image_sample/1.183.jpg",
@@ -60,6 +60,25 @@ class FaceXZooFaceDetector(AbstractFaceDetector):
         faceDetModelLoader = FaceDetModelLoader(model_path, model_category, model_name)
         model, cfg = faceDetModelLoader.load_model()
         self.faceDetModelHandler = FaceDetModelHandler(model, device, cfg)
+
+    @staticmethod
+    def install(path: Optional[str] = None) -> str:
+        """
+        Install FaceX-Zoo by clone from GitHub.
+
+        Args:
+            path (``str``, optional): The path to install FaceX-Zoo, default is "./FaceX-Zoo".
+
+        Returns:
+            ``str``: The path to the installed FaceX-Zoo.
+
+        """
+        path = path or "FaceX-Zoo"
+        if os.path.exists(path):
+            return path
+
+        os.system(f"git clone --depth=1 https://github.com/ControlNet/FaceX-Zoo {path or ''}")
+        return path
 
     def detect_face(self, image: ndarray, *args, **kwargs):
         assert image.ndim == 3 and image.shape[2] == 3, "frame should be 3-dim"

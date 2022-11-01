@@ -1,6 +1,5 @@
 from typing import Union, Optional, Tuple
 
-import numpy as np
 from numpy import ndarray
 
 from .abstract_face_detector import AbstractFaceDetector
