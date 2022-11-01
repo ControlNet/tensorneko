@@ -148,11 +148,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
-        torch-version: ["1.9.0", "1.10.0", "1.11.0"]
-        include:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        torch-version: ["1.9.*", "1.10.*", "1.11.*", "1.12.*", "1.13.*"]
+        lightning-version: ["1.7.*", "1.8.*"]
+        exclude:
           - python-version: "3.10"
-            torch-version: "1.11.0"
+            torch-version: "1.9.*"
+          - python-version: "3.10"
+            torch-version: "1.10.*"
 
     steps:
       - uses: actions/checkout@v2
@@ -166,6 +169,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install torch==${{ matrix.torch-version }}
+          pip install pytorch-lightning==${{ matrix.lightning-version }}
           pip install -r requirements.txt
           python init.py
 
@@ -182,11 +186,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ "3.7", "3.8", "3.9" ]
-        torch-version: [ "1.9.0", "1.10.0", "1.11.0" ]
-        include:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        torch-version: ["1.9.*", "1.10.*", "1.11.*", "1.12.*", "1.13.*"]
+        lightning-version: ["1.7.*", "1.8.*"]
+        exclude:
           - python-version: "3.10"
-            torch-version: "1.11.0"
+            torch-version: "1.9.*"
+          - python-version: "3.10"
+            torch-version: "1.10.*"
 
     steps:
       - uses: actions/checkout@v2
@@ -200,6 +207,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install torch==${{ matrix.torch-version }}
+          pip install pytorch-lightning==${{ matrix.lightning-version }}
           pip install -r requirements.txt
           python init.py
 
