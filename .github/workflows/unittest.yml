@@ -31,11 +31,6 @@ jobs:
           pip install -r requirements_util.txt
           python init.py
 
-      - name: Build package
-        run: |
-          pip install wheel
-          python setup_util.py sdist bdist_wheel
-
       - name: Try importing package
         run: |
           cd src
@@ -76,9 +71,6 @@ jobs:
           pip install -r requirements.txt
           python init.py
 
-      - name: Build package
-        run: python setup.py sdist bdist_wheel
-
       - name: Try importing package
         run: |
           cd src
@@ -91,13 +83,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
-        torch-version: ["1.9.0", "1.10.0", "1.11.0", "1.12.0"]
-        include:
-          - python-version: "3.10"
-            torch-version: "1.11.0"
-          - python-version: "3.10"
-            torch-version: "1.12.0"
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        torch-version: ["1.9.*", "1.10.*", "1.11.*", "1.12.*"]
+        lightning-version: ["1.7.*", "1.8.*"]
 
     steps:
       - uses: actions/checkout@v2
@@ -111,6 +99,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install torch==${{ matrix.torch-version }}
+          pip install pytorch-lightning==${{ matrix.lightning-version }}
           pip install -r requirements_test.txt
           python init.py
 
