@@ -24,7 +24,7 @@ class RoundRobinDataset(Dataset[T_co]):
 
     """
 
-    def __init__(self, datasets: List[Dataset], order: Optional[List[int]] = None, shuffle: bool = False,
+    def __init__(self, datasets: List[Dataset[T_co]], order: Optional[List[int]] = None, shuffle: bool = False,
         padding: bool = True
     ):
         super().__init__()
