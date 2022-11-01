@@ -10,7 +10,8 @@ from threading import Thread
 from typing import Optional, Union, List
 
 from .view import View
-from ...util import tensorneko_util_path, AbstractServer
+from ...util.server import AbstractServer
+from ...util import tensorneko_util_path
 
 
 class Server(AbstractServer):

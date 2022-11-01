@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Tensorneko Image Browser</title>
+    </head>
+    <body>
+        <h1>Tensorneko Image Browser</h1>
+        <label for="images">Image:</label>
+        <select name="images" id="images"></select>
+        <button id="prev">Prev</button>
+        <button id="next">Next</button>
+        <br>
+        <br>
+        <img id="image" src="" alt="Image" style="max-height: 80vh; height: auto; max-width: 80vw; width: auto">
+    </body>
+
+    <script type="application/javascript">
+        fetch("/.metadata.json")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("images").innerHTML = data.map(image => `<option value="${image}">${image}</option>`).join("");
+                // first as selected
+                document.getElementById("images").selectedIndex = 0;
+                // rendered first image
+                document.getElementById("image").src = data[0];
+            });
+
+        document.getElementById("images").addEventListener("change", (event) => {
+            document.getElementById("image").src = event.target.value;
+        });
+
+        document.getElementById("next").addEventListener("click", () => {
+            const images = document.getElementById("images");
+            const image = document.getElementById("image");
+            const index = images.selectedIndex;
+            if (index < images.length - 1) {
+                images.selectedIndex = index + 1;
+                image.src = images.value;
+            }
+        });
+
+        document.getElementById("prev").addEventListener("click", () => {
+            const images = document.getElementById("images");
+            const image = document.getElementById("image");
+            const index = images.selectedIndex;
+            if (index > 0) {
+                images.selectedIndex = index - 1;
+                image.src = images.value;
+            }
+        });
+    </script>
+</html>
