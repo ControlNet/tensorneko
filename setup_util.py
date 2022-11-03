@@ -34,6 +34,7 @@ setuptools.setup(
             "version.txt",
             "visualization/watcher/web/dist/index.html",
             "visualization/watcher/web/dist/assets/*",
+            "visualization/image_browser/web/index.html",
         ]
     },
     python_requires=">=3.7",
