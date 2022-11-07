@@ -51,7 +51,7 @@ class OpencvFaceDetector(AbstractFaceDetector):
         faces = self.face_cascade.detectMultiScale(image, *args, **kwargs)
         return faces
 
-    def process_image(self, image_path: str, out_path: str, max_faces=1, margin=0, *args, **kwargs):
+    def crop_image(self, image_path: str, out_path: str, max_faces=1, margin=0, *args, **kwargs):
         if max_faces > 1:
             raise NotImplementedError("Multiple faces are not supported yet.")
 
@@ -77,7 +77,7 @@ class OpencvFaceDetector(AbstractFaceDetector):
                 video.release()
                 return side + 2 * margin, side + 2 * margin
 
-    def process_video(self, video_path: str, out_path: str, frame_size: Optional[Union[int, Tuple[int, int]]] = None,
+    def crop_video(self, video_path: str, out_path: str, frame_size: Optional[Union[int, Tuple[int, int]]] = None,
         margin=0, fourcc="mp4v", *args, **kwargs
     ):
         video = self.cv2.VideoCapture(video_path)
