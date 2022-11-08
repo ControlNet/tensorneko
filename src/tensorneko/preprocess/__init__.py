@@ -4,6 +4,7 @@ from .resize import resize_image, resize_video
 from .crop import crop_with_padding
 from tensorneko_util.preprocess import frames2video
 from tensorneko_util.backend import VisualLib
+from tensorneko_util.preprocess import face_detector
 
 __all__ = [
     "ResizeMethod",
@@ -14,7 +15,8 @@ __all__ = [
     "resize_image",
     "resize_video",
     "crop_with_padding",
-    "frames2video"
+    "frames2video",
+    "face_detector"
 ]
 
 if VisualLib.ffmpeg_available():
