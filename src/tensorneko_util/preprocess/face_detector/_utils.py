@@ -1,9 +1,10 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING, Tuple, Optional, Union
 
 from ..crop import crop_with_padding
 
 if TYPE_CHECKING:
-    from . import AbstractFaceDetector
+    from .abstract_face_detector import AbstractFaceDetector
 
 
 def detector_model_crop_image(detector: AbstractFaceDetector, image_path: str, out_path: str, max_faces=1, margin=0):

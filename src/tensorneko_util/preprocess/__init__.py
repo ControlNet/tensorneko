@@ -1,8 +1,8 @@
 from .video import frames2video
 from .image import rgb2gray, rgb2gray_batch
 from .crop import crop_with_padding
-from tensorneko_util.backend import VisualLib
 from . import face_detector
+from ..backend import VisualLib
 
 __all__ = ['frames2video', 'rgb2gray', 'rgb2gray_batch', 'crop_with_padding', 'face_detector']
 
