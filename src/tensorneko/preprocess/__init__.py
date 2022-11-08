@@ -2,9 +2,9 @@ from .enum import ResizeMethod, PaddingMethod, PaddingPosition
 from .pad import padding_video, padding_audio
 from .resize import resize_image, resize_video
 from .crop import crop_with_padding
+from . import face_detector
 from tensorneko_util.preprocess import frames2video
 from tensorneko_util.backend import VisualLib
-from tensorneko_util.preprocess import face_detector
 
 __all__ = [
     "ResizeMethod",
