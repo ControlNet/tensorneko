@@ -1,7 +1,8 @@
 import re
 import subprocess
 
-from torch import Tensor
+import torch
+from torch import Tensor, tensor
 from torchmetrics.functional import peak_signal_noise_ratio as psnr
 
 from tensorneko_util.backend.visual_lib import VisualLib
@@ -49,6 +50,12 @@ def psnr_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN
 
     assert pred.shape[0] == real.shape[0], "The number of images in pred and real must be equal."
 
+    if pred.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        pred = pred.float() / 255.
+
+    if real.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        real = real.float() / 255.
+
     reduction_method = reduction.value
 
     if reduction_method == "mean":
@@ -77,13 +84,13 @@ def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> Tensor:
         if not VisualLib.ffmpeg_available():
             raise RuntimeError("ffmpeg is not found.")
 
-        p = subprocess.run(["-i", pred, "-i", real, "-filter_complex", "psnr", "-f", "null", "/dev/null"],
+        p = subprocess.run(["ffmpeg", "-i", pred, "-i", real, "-filter_complex", "psnr", "-f", "null", "/dev/null"],
                            capture_output=True)
-        psnr_out = p.stdout.decode().split("\n")[-2]
-        return Tensor(float(re.search(r" average:([\d.]+) ", psnr_out)[1]))
+        psnr_out = p.stderr.decode().split("\n")[-2]
+        return tensor(float(re.search(r" average:([\d.]+) ", psnr_out)[1]))
     else:
-        pred_video = read.video(pred).video  # (T, C, H, W)
-        real_video = read.video(real).video
+        pred_video = tensor(read.video(pred).video)  # (T, C, H, W)
+        real_video = tensor(read.video(real).video)
         return psnr_video(pred_video, real_video)
 
 
@@ -99,5 +106,10 @@ def psnr_video(pred: Tensor, real: Tensor) -> Tensor:
         Returns:
             :class:`~torch.Tensor`: The psnr of the video.
     """
+    if pred.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        pred = pred.float() / 255.0
+    if real.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        real = real.float() / 255.0
+
     real_video = padding_video(real, pred.shape[0], PaddingMethod.SAME)
     return psnr_image(pred, real_video, reduction=Reduction.MEAN)

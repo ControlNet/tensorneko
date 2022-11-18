@@ -2,7 +2,7 @@ import re
 import subprocess
 
 import torch
-from torch import Tensor
+from torch import Tensor, tensor
 from torchmetrics.functional import structural_similarity_index_measure as ssim
 
 from tensorneko_util.backend import VisualLib
@@ -51,6 +51,12 @@ def ssim_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN
 
     assert pred.shape[0] == real.shape[0], "The number of images in pred and real must be equal."
 
+    if pred.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        pred = pred.float() / 255.
+
+    if real.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        real = real.float() / 255.
+
     reduction_method = reduction.value
 
     if reduction_method == "mean":
@@ -76,13 +82,13 @@ def ssim_video(pred: str, real: str, use_ffmpeg: bool = False) -> Tensor:
         if not VisualLib.ffmpeg_available():
             raise RuntimeError("ffmpeg is not found.")
 
-        p = subprocess.run(["-i", pred, "-i", real, "-filter_complex", "ssim", "-f", "null", "/dev/null"],
+        p = subprocess.run(["ffmpeg", "-i", pred, "-i", real, "-filter_complex", "ssim", "-f", "null", "/dev/null"],
                            capture_output=True)
-        ssim_out = p.stdout.decode().split("\n")[-2]
-        return Tensor(float(re.search(r" All:([\d.]+) ", ssim_out)[1]))
+        ssim_out = p.stderr.decode().split("\n")[-2]
+        return tensor(float(re.search(r" All:([\d.]+) ", ssim_out)[1]))
     else:
-        pred_video = read.video(pred).video  # (T, C, H, W)
-        real_video = read.video(real).video
+        pred_video = tensor(read.video(pred).video)  # (T, C, H, W)
+        real_video = tensor(read.video(real).video)
         return ssim_video(pred_video, real_video)
 
 
@@ -96,7 +102,12 @@ def ssim_video(pred: Tensor, real: Tensor) -> Tensor:
         real (:class:`~torch.Tensor`): Real video tensor. (T, C, H, W)
 
         Returns:
-            ``float``: The ssim of the video.
+            :class:`~torch.Tensor`: The ssim of the video.
     """
+    if pred.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        pred = pred.float() / 255.0
+    if real.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
+        real = real.float() / 255.0
+
     real_video = padding_video(real, pred.shape[0], PaddingMethod.SAME)
-    return ssim_image(pred, real_video, reduction=Reduction.MEAN)
+    return ssim_image(pred.permute(0, 3, 1, 2), real_video.permute(0, 3, 1, 2), reduction=Reduction.MEAN)
