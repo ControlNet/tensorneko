@@ -1,4 +1,5 @@
 import os.path
+import sys
 from typing import Optional, Union, Tuple
 
 from numpy import ndarray
@@ -42,8 +43,11 @@ class FaceXZooFaceDetector(AbstractFaceDetector):
         self.cv2 = cv2
 
         if face_sdk_path is not None:
-            import sys
             sys.path.append(face_sdk_path)
+        else:
+            if os.path.exists("FaceX-Zoo"):
+                face_sdk_path = "FaceX-Zoo"
+                sys.path.append(face_sdk_path)
         try:
             from core.model_handler.face_detection.FaceDetModelHandler import FaceDetModelHandler
             from core.model_loader.face_detection.FaceDetModelLoader import FaceDetModelLoader
