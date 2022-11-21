@@ -110,4 +110,4 @@ def ssim_video(pred: Tensor, real: Tensor) -> Tensor:
         real = real.float() / 255.0
 
     real_video = padding_video(real, pred.shape[0], PaddingMethod.SAME)
-    return ssim_image(pred.permute(0, 3, 1, 2), real_video.permute(0, 3, 1, 2), reduction=Reduction.MEAN)
+    return ssim_image(pred, real_video, reduction=Reduction.MEAN)
