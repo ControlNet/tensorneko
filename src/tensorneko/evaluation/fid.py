@@ -29,17 +29,21 @@ class FID:
         self.pred_data = _FIDDataset()
         self.true_data = _FIDDataset()
 
-    def add_pred_image(self, path: str) -> None:
+    def add_pred_image(self, path: str) -> FID:
         self.pred_data.add_image(path)
+        return self
 
-    def add_pred_video(self, path: str) -> None:
+    def add_pred_video(self, path: str) -> FID:
         self.pred_data.add_video(path)
+        return self
 
-    def add_true_image(self, path: str) -> None:
+    def add_true_image(self, path: str) -> FID:
         self.true_data.add_image(path)
+        return self
 
-    def add_true_video(self, path: str) -> None:
+    def add_true_video(self, path: str) -> FID:
         self.true_data.add_video(path)
+        return self
 
     def to(self, device: Union[str, Device]) -> FID:
         self.device = torch.device(device)

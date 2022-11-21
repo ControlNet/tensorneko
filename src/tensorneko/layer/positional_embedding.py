@@ -42,10 +42,10 @@ class PositionalEmbedding(NekoModule):
             self.dropout = Dropout(dropout_rate)
 
     def forward(self, x: Tensor) -> Tensor:
-        f = F() >> _ + self.emb
+        x = x + self.emb
         if self.use_dropout:
-            f = f >> self.dropout
-        return f(x)
+            x = self.dropout(x)
+        return x
 
     @property
     def trainable(self):
