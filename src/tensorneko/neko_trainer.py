@@ -13,7 +13,7 @@ from pytorch_lightning.profilers import Profiler
 from pytorch_lightning.strategies import Strategy
 from pytorch_lightning.trainer.connectors.accelerator_connector import _LITERAL_WARN
 
-from .callback import NilCallback, LrLogger, EpochNumLogger, EpochTimeLogger
+from .callback import NilCallback, LrLogger, EpochNumLogger, EpochTimeLogger, GpuStatsLogger
 
 
 class NekoTrainer(Trainer):
@@ -105,6 +105,14 @@ class NekoTrainer(Trainer):
 
         # set learning rate logger
         cbs.extend([LrLogger(), EpochNumLogger(), EpochTimeLogger()])
+
+        # if gpumonitor is installed, enable callback
+        try:
+            gpu_cb = GpuStatsLogger()
+        except ImportError:
+            pass
+        else:
+            cbs.append(gpu_cb)
 
         # setup the log mode
         self.log_every_n_steps = log_every_n_steps
