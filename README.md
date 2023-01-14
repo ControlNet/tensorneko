@@ -399,7 +399,7 @@ Some metrics function for evaluation are provided.
 
 ## Neko Utilities
 
-### Functional
+### Misc functions
 
 `__`: The arguments to pipe operator. (Inspired from [fn.py](https://github.com/kachayev/fn.py))
 ```python
