@@ -2,7 +2,15 @@ from pathlib import Path
 from typing import Optional
 from urllib.request import urlretrieve
 
-from tqdm.auto import tqdm
+from ..backend._tqdm import import_tqdm_auto
+
+try:
+    auto = import_tqdm_auto()
+    tqdm = auto.tqdm
+    _is_progress_bar_available = True
+except ImportError:
+    tqdm = object
+    _is_progress_bar_available = False
 
 
 class DownloadProgressBar(tqdm):
@@ -36,6 +44,9 @@ def download_file(url: str, dir_path: str = ".", file_path: Optional[str] = None
         path = Path(dir_path) / url.split("/")[-1]
     path.parent.mkdir(exist_ok=True, parents=True)
     if progress_bar:
+        if not _is_progress_bar_available:
+            raise ImportError("Please install tqdm to use progress bar.")
+
         with DownloadProgressBar(unit="B", unit_scale=True, miniters=1, desc="Downloading Marlin model") as pb:
             urlretrieve(url, filename=path, reporthook=pb.update_to)
     else:
