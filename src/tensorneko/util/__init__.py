@@ -5,7 +5,7 @@ from tensorneko_util.util.fp import Seq, AbstractSeq, curry, F, Stream, return_o
 from tensorneko_util.util import ref, Timer, Singleton
 from tensorneko_util.util.eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, \
     subscribe_process, subscribe_thread
-from tensorneko_util.util import download_file
+from tensorneko_util.util import download_file, WindowMerger
 from . import type
 from .configuration import Configuration
 from .misc import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
@@ -73,4 +73,5 @@ __all__ = [
     "Singleton",
     "circular_pad",
     "download_file",
+    "WindowMerger",
 ]

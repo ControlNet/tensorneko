@@ -10,6 +10,7 @@ from .timer import Timer
 from .eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, subscribe_process, subscribe_thread
 from .singleton import Singleton
 from .downloader import download_file
+from .window_merger import WindowMerger
 
 tensorneko_util_path = get_tensorneko_util_path()
 
@@ -51,4 +52,5 @@ __all__ = [
     "Singleton",
     "circular_pad",
     "download_file",
+    "WindowMerger",
 ]

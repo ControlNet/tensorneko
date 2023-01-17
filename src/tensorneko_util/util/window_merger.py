@@ -96,7 +96,8 @@ class WindowMerger:
             return 0, (None, None)
 
     @classmethod
-    def _merge_step(cls, old_item: WindowValueCache, new_item: WindowValueCache) -> Tuple[List[WindowValueCache], List[WindowValueCache], int]:
+    def _merge_step(cls, old_item: WindowValueCache, new_item: WindowValueCache
+    ) -> Tuple[List[WindowValueCache], List[WindowValueCache], int]:
         start, end, value = new_item.start, new_item.end, new_item.value
         merged_items = []
         new_items = []
