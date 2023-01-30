@@ -11,7 +11,7 @@ from .configuration import Configuration
 from .misc import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
     generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, circular_pad
 from .misc import get_tensorneko_path
-from .dispatched_func import sparse2binary, binary2sparse
+from .dispatched_misc import sparse2binary, binary2sparse
 from .reproducibility import Seed
 from .string_getter import get_activation, get_loss
 from .type import ModuleFactory, Shape, Device

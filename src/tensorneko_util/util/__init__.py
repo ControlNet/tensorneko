@@ -4,7 +4,7 @@ from .dispatcher import dispatch
 from .fp import __, F, _, Stream, return_option, Option, Monad, Eval, Seq, AbstractSeq, curry
 from .misc import generate_inf_seq, compose, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, \
     get_tensorneko_util_path, circular_pad
-from .dispatched_func import sparse2binary, binary2sparse
+from .dispatched_misc import sparse2binary, binary2sparse
 from .ref import ref
 from .timer import Timer
 from .eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, subscribe_process, subscribe_thread
