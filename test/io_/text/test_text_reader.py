@@ -1,8 +1,5 @@
 import os.path
 import unittest
-from typing import List
-
-import numpy
 
 from tensorneko.io import read
 

@@ -13,7 +13,7 @@ from pytorch_lightning.profilers import Profiler
 from pytorch_lightning.strategies import Strategy
 from pytorch_lightning.trainer.connectors.accelerator_connector import _LITERAL_WARN
 
-from .callback import NilCallback, LrLogger, EpochNumLogger, EpochTimeLogger
+from .callback import NilCallback, LrLogger, EpochNumLogger, EpochTimeLogger, GpuStatsLogger, SystemStatsLogger
 
 
 class NekoTrainer(Trainer):
@@ -106,6 +106,22 @@ class NekoTrainer(Trainer):
         # set learning rate logger
         cbs.extend([LrLogger(), EpochNumLogger(), EpochTimeLogger()])
 
+        # if gpumonitor is installed, enable callback
+        try:
+            gpu_cb = GpuStatsLogger()
+        except ImportError:
+            pass
+        else:
+            cbs.append(gpu_cb)
+
+        # if psutil is installed, enable callback
+        try:
+            sys_cb = SystemStatsLogger()
+        except ImportError:
+            pass
+        else:
+            cbs.append(sys_cb)
+
         # setup the log mode
         self.log_every_n_steps = log_every_n_steps
         self.log_on_epoch = log_every_n_steps == 0
@@ -170,12 +186,12 @@ class NekoTrainer(Trainer):
         self.has_no_logger = logger is None
 
         self.logger_train = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
-                                              version=os.path.join(self.log_name, "train"), log_graph=False
-                                              # TODO: Fix log_Graph
-                                              ) if self.has_no_logger is not None else None
+            version=os.path.join(self.log_name, "train"), log_graph=False
+            # TODO: Fix log_Graph
+        ) if self.has_no_logger is not None else None
         self.logger_val = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
-                                            version=os.path.join(self.log_name, "val"), log_graph=False
-                                            ) if self.has_no_logger is not None else None
+            version=os.path.join(self.log_name, "val"), log_graph=False
+        ) if self.has_no_logger is not None else None
         self._loggers = []
 
     @property

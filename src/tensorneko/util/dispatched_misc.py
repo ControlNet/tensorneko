@@ -2,8 +2,8 @@ import torch
 from torch import Tensor
 
 from tensorneko_util.util import dispatch
-from tensorneko_util.util.dispatched_func import sparse2binary as _sparse2binary
-from tensorneko_util.util.dispatched_func import binary2sparse as _binary2sparse
+from tensorneko_util.util.dispatched_misc import sparse2binary as _sparse2binary
+from tensorneko_util.util.dispatched_misc import binary2sparse as _binary2sparse
 
 
 @dispatch.base(_sparse2binary)

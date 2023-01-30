@@ -9,7 +9,7 @@ from torch import Tensor
 from torch.nn import Module
 
 from tensorneko_util.util import F, _
-from tensorneko_util.util.func import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
+from tensorneko_util.util.misc import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
     identity, list_to_dict, compose, circular_pad
 from .type import T, A
 

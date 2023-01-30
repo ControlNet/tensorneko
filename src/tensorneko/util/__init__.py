@@ -5,12 +5,13 @@ from tensorneko_util.util.fp import Seq, AbstractSeq, curry, F, Stream, return_o
 from tensorneko_util.util import ref, Timer, Singleton
 from tensorneko_util.util.eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, \
     subscribe_process, subscribe_thread
+from tensorneko_util.util import download_file, WindowMerger
 from . import type
 from .configuration import Configuration
-from .func import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
+from .misc import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
     generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, circular_pad
-from .func import get_tensorneko_path
-from .dispatched_func import sparse2binary, binary2sparse
+from .misc import get_tensorneko_path
+from .dispatched_misc import sparse2binary, binary2sparse
 from .reproducibility import Seed
 from .string_getter import get_activation, get_loss
 from .type import ModuleFactory, Shape, Device
@@ -57,7 +58,6 @@ __all__ = [
     "tensorneko_util_path",
     "sparse2binary",
     "binary2sparse",
-    "AbstractServer",
     "dispatch",
     "AverageMeter",
     "AbstractSeq",
@@ -71,5 +71,7 @@ __all__ = [
     "subscribe_process",
     "subscribe_thread",
     "Singleton",
-    "circular_pad"
+    "circular_pad",
+    "download_file",
+    "WindowMerger",
 ]

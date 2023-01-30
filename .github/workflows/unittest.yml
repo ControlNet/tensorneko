@@ -170,7 +170,7 @@ jobs:
         run: |
           pip install torch==${{ matrix.torch-version }}
           pip install pytorch-lightning==${{ matrix.lightning-version }}
-          pip install -r requirements.txt
+          pip install -r requirements_test.txt
           python init.py
 
       - name: Set PYTHONPATH
@@ -208,7 +208,7 @@ jobs:
         run: |
           pip install torch==${{ matrix.torch-version }}
           pip install pytorch-lightning==${{ matrix.lightning-version }}
-          pip install -r requirements.txt
+          pip install -r requirements_test.txt
           python init.py
 
       - name: Set PYTHONPATH
