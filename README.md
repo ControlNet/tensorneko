@@ -213,7 +213,7 @@ def preprocessing(d): ...
 pb = ProgressBar("Processing", total=len(data_list))
 logger = Logger("Log message")
 var = Variable("Some Value", 0)
-line_chart = LineChart("Line Chart", "x", "y")
+line_chart = LineChart("Line Chart", x_label="x", y_label="y")
 view = View("Data preprocessing").add_all()
 
 t0 = time.time()
