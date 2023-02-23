@@ -5,6 +5,7 @@ on:
       - "master"
 jobs:
   tensorneko-util-import-test:
+    name: Import Test / tensorneko-util
     runs-on: ubuntu-20.04
 
     strategy:
@@ -37,6 +38,7 @@ jobs:
           python -c "import tensorneko_util"
 
   tensorneko-import-test:
+    name: Import Test / tensorneko
     runs-on: ubuntu-20.04
 
     strategy:
@@ -77,6 +79,7 @@ jobs:
           python -c "import tensorneko"
 
   unittest:
+    name: Unittest
     runs-on: ubuntu-20.04
     needs: [tensorneko-util-import-test, tensorneko-import-test]
 
@@ -115,6 +118,7 @@ jobs:
         run: python -m unittest discover test
 
   build-web:
+    name: Build Web
     runs-on: ubuntu-20.04
 
     steps:
@@ -142,6 +146,7 @@ jobs:
           ls -l dist/assets
 
   simulate-training-classifier:
+    name: Simulate Training / Classifier
     needs: [unittest, build-web]
     runs-on: ubuntu-20.04
 
@@ -180,6 +185,7 @@ jobs:
         run: python test/simulate/simulate_train_mnist_cla.py
 
   simulate-training-gan:
+    name: Simulate Training / GAN
     needs: [unittest, build-web]
     runs-on: ubuntu-20.04
 
