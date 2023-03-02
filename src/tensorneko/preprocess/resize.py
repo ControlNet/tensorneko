@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 import torch
@@ -12,7 +12,7 @@ from .enum import ResizeMethod, get_enum_value
 from ..util import F, _
 
 
-def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMethod = ResizeMethod.BICUBIC
+def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: Union[ResizeMethod, str] = ResizeMethod.BICUBIC
 ) -> Tensor:
     """
     Resizing an image to determined size.
@@ -20,12 +20,13 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMet
     Args:
         tensor (:class:`~torch.Tensor`): Image tensor (C, H, W) with value range [0, 1].
         size ((``int``, ``int``)): Target size (H, W).
-        resize_method (:class:`ResizeMethod`, optional): Resize method. Default bicubic.
+        resize_method (:class:`ResizeMethod` | ``str``, optional): Resize method. Default bicubic.
 
     Returns:
         :class:`~torch.Tensor`: The resized image.
     """
     h, w = size
+    resize_method = _map_resize_method(resize_method)
 
     def resizer(x: ndarray) -> ndarray:
         x = Image.fromarray(x)
@@ -44,7 +45,7 @@ def resize_image(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMet
     return f(tensor)
 
 
-def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMethod = ResizeMethod.BICUBIC,
+def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: Union[ResizeMethod, str] = ResizeMethod.BICUBIC,
     fast=False
 ) -> Tensor:
     """
@@ -53,13 +54,14 @@ def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMet
     Args:
         tensor (:class:`~torch.Tensor`): Video tensor (T, C, H, W)
         size ((``int``, ``int``)): Target size (H, W)
-        resize_method (:class:`ResizeMethod`, optional): Resize method. Default bicubic.
+        resize_method (:class:`ResizeMethod` | ``str``, optional): Resize method. Default bicubic.
         fast (bool, optional): If True, use fast mode (pytorch F.interpolate). Default False.
 
     Returns:
         :class:`~torch.Tensor`: The resized video.
     """
     if not fast:
+        resize_method = _map_resize_method(resize_method)
         image_resizer = F(resize_image, size=size, resize_method=resize_method) \
                         >> F(rearrange, pattern="c h w -> 1 c h w")
         f = F(map, image_resizer) \
@@ -67,4 +69,33 @@ def resize_video(tensor: Tensor, size: Tuple[int, int], resize_method: ResizeMet
             >> torch.vstack
         return f(tensor)
     else:
+        if resize_method == ResizeMethod.BICUBIC:
+            resize_method = "bicubic"
+        elif resize_method == ResizeMethod.BILINEAR:
+            resize_method = "bilinear"
+        elif resize_method == ResizeMethod.NEAREST:
+            resize_method = "nearest"
+        elif type(resize_method) == str:
+            pass
+        else:
+            raise TypeError("Not matched resize method type.")
+
         return func.interpolate(tensor, size, mode=get_enum_value(resize_method, ResizeMethod), align_corners=False)
+
+
+def _map_resize_method(resize_method: Union[ResizeMethod, str]) -> ResizeMethod:
+    if resize_method == "bicubic":
+        resize_method = ResizeMethod.BICUBIC
+    elif resize_method == "bilinear":
+        resize_method = ResizeMethod.BILINEAR
+    elif resize_method == "nearest":
+        resize_method = ResizeMethod.NEAREST
+    elif resize_method == "lanczos":
+        resize_method = ResizeMethod.LANCZOS
+    elif resize_method == "box":
+        resize_method = ResizeMethod.BOX
+    elif type(resize_method) == ResizeMethod:
+        pass
+    else:
+        raise TypeError("Not matched resize method type.")
+    return resize_method
