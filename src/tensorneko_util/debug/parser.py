@@ -13,6 +13,10 @@ class Arguments:
     def __getitem__(self, item):
         return self._fields[item]
 
+    def __setitem__(self, key, value):
+        self._fields[key] = value
+        self.__dict__[key] = value
+
     def __str__(self):
         return f"Args {self._fields} "
 
