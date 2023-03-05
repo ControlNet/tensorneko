@@ -117,6 +117,37 @@ jobs:
       - name: Run Test
         run: python -m unittest discover test
 
+  coverage:
+    # Run coverage and report to coveralls
+    name: Coverage
+    runs-on: ubuntu-20.04
+    needs: [unittest]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+        python-version: "3.10"
+        architecture: x64
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements_test.txt
+          python init.py
+          pip install coverage pytest
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
+
+      - name: Run Coverage
+        run: |
+          coverage run -m pytest
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+
   build-web:
     name: Build Web
     runs-on: ubuntu-20.04
