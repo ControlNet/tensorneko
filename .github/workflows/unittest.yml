@@ -129,24 +129,41 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-        python-version: "3.10"
-        architecture: x64
+          python-version: "3.10"
+          architecture: x64
 
       - name: Install dependencies
         run: |
           pip install -r requirements_test.txt
           python init.py
-          pip install coverage pytest
+          pip install coverage pytest coveralls
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
       - name: Run Coverage
-        run: |
-          coverage run -m pytest
+        run: coverage run --source=tensorneko,tensorneko_util -m pytest
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        run: coveralls --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: tensorneko
+          COVERALLS_PARALLEL: true
+
+  coveralls_finish:
+    name: Coveralls Finish
+    needs: [coverage]
+    runs-on: ubuntu-20.04
+    container: python:3-slim
+
+    steps:
+      - name: Finished
+        run: |
+          pip3 install --upgrade coveralls
+          coveralls --service=github --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-web:
     name: Build Web
