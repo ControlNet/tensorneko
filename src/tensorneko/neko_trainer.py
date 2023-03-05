@@ -58,7 +58,7 @@ class NekoTrainer(Trainer):
         num_sanity_val_steps: int = 2,
         resume_from_checkpoint: Optional[Union[Path, str]] = None,
         profiler: Optional[Union[Profiler, str]] = None,
-        benchmark: Optional[bool] = None,
+        benchmark: Optional[bool] = True,
         deterministic: Optional[Union[bool, _LITERAL_WARN]] = None,
         reload_dataloaders_every_n_epochs: int = 0,
         auto_lr_find: Union[bool, str] = False,

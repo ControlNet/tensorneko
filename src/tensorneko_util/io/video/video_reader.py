@@ -54,7 +54,7 @@ class VideoReader:
             if not VisualLib.pytorch_available():
                 raise ValueError("Torchvision is not installed.")
             import torchvision
-            video, audio, info = torchvision.io.read_video(path)
+            video, audio, info = torchvision.io.read_video(path, pts_unit="sec")
             if channel_first:
                 video = rearrange(video, 'T H W C -> T C H W')
             audio = rearrange(audio, 'C T -> T C')

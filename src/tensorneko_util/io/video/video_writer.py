@@ -51,7 +51,7 @@ class VideoWriter:
                 for output. None means no audio in output video file. Default: None.
             audio_fps (``int``, optional): The audio fps. Default: None.
             audio_codec (``str``, optional): The audio codec if audio is required. Default: None.
-            channel_first (``bool``, optional): Get image dimension (T, H, W, C) if False or (T, C, H, W) if True.
+            channel_first (``bool``, optional): Get video dimension (T, H, W, C) if False or (T, C, H, W) if True.
                 Default: False.
             backend (:class:`~tensorneko.backend.visual_lib.VisualLib`, optional): VisualLib backend.
                 Default: opencv if installed, then torchvision if installed, then ffmpeg if available.
@@ -101,7 +101,7 @@ class VideoWriter:
             if not VisualLib.pytorch_available():
                 raise ValueError("Torchvision is not installed.")
             import torchvision
-            torchvision.io.write_video(path, rearrange(video), video_fps, audio_fps=audio_fps, audio_array=audio)
+            torchvision.io.write_video(path, video, video_fps, audio_fps=audio_fps, audio_array=audio)
         elif backend == VisualLib.FFMPEG:
             if audio is not None:
                 raise ValueError("Write audio is not supported in ffmpeg backend.")
