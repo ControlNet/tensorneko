@@ -25,11 +25,11 @@ class FaceXZooFaceDetector(AbstractFaceDetector):
         detector = FaceXZooFaceDetector(FaceXZooFaceDetector.install(), "cuda:0")
 
         # process image, save to facexzoo_face_detector_out.jpg
-        detector.process_image("test/resource/image_sample/1.183.jpg",
+        detector.crop_image("test/resource/image_sample/1.183.jpg",
             "test/resource/temp_output/facexzoo_face_detector_out.jpg")
 
         # process video, save to facexzoo_face_detector_out.mp4
-        detector.process_video("test/resource/video_sample/sample.mp4",
+        detector.crop_video("test/resource/video_sample/sample.mp4",
             "test/resource/temp_output/facexzoo_face_detector_out.mp4")
 
     """

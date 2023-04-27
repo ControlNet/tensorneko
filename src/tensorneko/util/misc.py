@@ -8,7 +8,6 @@ import torch
 from torch import Tensor
 from torch.nn import Module
 
-from tensorneko_util.util import F, _
 from tensorneko_util.util.misc import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
     identity, list_to_dict, compose, circular_pad
 from .type import T, A
@@ -40,7 +39,10 @@ def reduce_dict_by(key: str, op: Callable[[T, T], T]) -> Callable[[List[Dict[str
         tensor([350.])
 
     """
-    return F() >> (map, _[key]) >> list >> F(reduce, op)
+    def wrapper(x: List[Dict[str, T]]) -> T:
+        values = [d[key] for d in x]
+        return reduce(op, values)
+    return wrapper
 
 
 def summarize_dict_by(key: str, op: Callable[[Union[Sequence[T], T]], T]
@@ -79,15 +81,14 @@ def summarize_dict_by(key: str, op: Callable[[Union[Sequence[T], T]], T]
         array([3.])
 
     """
-    return F() >> (map, _[key]) >> list >> ifelse(
-        lambda xs: type(xs[0]) is Tensor,
-        func_true=torch.vstack,
-        func_false=ifelse(
-            lambda xs: type(xs[0]) is np.ndarray,
-            func_true=numpy.vstack,
-            func_false=_
-        )
-    ) >> op
+    def wrapper(x: List[Dict[str, T]]) -> T:
+        values = [d[key] for d in x]
+        if type(values[0]) is Tensor:
+            values = torch.vstack(values)
+        elif type(values[0]) is np.ndarray:
+            values = np.vstack(values)
+        return op(values)
+    return wrapper
 
 
 def with_printed_shape(x: A) -> A:
@@ -108,7 +109,7 @@ def with_printed_shape(x: A) -> A:
         >>> x == y
         tensor([True, True, True])
     """
-    return F(with_printed, func=lambda tensor: tensor.shape)(x)
+    return with_printed(x, func=lambda tensor: tensor.shape)
 
 
 def is_bad_num(x: Tensor) -> Tensor:

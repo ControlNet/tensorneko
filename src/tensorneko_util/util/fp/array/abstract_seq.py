@@ -3,12 +3,13 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Union, Callable, List, Optional, Iterable
 
+from ..monad.monad import Monad
 from ...type import T, R
 from ....backend._tqdm import import_tqdm_auto
 from ....backend.parallel import ParallelType
 
 
-class AbstractSeq(Iterable[T], ABC):
+class AbstractSeq(Iterable[T], Monad[T], ABC):
 
     @abstractmethod
     def __getitem__(self, item: Union[int, slice]) -> Union[T, AbstractSeq[T]]:
@@ -42,7 +43,7 @@ class AbstractSeq(Iterable[T], ABC):
         ...
 
     @abstractmethod
-    def flatten(self) -> AbstractSeq[T]:
+    def flatten(self: AbstractSeq[AbstractSeq[T]]) -> AbstractSeq[T]:
         ...
 
     @abstractmethod
