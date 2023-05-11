@@ -179,7 +179,7 @@ class GAN(NekoModel, ABC):
         }
 
     def on_validation_epoch_end(self) -> None:
-        super().on_epoch_end()
+        super().on_validation_epoch_end()
         if self.sample_z is None:
             self.sample_z = torch.randn(self.num_samples, self.latent_dim, device=self.device)
         sample_generated = self.generator(self.sample_z)
