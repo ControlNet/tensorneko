@@ -3,7 +3,6 @@ from typing import Iterable
 import torch
 from torch import randn
 from torch.nn import Module
-from torch.utils.tensorboard import SummaryWriter
 
 from ..util import Shape
 
@@ -40,6 +39,7 @@ def log_graph(module: Module, input_shape_list: Iterable[Shape], log_dir: str = 
 
     """
 
+    from torch.utils.tensorboard import SummaryWriter
     writer = SummaryWriter(log_dir=log_dir)
     xs = list(map(lambda shape: randn(torch.Size((1, *shape))), input_shape_list))
     if len(xs) == 1:

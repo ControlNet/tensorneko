@@ -1,8 +1,8 @@
 from typing import Optional, Union, Sequence, Dict, List
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 import torch.nn
-from pytorch_lightning.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint
 from torch import Tensor
 from torch.optim import Adam
 from torch.utils.data import random_split, DataLoader

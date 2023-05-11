@@ -1,4 +1,4 @@
-from pytorch_lightning import Callback, Trainer, LightningModule
+from lightning.pytorch import Callback, Trainer, LightningModule
 
 
 class SystemStatsLogger(Callback):

@@ -4,14 +4,14 @@ from pathlib import Path
 from time import time
 from typing import Optional, Union, List, Dict
 
-from pytorch_lightning import Trainer, Callback
-from pytorch_lightning.accelerators import Accelerator
-from pytorch_lightning.callbacks import ModelCheckpoint, Checkpoint
-from pytorch_lightning.loggers import Logger, TensorBoardLogger
-from pytorch_lightning.plugins import PLUGIN_INPUT
-from pytorch_lightning.profilers import Profiler
-from pytorch_lightning.strategies import Strategy
-from pytorch_lightning.trainer.connectors.accelerator_connector import _LITERAL_WARN
+from lightning.pytorch import Trainer, Callback
+from lightning.pytorch.accelerators import Accelerator
+from lightning.pytorch.callbacks import ModelCheckpoint, Checkpoint
+from lightning.pytorch.loggers import Logger, TensorBoardLogger
+from lightning.pytorch.plugins import PLUGIN_INPUT
+from lightning.pytorch.profilers import Profiler
+from lightning.pytorch.strategies import Strategy
+from lightning.pytorch.trainer.connectors.accelerator_connector import _LITERAL_WARN
 
 from .callback import NilCallback, LrLogger, EpochNumLogger, EpochTimeLogger, GpuStatsLogger, SystemStatsLogger
 
@@ -128,6 +128,48 @@ class NekoTrainer(Trainer):
         self.log_on_step = log_every_n_steps > 0
         if self.log_on_epoch:
             log_every_n_steps = 10000000
+
+        # super().__init__(
+        #     accelerator = "auto",
+        #     strategy = "auto",
+        #     devices = "auto",
+        #     num_nodes = 1,
+        #     precision = "32-true",
+        #     logger = None,
+        #     callbacks = None,
+        #     fast_dev_run = False,
+        #     max_epochs = None,
+        #     min_epochs = None,
+        #     max_steps = -1,
+        #     min_steps = None,
+        #     max_time = None,
+        #     limit_train_batches = None,
+        #     limit_val_batches = None,
+        #     limit_test_batches = None,
+        #     limit_predict_batches = None,
+        #     overfit_batches = 0.0,
+        #     val_check_interval = None,
+        #     check_val_every_n_epoch = 1,
+        #     num_sanity_val_steps = None,
+        #     log_every_n_steps = None,
+        #     enable_checkpointing = None,
+        #     enable_progress_bar = None,
+        #     enable_model_summary = None,
+        #     accumulate_grad_batches = 1,
+        #     gradient_clip_val = None,
+        #     gradient_clip_algorithm = None,
+        #     deterministic = None,
+        #     benchmark = None,
+        #     inference_mode = True,
+        #     use_distributed_sampler = True,
+        #     profiler = None,
+        #     detect_anomaly = False,
+        #     barebones: = False,
+        #     plugins = None,
+        #     sync_batchnorm = False,
+        #     reload_dataloaders_every_n_epochs = 0,
+        #     default_root_dir = None,
+        # )
 
         super().__init__(
             logger=logger is not None,

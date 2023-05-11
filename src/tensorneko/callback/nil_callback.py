@@ -1,4 +1,4 @@
-from pytorch_lightning import Callback
+from lightning.pytorch import Callback
 
 
 class NilCallback(Callback):
