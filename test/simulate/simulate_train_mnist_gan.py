@@ -75,7 +75,7 @@ class WGANImpl(WGAN, GANImpl):
 
 if __name__ == '__main__':
     model = WGANImpl(128, 0.0002, 0.0003, gp_weight=10.0, d_steps=3)
-    trainer = NekoTrainer(log_every_n_steps=100, gpus=0, logger=model.name, precision=32, max_epochs=2,
+    trainer = NekoTrainer(log_every_n_steps=100, logger=model.name, precision=32, max_epochs=2,
                           enable_checkpointing=False,
                           callbacks=[DisplayMetricsCallback(), EarlyStoppingLR(0.00025, mode="all")])
 

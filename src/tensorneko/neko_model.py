@@ -1,15 +1,17 @@
 from abc import abstractmethod
-from typing import Optional, Dict, Union, Sequence, Any
+from typing import Optional, Dict, Union, Sequence, Any, List
 
 import torch
-from pytorch_lightning import LightningModule
-from pytorch_lightning.loggers import LightningLoggerBase
-from pytorch_lightning.utilities.types import EPOCH_OUTPUT, STEP_OUTPUT
+from lightning.pytorch import LightningModule
+from lightning.pytorch.loggers import Logger
+from lightning.pytorch.utilities.types import STEP_OUTPUT
 from torch import Tensor
 
 from .neko_module import NekoModule
 from .neko_trainer import NekoTrainer
 from .util import summarize_dict_by, Shape
+
+EPOCH_OUTPUT = List[STEP_OUTPUT]
 
 
 class NekoModel(LightningModule, NekoModule):
@@ -23,9 +25,9 @@ class NekoModel(LightningModule, NekoModule):
         input_shape (:class:`~tensorneko.util.Shape`, optional):
             An optional argument can allow it to plot a graph for TensorBoard
 
-        *args: Other arguments for :class:`~pytorch_lightning.core.lightning.LightningModule`
+        *args: Other arguments for :class:`~lightning.pytorch.core.lightning.LightningModule`
 
-        **kwargs: Other arguments for :class:`~pytorch_lightning.core.lightning.LightningModule`
+        **kwargs: Other arguments for :class:`~lightning.pytorch.core.lightning.LightningModule`
     """
     trainer: NekoTrainer
 
@@ -40,6 +42,8 @@ class NekoModel(LightningModule, NekoModule):
             self.input_shape = input_shape
             self.example_input_array = torch.rand([1, *input_shape])
         self.history = []
+        self.training_step_outputs = []
+        self.validation_step_outputs = []
 
     @abstractmethod
     def forward(self, *args, **kwargs):
@@ -53,7 +57,7 @@ class NekoModel(LightningModule, NekoModule):
         hiddens: Optional[Tensor] = None
     ) -> Dict[str, Tensor]:
         """
-        The method inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.training_step`.
+        The method inherit from :meth:`~lightning.pytorch.core.lightning.LightningModule.training_step`.
 
         Here you compute and return the training loss and some additional metrics for e.g.
         the progress bar or logger.
@@ -67,7 +71,7 @@ class NekoModel(LightningModule, NekoModule):
             optimizer_idx (``int``, optional): When using multiple optimizers, this argument will also be present.
 
             hiddens(:class:`~torch.Tensor`, optional): Passed in if
-                :paramref:`~pytorch_lightning.core.lightning.LightningModule.truncated_bptt_steps` > 0.
+                :paramref:`~lightning.pytorch.core.lightning.LightningModule.truncated_bptt_steps` > 0.
 
         Returns:
             ``Dict`` [``str``, :class:`~torch.Tensor`]:
@@ -75,7 +79,7 @@ class NekoModel(LightningModule, NekoModule):
 
         Notes:
             The return value can be other types, but you need to handle them by override the
-                method :meth:`~pytorch_lightning.TrainingModule.training_step_end`
+                method :meth:`~lightning.pytorch.TrainingModule.training_step_end`
 
         Examples::
 
@@ -94,7 +98,7 @@ class NekoModel(LightningModule, NekoModule):
         dataloader_idx: Optional[int] = None
     ) -> Dict[str, Tensor]:
         """
-        The method inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.validation_step`.
+        The method inherit from :meth:`~lightning.pytorch.core.lightning.LightningModule.validation_step`.
 
         Operates on a single batch of data from the validation set.
         In this step you'd might generate examples or calculate anything of interest like accuracy.
@@ -125,10 +129,10 @@ class NekoModel(LightningModule, NekoModule):
 
     def predict_step(self, batch: Tensor, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
         """
-        Inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.predict_step`.
+        Inherit from :meth:`~lightning.pytorch.core.lightning.LightningModule.predict_step`.
 
-        Step function called during :meth:`~pytorch_lightning.trainer.trainer.Trainer.predict`.
-        By default, it calls :meth:`~pytorch_lightning.core.lightning.LightningModule.forward`.
+        Step function called during :meth:`~lightning.pytorch.trainer.trainer.Trainer.predict`.
+        By default, it calls :meth:`~lightning.pytorch.core.lightning.LightningModule.forward`.
         Override to add any processing logic.
 
         Args:
@@ -150,14 +154,14 @@ class NekoModel(LightningModule, NekoModule):
 
     @abstractmethod
     def configure_optimizers(self):
-        """Inherit from :meth:`~pytorch_lightning.core.lightning.LightningModule.configure_optimizers`."""
+        """Inherit from :meth:`~lightning.pytorch.core.lightning.LightningModule.configure_optimizers`."""
         ...
 
     @property
-    def logger(self) -> Optional[LightningLoggerBase]:
+    def logger(self) -> Optional[Logger]:
         """
         Returns:
-            :class:`~pytorch_lightning.loggers.LightningLoggerBase` | ``None``:
+            :class:`~lightning.pytorch.loggers.LightningLoggerBase` | ``None``:
                 The training or validation logger for the module.
         """
         if not self.trainer:
@@ -165,23 +169,31 @@ class NekoModel(LightningModule, NekoModule):
         else:
             return self.trainer.logger
 
-    def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-        """For each training epoch end, log the metrics"""
-        if self.trainer.log_on_epoch and self.logger is not None:
-            self.log_on_training_epoch_end(outputs)
-
-    def validation_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-        """For each validation epoch end, log the metrics"""
-        if self.logger is not None:
-            self.log_on_validation_epoch_end(outputs)
-
-    def training_step_end(self, output: STEP_OUTPUT) -> STEP_OUTPUT:
-        """For each training step end, log the metrics"""
+    def on_train_batch_end(self, outputs: STEP_OUTPUT, batch: Any, batch_idx: int) -> None:
+        """For each training step end, log the metrics. Append the outputs of training step to the list"""
+        self.training_step_outputs.append(outputs)
         if self.trainer.log_on_step \
             and self.logger is not None \
             and self.trainer.global_step % self.trainer.log_every_n_steps == 0:
-            self.log_on_training_step_end(output)
-        return output
+            self.log_on_training_step_end(outputs)
+
+    def on_validation_batch_end(
+        self, outputs: Optional[STEP_OUTPUT], batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> None:
+        """Append the outputs of validation step to the list"""
+        self.validation_step_outputs.append(outputs)
+
+    def on_train_epoch_end(self) -> None:
+        """For each training epoch end, log the metrics"""
+        if self.trainer.log_on_epoch and self.logger is not None:
+            self.log_on_training_epoch_end(self.training_step_outputs)
+        self.training_step_outputs.clear()
+
+    def on_validation_epoch_end(self) -> None:
+        """For each validation epoch end, log the metrics"""
+        if self.logger is not None:
+            self.log_on_validation_epoch_end(self.validation_step_outputs)
+        self.validation_step_outputs.clear()
 
     def log_on_training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         """Log the training epoch outputs"""
@@ -206,7 +218,7 @@ class NekoModel(LightningModule, NekoModule):
             self.logger.log_metrics({key: value}, step=self.trainer.global_step)
             self.log(key, value, on_epoch=True, on_step=False, logger=False, sync_dist=self.distributed)
             self.log(f"val_{key}", value, on_epoch=True, on_step=False, logger=False, prog_bar=True,
-                     sync_dist=self.distributed)
+                sync_dist=self.distributed)
 
     def log_on_training_step_end(self, output: STEP_OUTPUT) -> None:
         """Log the training step outputs"""
@@ -217,10 +229,11 @@ class NekoModel(LightningModule, NekoModule):
             self.log(key, value, on_epoch=False, on_step=True, logger=False, sync_dist=self.distributed)
         self.history.append(history_item)
 
-    def test_step_end(self, output: STEP_OUTPUT) -> Optional[STEP_OUTPUT]:
+    def on_test_batch_end(
+        self, outputs: Optional[STEP_OUTPUT], batch: Any, batch_idx: int, dataloader_idx: int = 0
+    ) -> None:
         """For each test step end, log the metrics"""
-        self.log_dict(output, sync_dist=self.distributed)
-        return output
+        self.log_dict(outputs, sync_dist=self.distributed)
 
     def log_image(self, name: str, image: torch.Tensor) -> None:
         """Log an image to the logger"""

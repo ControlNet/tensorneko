@@ -1,8 +1,8 @@
 from typing import Optional, Union, Sequence, Dict, List
 
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 import torch.nn
-from pytorch_lightning.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint
 from torch import Tensor
 from torch.optim import Adam
 from torch.utils.data import random_split, DataLoader
@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     dm = MNISTDataModule()
 
-    trainer = NekoTrainer(log_every_n_steps=50, gpus=0, logger=model.name, precision=32, max_epochs=2,
+    trainer = NekoTrainer(log_every_n_steps=50, logger=model.name, precision=32, max_epochs=2,
                           callbacks=[ModelCheckpoint(dirpath="./ckpt",
                                                      save_last=True, filename=model.name + "-{epoch}-{val_acc:.3f}",
                                                      monitor="val_acc", mode="max"

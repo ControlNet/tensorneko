@@ -12,7 +12,7 @@
 <div align="center">    
     <a href="https://www.python.org/"><img src="https://img.shields.io/pypi/pyversions/tensorneko?style=flat-square"></a>
     <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-%3E%3D1.9.0-EE4C2C?style=flat-square&logo=pytorch"></a>
-    <a href="https://www.pytorchlightning.ai/"><img src="https://img.shields.io/badge/Pytorch%20Lightning-1.7.*-792EE5?style=flat-square&logo=pytorch-lightning"></a>
+    <a href="https://www.pytorchlightning.ai/"><img src="https://img.shields.io/badge/Lightning-2.0.*-792EE5?style=flat-square&logo=lightning"></a>
 </div>
 
 <div align="center">
@@ -280,7 +280,7 @@ import torch.nn
 from torch import Tensor
 from torch.optim import Adam
 from torchmetrics import Accuracy
-from pytorch_lightning.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint
 
 import tensorneko as neko
 from tensorneko.util import get_activation, get_loss
