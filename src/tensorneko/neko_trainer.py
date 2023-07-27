@@ -49,7 +49,7 @@ class NekoTrainer(Trainer):
         gradient_clip_val: Optional[Union[int, float]] = None,
         gradient_clip_algorithm: Optional[str] = None,
         deterministic: Optional[Union[bool, _LITERAL_WARN]] = None,
-        benchmark: Optional[bool] = None,
+        benchmark: Optional[bool] = True,
         inference_mode: bool = True,
         use_distributed_sampler: bool = True,
         profiler: Optional[Union[Profiler, str]] = None,
