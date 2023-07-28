@@ -243,3 +243,7 @@ class NekoModel(LightningModule, NekoModule):
             return
 
         self.logger.experiment.add_image(name, torch.clip(image, 0, 1), self.trainer.global_step)
+
+    def on_train_start(self) -> None:
+        """Log the model graph to tensorboard when the input shape is set"""
+        self.logger.log_graph(self, self.example_input_array)
