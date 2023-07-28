@@ -28,6 +28,13 @@ except ImportError:
     Hdf5Writer = object
     h5py_available = False
 
+try:
+    from .toml import TomlWriter
+    toml_available = True
+except ImportError:
+    TomlWriter = object
+    toml_available = False
+
 
 class Writer:
 
@@ -41,6 +48,7 @@ class Writer:
         self._mat = None
         self._yaml = None
         self._h5 = None
+        self._toml = None
 
     @property
     def mat(self) -> Type[MatWriter]:
@@ -68,3 +76,12 @@ class Writer:
             return self._h5
         else:
             raise ImportError("To use the hdf5 writer, please install h5py.")
+
+    @property
+    def toml(self) -> Type[TomlWriter]:
+        if toml_available:
+            if self._toml is None:
+                self._toml = TomlWriter
+            return self._toml
+        else:
+            raise ImportError("To use the toml writer, please install toml.")

@@ -28,6 +28,13 @@ except ImportError:
     Hdf5Reader = object
     h5py_available = False
 
+try:
+    from .toml import TomlReader
+    toml_available = True
+except ImportError:
+    TomlReader = object
+    toml_available = False
+
 
 class Reader:
 
@@ -41,6 +48,7 @@ class Reader:
         self._mat = None
         self._yaml = None
         self._h5 = None
+        self._toml = None
 
     @property
     def mat(self) -> Type[MatReader]:
@@ -68,3 +76,12 @@ class Reader:
             return self._h5
         else:
             raise ImportError("To use the hdf5 reader, please install h5py.")
+
+    @property
+    def toml(self) -> Type[TomlReader]:
+        if toml_available:
+            if self._toml is None:
+                self._toml = TomlReader
+            return self._toml
+        else:
+            raise ImportError("To use the toml reader, please install toml.")
