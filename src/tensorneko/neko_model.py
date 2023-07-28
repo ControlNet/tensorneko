@@ -171,6 +171,7 @@ class NekoModel(LightningModule, NekoModule):
 
     def on_train_batch_end(self, outputs: STEP_OUTPUT, batch: Any, batch_idx: int) -> None:
         """For each training step end, log the metrics. Append the outputs of training step to the list"""
+        outputs = {k: v.detach() for k, v in outputs.items()}
         self.training_step_outputs.append(outputs)
         if self.trainer.log_on_step \
             and self.logger is not None \
@@ -181,6 +182,7 @@ class NekoModel(LightningModule, NekoModule):
         self, outputs: Optional[STEP_OUTPUT], batch: Any, batch_idx: int, dataloader_idx: int = 0
     ) -> None:
         """Append the outputs of validation step to the list"""
+        outputs = {k: v.detach() for k, v in outputs.items()}
         self.validation_step_outputs.append(outputs)
 
     def on_train_epoch_end(self) -> None:
