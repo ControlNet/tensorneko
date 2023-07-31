@@ -56,7 +56,15 @@ class VisualLib(Enum):
         if _VisualLibAvailability.is_ffmpeg_available is None:
             ffmpeg_available = subprocess.run('ffmpeg -version', stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL, shell=True).returncode == 0
-            _VisualLibAvailability.is_ffmpeg_available = ffmpeg_available
+            if ffmpeg_available:
+                try:
+                    import ffmpeg
+                    _VisualLibAvailability.is_ffmpeg_available = True
+                except ImportError:
+                    _VisualLibAvailability.is_ffmpeg_available = False
+            else:
+                _VisualLibAvailability.is_ffmpeg_available = False
+
         return _VisualLibAvailability.is_ffmpeg_available
 
     @staticmethod
