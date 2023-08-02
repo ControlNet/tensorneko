@@ -1,5 +1,7 @@
 from typing import Optional
 
+import numpy as np
+
 from .audio_data import AudioData
 from .._default_backends import _default_audio_io_backend
 from ...backend.audio_lib import AudioLib
@@ -30,6 +32,33 @@ class AudioReader:
                 raise ValueError("Torchaudio is not available.")
             import torchaudio
             return AudioData(*torchaudio.load(path, channels_first=channel_first))
+        elif backend == AudioLib.FFMPEG:
+            if not AudioLib.ffmpeg_available():
+                raise ValueError("FFmpeg is not available.")
+            import ffmpeg
+
+            for stream in ffmpeg.probe(path)["streams"]:
+                if stream["codec_type"] == "audio":
+                    sample_rate = int(stream["sample_rate"])
+                    channel = int(stream["channels"])
+                    break
+            else:
+                raise RuntimeError("No audio stream found.")
+
+            try:
+                out, _ = (
+                    ffmpeg.input(path, threads=0)
+                    .output("-", format="s16le", acodec="pcm_s16le")
+                    .run(cmd=["ffmpeg", "-nostdin"], capture_stdout=True, capture_stderr=True)
+                )
+            except ffmpeg.Error as e:
+                raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+
+            arr = np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+            arr = arr.reshape(-1, channel)
+            arr = arr.T if channel_first else arr
+
+            return AudioData(arr, sample_rate)
         else:
             raise ValueError("Unknown audio library: {}".format(backend))
 

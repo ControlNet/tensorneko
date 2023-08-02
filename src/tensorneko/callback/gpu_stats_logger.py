@@ -25,7 +25,7 @@ class GpuStatsLogger(Callback):
                 f"gpu{gpu.index}_utilization": gpu.utilization / 100,
                 f"gpu{gpu.index}_power_draw": float(gpu.power_draw),
                 f"gpu{gpu.index}_power_percentage": gpu.power_draw / gpu.power_limit,
-                f"gpu{gpu.index}_fan_speed": float(gpu.fan_speed),
+                f"gpu{gpu.index}_fan_speed": float(gpu.fan_speed) if gpu.fan_speed is not None else 0.,
             }
             pl_module.logger.log_metrics(logged_info, step=trainer.global_step)
             pl_module.log_dict(logged_info, logger=False, sync_dist=pl_module.distributed)

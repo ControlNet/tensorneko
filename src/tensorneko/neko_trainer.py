@@ -215,8 +215,7 @@ class NekoTrainer(Trainer):
         self.has_no_logger = logger is None
 
         self.logger_train = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
-            version=os.path.join(self.log_name, "train"), log_graph=False
-            # TODO: Fix log_Graph
+            version=os.path.join(self.log_name, "train"), log_graph=True
         ) if self.has_no_logger is not None else None
         self.logger_val = TensorBoardLogger(save_dir=self.default_root_dir, name="logs",
             version=os.path.join(self.log_name, "val"), log_graph=False
