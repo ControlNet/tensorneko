@@ -9,7 +9,8 @@ from tensorneko_util.util import download_file, WindowMerger
 from . import type
 from .configuration import Configuration
 from .misc import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
-    generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, circular_pad
+    generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, circular_pad, \
+    load_py
 from .misc import get_tensorneko_path
 from .dispatched_misc import sparse2binary, binary2sparse
 from .reproducibility import Seed
@@ -72,6 +73,7 @@ __all__ = [
     "subscribe_thread",
     "Singleton",
     "circular_pad",
+    "load_py",
     "download_file",
     "WindowMerger",
 ]
