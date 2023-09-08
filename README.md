@@ -474,12 +474,7 @@ This library provides event bus based reactive tools. The API integrates the Pyt
 
 ```python
 # useful decorators for default event bus
-from tensorneko.util import (
-    subscribe, # run in the main thread
-    subscribe_thread, # run in a new thread
-    subscribe_async, # run async
-    subscribe_process # run in a new process
-)
+from tensorneko.util import subscribe
 # Event base type
 from tensorneko.util import Event
 
@@ -488,13 +483,24 @@ class LogEvent(Event):
         self.message = message
 
 # the event argument should be annotated correctly
-@subscribe
+@subscribe # run in the main thread
 def log_information(event: LogEvent):
     print(event.message)
 
-@subscribe_thread
+
+@subscribe.thread # run in a new thread
 def log_information_thread(event: LogEvent):
     print(event.message, "in another thread")
+
+
+@subscribe.coro # run with async
+async def log_information_async(event: LogEvent):
+    print(event.message, "async")
+
+
+@subscribe.process # run in a new process
+def log_information_process(event: LogEvent):
+    print(event.message, "in a new process")
 
 if __name__ == '__main__':
     # emit an event, and then the event handler will be invoked
@@ -502,7 +508,9 @@ if __name__ == '__main__':
     LogEvent("Hello world!")
     # one possible output:
     # Hello world! in another thread
+    # Hello world! async
     # Hello world!
+    # Hello world! in a new process
 ```
 
 ### Multiple Dispatch

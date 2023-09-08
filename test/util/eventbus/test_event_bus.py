@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from itertools import permutations
 
-from tensorneko_util.util import subscribe, subscribe_async, subscribe_thread, Event
+from tensorneko_util.util import subscribe, Event
 
 
 @subscribe
@@ -35,13 +35,13 @@ def thread_handler_normal(event: ThreadEvent):
     print("thread_handler_normal is called, x =", event.x)
 
 
-@subscribe_thread
+@subscribe.thread
 def thread_handler_thread(event: ThreadEvent):
     time.sleep(random.random())
     print("thread_handler_thread is called, x =", event.x)
 
 
-@subscribe_thread
+@subscribe.thread
 def thread_handler_thread(event: ThreadEvent):
     time.sleep(random.random())
     print("thread_handler_thread2 is called, x =", event.x)
@@ -52,13 +52,13 @@ class AsyncEvent(Event):
         self.x = x
 
 
-@subscribe_async
+@subscribe.coro
 async def async_handler_async(event: AsyncEvent):
     await asyncio.sleep(random.random())
     print("async_handler_async is called, x =", event.x)
 
 
-@subscribe_async
+@subscribe.coro
 async def async_handler_async(event: AsyncEvent):
     await asyncio.sleep(random.random())
     print("async_handler_async2 is called, x =", event.x)
@@ -75,13 +75,13 @@ def mixed_handler_normal(event: MixedEvent):
     print("mixed_handler_normal is called, x =", event.x)
 
 
-@subscribe_thread
+@subscribe.thread
 def mixed_handler_thread(event: MixedEvent):
     time.sleep(random.random())
     print("mixed_handler_thread is called, x =", event.x)
 
 
-@subscribe_async
+@subscribe.coro
 async def mixed_handler_async(event: MixedEvent):
     await asyncio.sleep(random.random())
     print("mixed_handler_async is called, x =", event.x)

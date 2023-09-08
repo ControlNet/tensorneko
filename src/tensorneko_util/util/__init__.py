@@ -7,7 +7,7 @@ from .misc import generate_inf_seq, compose, listdir, with_printed, ifelse, dict
 from .dispatched_misc import sparse2binary, binary2sparse
 from .ref import ref
 from .timer import Timer
-from .eventbus import Event, EventBus, EventHandler, subscribe, subscribe_async, subscribe_process, subscribe_thread
+from .eventbus import Event, EventBus, EventHandler, subscribe
 from .singleton import Singleton
 from .downloader import download_file
 from .window_merger import WindowMerger
@@ -46,9 +46,6 @@ __all__ = [
     "Event",
     "EventBus",
     "subscribe",
-    "subscribe_async",
-    "subscribe_process",
-    "subscribe_thread",
     "Singleton",
     "circular_pad",
     "load_py",

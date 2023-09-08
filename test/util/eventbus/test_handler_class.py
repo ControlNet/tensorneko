@@ -3,7 +3,7 @@ import random
 import time
 import unittest
 
-from tensorneko_util.util import subscribe, subscribe_thread, subscribe_async, Event
+from tensorneko_util.util import subscribe, Event
 from tensorneko_util.util.eventbus.bus import EventHandler
 
 
@@ -29,7 +29,7 @@ class AddValueThreadEvent(Event):
         self.value = value
 
 
-@subscribe_thread
+@subscribe.thread
 class CustomThreadHandler(EventHandler):
 
     def __init__(self):
@@ -46,7 +46,7 @@ class AddValueAsyncEvent(Event):
         self.value = value
 
 
-@subscribe_async
+@subscribe.coro
 class CustomAsyncHandler(EventHandler):
 
     def __init__(self):
