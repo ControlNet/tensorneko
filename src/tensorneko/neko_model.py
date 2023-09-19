@@ -228,7 +228,8 @@ class NekoModel(LightningModule, NekoModule):
         for key, value in output.items():
             history_item[key] = value
             self.logger.log_metrics({key: value}, step=self.trainer.global_step)
-            self.log(key, value, on_epoch=False, on_step=True, logger=False, sync_dist=self.distributed)
+            self.log(key, value, on_epoch=False, on_step=True, logger=False, prog_bar=key == "loss",
+                sync_dist=self.distributed)
         self.history.append(history_item)
 
     def on_test_batch_end(
