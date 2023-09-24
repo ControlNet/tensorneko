@@ -176,11 +176,11 @@ def clip_video(video_path: str, output_path: str, start_time: float, end_time: f
 
     if precise:
         args = [
-            "-ss", str(start_time), "-to", str(end_time), "-i", video_path, "-c", "copy", output_path, *ffmpeg_args
+            "-i", video_path, "-ss", str(start_time), "-to", str(end_time), "-c", "copy", output_path, *ffmpeg_args
         ]
     else:
         args = [
-            "-i", video_path, "-ss", str(start_time), "-to", str(end_time), "-c", "copy", output_path, *ffmpeg_args
+            "-ss", str(start_time), "-to", str(end_time), "-i", video_path, "-c", "copy", output_path, *ffmpeg_args
         ]
 
     return ffmpeg_command(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

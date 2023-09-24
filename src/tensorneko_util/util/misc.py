@@ -1,3 +1,4 @@
+import importlib.util
 import os
 from functools import reduce
 from os.path import dirname, abspath
@@ -218,3 +219,19 @@ def circular_pad(x: List, target: int) -> List:
         return x + x[:target - len(x)]
     else:
         return circular_pad(x + x, target)
+
+
+def load_py(path: str) -> Any:
+    """
+    Load a python file as a module.
+
+    Args:
+        path (``str``): The path of the python file.
+
+    Returns:
+        ``Any``: The loaded module.
+    """
+    spec = importlib.util.spec_from_file_location("module.name", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module

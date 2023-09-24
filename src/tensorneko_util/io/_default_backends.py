@@ -1,4 +1,5 @@
 from ..backend.visual_lib import VisualLib
+from ..backend.audio_lib import AudioLib
 
 
 def _default_image_io_backend():
@@ -23,7 +24,7 @@ def _default_video_io_backend():
 
 
 def _default_audio_io_backend():
-    if VisualLib.pytorch_available():
-        return VisualLib.PYTORCH
+    if AudioLib.pytorch_available():
+        return AudioLib.PYTORCH
     else:
         raise ValueError("No backend available. Please install Torchaudio.")

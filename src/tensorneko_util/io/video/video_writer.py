@@ -1,4 +1,5 @@
 import pathlib
+import warnings
 from typing import Optional, Union
 
 import numpy as np
@@ -36,12 +37,12 @@ class VideoWriter:
     @classmethod
     @dispatch
     def to(cls, path: str, video: T_ARRAY, video_fps: float, audio: T_ARRAY = None,
-        audio_fps: Optional[int] = None, audio_codec: str = None, channel_first: bool = False,
+        audio_fps: int = None, audio_codec: str = None, channel_first: bool = False,
         backend: VisualLib = None
     ) -> None:
         """
         Write to video file from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (T, C, H, W).
-
+        TODO: Buggy when the argument is too much.
         Args:
             path (``str``): The path of output file.
             video (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The video tensor or array with (T, C, H, W) for
@@ -63,13 +64,19 @@ class VideoWriter:
         if channel_first:
             video = rearrange(video, "t c h w -> t h w c")
 
+        # if the video is already a uint8 array, give a warning
         # to uint8
         if isinstance(video, np.ndarray):
+            if video.dtype == np.uint8:
+                warnings.warn("The video array is already a uint8 array. The output video may be incorrect.")
             video = (video * 255).astype(np.uint8)
         else:
             try:
                 import torch
                 if isinstance(video, torch.Tensor):
+                    if video.dtype == torch.uint8:
+                        warnings.warn("The video tensor is already a uint8 tensor. The output video may be incorrect.")
+
                     if backend == VisualLib.PYTORCH:
                         video = (video * 255).type(torch.IntTensor)
                     else:
@@ -101,7 +108,8 @@ class VideoWriter:
             if not VisualLib.pytorch_available():
                 raise ValueError("Torchvision is not installed.")
             import torchvision
-            torchvision.io.write_video(path, video, video_fps, audio_fps=audio_fps, audio_array=audio)
+            torchvision.io.write_video(path, video, video_fps, audio_fps=audio_fps, audio_array=audio,
+                audio_codec=audio_codec)
         elif backend == VisualLib.FFMPEG:
             if audio is not None:
                 raise ValueError("Write audio is not supported in ffmpeg backend.")
