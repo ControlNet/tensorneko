@@ -1,8 +1,9 @@
 import importlib.util
 import os
+import time
 from functools import reduce
 from os.path import dirname, abspath
-from typing import Callable, List, Dict, Iterable, Sequence, Any
+from typing import Callable, List, Dict, Iterable, Sequence, Any, Optional, Type, TypeVar, Union, Tuple
 
 from .fp import F, _, Stream
 from .type import T, R
@@ -235,3 +236,39 @@ def load_py(path: str) -> Any:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+T_E = TypeVar("T_E", bound=Exception)
+
+
+def try_until_success(func: Callable, *args, max_trials: Optional[int] = None, sleep_time: int = 0,
+    exception_type: Union[Type[T_E], Tuple[T_E, ...]] = Exception, **kwargs
+) -> Any:
+    """
+    Try to run the function until success.
+
+    Args:
+        func (``Callable``): The function to run.
+        max_trials (``int``, optional): The max try times. None for unlimited. Default: None.
+        sleep_time (``int``, optional): The sleep time between each try. Default: 0.
+        exception_type (``Type[Exception] | (Type[Exception], ...)``, optional): The exception types to catch.
+            Default: Exception.
+        *args: The args for the function.
+        **kwargs: The kwargs for the function.
+
+    Returns:
+        ``Any``: The output of the function.
+
+    Raises:
+        ``Exception``: The exception from the function.
+    """
+    trials = 0
+    while True:
+        try:
+            return func(*args, **kwargs)
+        except exception_type as e:
+            trials += 1
+            if max_trials is not None and trials > max_trials:
+                raise e
+        if sleep_time > 0:
+            time.sleep(sleep_time)

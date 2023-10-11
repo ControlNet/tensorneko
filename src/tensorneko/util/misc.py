@@ -9,7 +9,7 @@ from torch import Tensor
 from torch.nn import Module
 
 from tensorneko_util.util.misc import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
-    identity, list_to_dict, compose, circular_pad, load_py
+    identity, list_to_dict, compose, circular_pad, load_py, try_until_success
 from .type import T, A
 
 
@@ -39,9 +39,11 @@ def reduce_dict_by(key: str, op: Callable[[T, T], T]) -> Callable[[List[Dict[str
         tensor([350.])
 
     """
+
     def wrapper(x: List[Dict[str, T]]) -> T:
         values = [d[key] for d in x]
         return reduce(op, values)
+
     return wrapper
 
 
@@ -81,6 +83,7 @@ def summarize_dict_by(key: str, op: Callable[[Union[Sequence[T], T]], T]
         array([3.])
 
     """
+
     def wrapper(x: List[Dict[str, T]]) -> T:
         values = [d[key] for d in x]
         if type(values[0]) is Tensor:
@@ -88,6 +91,7 @@ def summarize_dict_by(key: str, op: Callable[[Union[Sequence[T], T]], T]
         elif type(values[0]) is np.ndarray:
             values = np.vstack(values)
         return op(values)
+
     return wrapper
 
 
@@ -160,3 +164,4 @@ identity = identity
 list_to_dict = list_to_dict
 circular_pad = circular_pad
 load_py = load_py
+try_until_success = try_until_success
