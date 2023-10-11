@@ -241,14 +241,14 @@ def load_py(path: str) -> Any:
 T_E = TypeVar("T_E", bound=Exception)
 
 
-def try_until_success(func: Callable, *args, max_trials: Optional[int] = None, sleep_time: int = 0,
+def try_until_success(func: Callable[[...], T], *args, max_trials: Optional[int] = None, sleep_time: int = 0,
     exception_type: Union[Type[T_E], Tuple[T_E, ...]] = Exception, **kwargs
-) -> Any:
+) -> T:
     """
     Try to run the function until success.
 
     Args:
-        func (``Callable``): The function to run.
+        func (``(...) -> T``): The function to run.
         max_trials (``int``, optional): The max try times. None for unlimited. Default: None.
         sleep_time (``int``, optional): The sleep time between each try. Default: 0.
         exception_type (``Type[Exception] | (Type[Exception], ...)``, optional): The exception types to catch.
@@ -257,7 +257,7 @@ def try_until_success(func: Callable, *args, max_trials: Optional[int] = None, s
         **kwargs: The kwargs for the function.
 
     Returns:
-        ``Any``: The output of the function.
+        ``T``: The output of the function.
 
     Raises:
         ``Exception``: The exception from the function.
