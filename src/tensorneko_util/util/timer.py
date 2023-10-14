@@ -30,25 +30,46 @@ class Timer:
             time.sleep(1)
             print("f")
 
+        # disable verbose and get time manually
+        with Timer(verbose=False) as t:
+            time.sleep(1)
+            dt = t.time("sleep A")
+            print(f"Time of sleep A: {dt}")
+            time.sleep(1)
+            dt = t.time("sleep B")
+            print(f"Time of sleep B: {dt}")
+            print(f"Time of sleep A and B: {t.elapsed}")
+            time.sleep(1)
+            print(f"Total time: {t.elapsed}")
+
     """
 
-    def __init__(self):
+    def __init__(self, verbose: bool = True):
         self.times = []
         self.names = []
         self.total_time = None
+        self.verbose = verbose
 
     def __enter__(self):
         self.times.append(time.perf_counter())
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.total_time = time.perf_counter() - self.times[0]
-        print(self._make_str("Total", self.total_time))
+    @property
+    def elapsed(self):
+        return time.perf_counter() - self.times[0]
 
-    def time(self, name: Optional[str] = None):
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.total_time = self.elapsed
+        if self.verbose:
+            print(self._make_str("Total", self.total_time))
+
+    def time(self, name: Optional[str] = None) -> float:
         self.times.append(time.perf_counter())
         name = name or ""
-        print(self._make_str(name, time.perf_counter() - self.times[-2]))
+        dt = time.perf_counter() - self.times[-2]
+        if self.verbose:
+            print(self._make_str(name, dt))
+        return dt
 
     def __call__(self, f: Callable):
         @wraps(f)

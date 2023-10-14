@@ -85,3 +85,31 @@ class Reader:
             return self._toml
         else:
             raise ImportError("To use the toml reader, please install toml.")
+
+    def __call__(self, path: str, *args, **kwargs):
+        """Automatically infer the file type and return the corresponding result. """
+        if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".bmp"):
+            return self.image(path, *args, **kwargs)
+        elif path.endswith(".txt"):
+            return self.text(path, *args, **kwargs)
+        elif path.endswith(".json"):
+            return self.json(path, *args, **kwargs)
+        elif path.endswith(".mp4") or path.endswith(".avi") or path.endswith(".mov") or path.endswith(".mkv"):
+            return self.video(path, *args, **kwargs)
+        elif path.endswith(".wav") or path.endswith(".mp3") or path.endswith(".flac"):
+            return self.audio(path, *args, **kwargs)
+        elif path.endswith(".pkl") or path.endswith(".pickle"):
+            assert len(args) == 0 and len(kwargs) == 0, "Pickle reader does not support extra arguments."
+            return self.pickle(path)
+        elif path.endswith(".mat"):
+            return self.mat(path, *args, **kwargs)
+        elif path.endswith(".yaml") or path.endswith(".yml"):
+            return self.yaml(path, *args, **kwargs)
+        elif path.endswith(".h5") or path.endswith(".hdf5"):
+            assert len(args) == 0 and len(kwargs) == 0, "Hdf5 reader does not support extra arguments."
+            return self.h5(path)
+        elif path.endswith(".toml"):
+            assert len(args) == 0 and len(kwargs) == 0, "Toml reader does not support extra arguments."
+            return self.toml(path)
+        else:
+            raise ValueError("Unknown file type: {}".format(path))
