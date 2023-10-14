@@ -128,6 +128,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install wheel
           python init.py
 
       - name: Build package for tensorneko_util
