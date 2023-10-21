@@ -1,5 +1,6 @@
 import IPython
-from IPython.display import Audio, Video, YouTubeVideo, Code
+from IPython.display import Audio, Video, YouTubeVideo, Code, Image
+import sys
 
 
 def audio(path: str):
@@ -12,6 +13,10 @@ def video(path: str, embed=False):
 
 def youtube_video(id_: str):
     return IPython.display.display(YouTubeVideo(id_))
+
+
+def image(path: str):
+    return IPython.display.display(Image(path))
 
 
 def code(path: str, language: str = None):
@@ -27,3 +32,27 @@ def code(path: str, language: str = None):
 
     IPython.display.Code._repr_html_ = _jupyterlab_repr_html_
     return IPython.display.display(Code(path, language=language))
+
+
+class Display:
+    audio = staticmethod(audio)
+    video = staticmethod(video)
+    image = staticmethod(image)
+    youtube_video = staticmethod(youtube_video)
+    code = staticmethod(code)
+
+    def __call__(self, path: str, *args, **kwargs):
+        ext = path.split(".")[-1]
+        if ext in ("mp3", "wav", "ogg"):
+            return self.audio(path)
+        elif ext in ("mp4", "avi", "mkv"):
+            return self.video(path, *args, **kwargs)
+        elif ext in ("jpg", "jpeg", "png", "bmp", "gif"):
+            return self.image(path)
+        elif ext in ("py", "c", "cpp", "java", "js", "html", "css", "json", "yaml", "yml", "xml", "sh", "bat"):
+            return self.code(path, *args, **kwargs)
+        else:
+            raise ValueError(f"Unknown file type: {ext}")
+
+
+sys.modules[__name__] = Display()
