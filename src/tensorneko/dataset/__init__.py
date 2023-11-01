@@ -6,5 +6,6 @@ from . import sampler
 __all__ = [
     "RoundRobinDataset",
     "NestedDataset",
+    "ListDataset",
     "sampler"
 ]
