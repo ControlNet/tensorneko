@@ -4,7 +4,7 @@ from typing import List, Optional
 from torch.utils.data import Dataset
 from torch.utils.data.dataset import T_co
 
-from tensorneko.util import circular_pad
+from ..util import circular_pad
 
 
 class RoundRobinDataset(Dataset[T_co]):

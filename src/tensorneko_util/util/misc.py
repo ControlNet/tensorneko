@@ -4,6 +4,7 @@ import time
 from functools import reduce
 from os.path import dirname, abspath
 from typing import Callable, List, Dict, Iterable, Sequence, Any, Optional, Type, TypeVar, Union, Tuple
+import numpy as np
 
 from .fp import F, _, Stream
 from .type import T, R
@@ -272,3 +273,31 @@ def try_until_success(func: Callable[[Any], T], *args, max_trials: Optional[int]
                 raise e
         if sleep_time > 0:
             time.sleep(sleep_time)
+
+
+def sample_indexes(total_frames: int, n_frames: int, sample_rate: int) -> np.ndarray:
+    """
+    Sample continuous indexes from total frames.
+
+    Args:
+        total_frames (``int``): The total number of items from source.
+        n_frames (``int``): The number of items to sample.
+        sample_rate (``int``): The sample rate to retrieve the continuous items.
+    Returns:
+        ``np.ndarray``: The sampled indexes.
+
+    Examples::
+
+        >>> sample_indexes(10, 3, 1)
+        array([5, 6, 7])
+
+        >>> sample_indexes(10, 3, 2)
+        array([1, 3, 5])
+
+        >>> sample_indexes(10, 3, 3)
+        array([2, 5, 8])
+4
+    """
+
+    start_ind = np.random.randint(0, total_frames - (n_frames * sample_rate) + 2, ())
+    return np.arange(n_frames) * sample_rate + start_ind

@@ -70,7 +70,7 @@ def iou_2d(proposal: Union[Tensor, ndarray], target: Union[Tensor, ndarray]) -> 
 
     inner_x1 = torch.maximum(proposal_x1, target_x1)
     inner_y1 = torch.maximum(proposal_y1, target_y1)
-    inner_x2 = torch.minimum(proposal_x2, target_y2)
+    inner_x2 = torch.minimum(proposal_x2, target_x2)
     inner_y2 = torch.minimum(proposal_y2, target_y2)
 
     area_proposal = (proposal_x2 - proposal_x1) * (proposal_y2 - proposal_y1)

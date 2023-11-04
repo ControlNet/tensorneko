@@ -22,6 +22,34 @@ except ImportError:
 
 
 class FID:
+    """
+    Calculate Fréchet inception distance based on torchmetrics. Require library "torch-fidelity".
+
+    Args:
+        device (``str`` | :class:`~torch.device`, optional): Device to run the metric. Default: ``"cpu"``.
+
+    Example::
+
+        from tensorneko.evaluation import FID
+        fid = FID("cuda")
+        
+        # add predicted and real images
+        fid.add_pred_image("path/to/pred/image1.png")
+        fid.add_pred_image("path/to/pred/image2.png")
+        fid.add_true_image("path/to/true/image1.png")
+        fid.add_true_image("path/to/true/image2.png")
+
+        # add predicted and real videos
+        fid.add_pred_video("path/to/pred/video1.mp4")
+        fid.add_pred_video("path/to/pred/video2.mp4")
+        fid.add_true_video("path/to/true/video1.mp4")
+        fid.add_true_video("path/to/true/video2.mp4")
+
+        # compute FID
+        fid_score = fid.compute(batch_size=128, num_workers=8, progress_bar=True)
+        print(fid_score)
+
+    """
 
     def __init__(self, device: Union[str, Device] = "cpu"):
         self.device = torch.device(device)
@@ -56,14 +84,14 @@ class FID:
     def cuda(self) -> FID:
         return self.to("cuda")
 
-    def compute(self, batch_size=128, num_workers=8, progress_bar: bool = True) -> float:
+    def compute(self, batch_size=128, num_workers=0, progress_bar: bool = False) -> float:
         pred = torch.utils.data.DataLoader(self.pred_data, batch_size=batch_size, num_workers=num_workers)
         true = torch.utils.data.DataLoader(self.true_data, batch_size=batch_size, num_workers=num_workers)
 
         if progress_bar:
             tqdm = import_tqdm_auto().tqdm
-            pred = tqdm(pred, desc="Forward predicted features")
-            true = tqdm(true, desc="Forward ground truth features")
+            pred = tqdm(total=len(pred), desc="Forward predicted features")
+            true = tqdm(total=len(true), desc="Forward ground truth features")
 
         for batch in pred:
             self.fid.update(batch.to(self.device), real=False)
@@ -71,6 +99,11 @@ class FID:
             self.fid.update(batch.to(self.device), real=True)
 
         return self.fid.compute().item()
+
+    def reset(self):
+        self.pred_data = _FIDDataset()
+        self.true_data = _FIDDataset()
+        self.fid.reset()
 
 
 @dataclass
@@ -104,6 +137,7 @@ class _FIDDataset(IterableDataset):
             raise RuntimeError("Cannot open video file.")
         n_frames = int(cap.get(self.cv2.CAP_PROP_FRAME_COUNT))
         self.length += n_frames
+        cap.release()
 
     @staticmethod
     def _preprocess_image(image: Tensor) -> Tensor:
@@ -129,6 +163,8 @@ class _FIDDataset(IterableDataset):
             frame = torch.from_numpy(frame).permute(2, 0, 1)
             frame = self._preprocess_image(frame)
             yield frame
+
+        cap.release()
 
     def __iter__(self):
         for entry in self.content:
