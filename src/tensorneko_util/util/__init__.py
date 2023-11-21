@@ -3,7 +3,7 @@ from .average_meter import AverageMeter
 from .dispatcher import dispatch
 from .fp import __, F, _, Stream, return_option, Option, Monad, Eval, Seq, AbstractSeq, curry
 from .misc import generate_inf_seq, compose, listdir, with_printed, ifelse, dict_add, as_list, identity, list_to_dict, \
-    get_tensorneko_util_path, circular_pad, load_py, try_until_success
+    get_tensorneko_util_path, circular_pad, load_py, try_until_success, sample_indexes
 from .dispatched_misc import sparse2binary, binary2sparse
 from .ref import ref
 from .timer import Timer
@@ -50,6 +50,7 @@ __all__ = [
     "circular_pad",
     "load_py",
     "try_until_success",
+    "sample_indexes",
     "download_file",
     "WindowMerger",
 ]
