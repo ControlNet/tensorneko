@@ -3,11 +3,13 @@ import os
 import time
 from functools import reduce
 from os.path import dirname, abspath
-from typing import Callable, List, Dict, Iterable, Sequence, Any, Optional, Type, TypeVar, Union, Tuple
+from types import ModuleType
+from typing import Callable, List, Dict, Iterable, Sequence, Any, Optional, Type, Union, Tuple
+
 import numpy as np
 
 from .fp import F, _, Stream
-from .type import T, R
+from .type import T, R, Param, T_E
 
 
 def identity(*args, **kwargs):
@@ -21,15 +23,15 @@ def identity(*args, **kwargs):
         return args
 
 
-def generate_inf_seq(items: Iterable[Any]) -> Stream:
+def generate_inf_seq(items: Iterable[T]) -> Stream[T]:
     """
     Generate an infinity late-evaluate sequence.
 
     Args:
-        items [``Iterable[Any]``]: Original items.
+        items [``Iterable[T]``]: Original items.
 
     Returns:
-        :class:`~fp.stream.Stream`: The infinity sequence.
+        :class:`~fp.stream.Stream[T]`: The infinity sequence.
 
     Examples::
 
@@ -103,16 +105,16 @@ def listdir(path: str, filter_func: Callable[[str], bool] = lambda arg: True) ->
     return list(map(F(os.path.join, path), files))
 
 
-def with_printed(x: Any, func: Callable = identity) -> Any:
+def with_printed(x: T, func: Callable[[T], Any] = identity) -> T:
     """
     An identity function but with printed to console with some transform.
 
     Args:
-        x (``Any``): Input.
-        func (``Callable``, optional): A function used to apply the input for printing.
+        x (``T``): Input.
+        func (``(T) -> Any``, optional): A function used to apply the input for printing. Default: identity function.
 
     Returns:
-        ``Any``: Identity output.
+        ``T``: Identity output.
 
     Examples::
 
@@ -179,15 +181,15 @@ def as_list(*args, **kwargs) -> list:
     return list(args) + list(kwargs.values())
 
 
-def list_to_dict(l: List[T], key: Callable[[T], Any]) -> Dict[Any, T]:
+def list_to_dict(l: List[T], key: Callable[[T], R]) -> Dict[R, T]:
     """
     Convert the list as a dictionary by given key.
     Args:
         l (``List[T]``): Input list.
-        key (``(T) -> Any``): The key getter function.
+        key (``(T) -> R``): The key getter function.
 
     Returns:
-        ``Dict[Any, T]``: The output dictionary.
+        ``Dict[R, T]``: The output dictionary.
     """
     return {key(x): x for x in l}
 
@@ -202,16 +204,16 @@ def get_tensorneko_util_path() -> str:
     return dirname(dirname(abspath(__file__)))
 
 
-def circular_pad(x: List, target: int) -> List:
+def circular_pad(x: List[T], target: int) -> List[T]:
     """
     Circular padding a list to the target length.
 
     Args:
-        x(``List``): Input list.
+        x(``List[T]``): Input list.
         target(``int``): Target length.
 
     Returns:
-        ``List``: The padded list.
+        ``List[T]``: The padded list.
     """
     if len(x) == target:
         return x
@@ -223,7 +225,7 @@ def circular_pad(x: List, target: int) -> List:
         return circular_pad(x + x, target)
 
 
-def load_py(path: str) -> Any:
+def load_py(path: str) -> ModuleType:
     """
     Load a python file as a module.
 

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Generic
+
+from tensorneko_util.util.type import T
 
 
-class Configuration(ABC):
+class Configuration(ABC, Generic[T]):
     """
     Configuration base abstract class.
 
@@ -55,7 +57,7 @@ class Configuration(ABC):
         return iter((*self.args, *self.kwargs.values()))
 
     @abstractmethod
-    def build(self) -> Any:
+    def build(self) -> T:
         """
         A method to build an object.
 
