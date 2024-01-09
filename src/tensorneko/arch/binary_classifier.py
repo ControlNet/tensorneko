@@ -1,18 +1,17 @@
-from abc import ABC
-from typing import Optional, Union, Sequence, Dict
+from typing import Optional, Union, Sequence, Dict, Any
 
 from torch import Tensor
-from torch.nn import BCEWithLogitsLoss
+from torch.nn import BCEWithLogitsLoss, Module
 from torch.optim import Adam
 from torchmetrics import Accuracy, F1Score, AUROC
 
 from ..neko_model import NekoModel
 
 
-class BinaryClassifier(NekoModel, ABC):
+class BinaryClassifier(NekoModel):
 
-    def __init__(self, model=None, learning_rate: float = 1e-4, distributed: bool = False):
-        super().__init__()
+    def __init__(self, name, model: Module, learning_rate: float = 1e-4, distributed: bool = False):
+        super().__init__(name)
         self.save_hyperparameters()
         self.model = model
         self.learning_rate = learning_rate
@@ -23,8 +22,10 @@ class BinaryClassifier(NekoModel, ABC):
         self.auc_fn = AUROC(task="binary")
 
     @classmethod
-    def from_module(cls, model, learning_rate: float = 1e-4, distributed=False):
-        return cls(model, learning_rate, distributed)
+    def from_module(cls, model: Module, learning_rate: float = 1e-4, name: str = "binary_classifier",
+        distributed: bool = False
+    ):
+        return cls(name, model, learning_rate, distributed)
 
     def forward(self, x):
         return self.model(x)
@@ -48,6 +49,10 @@ class BinaryClassifier(NekoModel, ABC):
         dataloader_idx: Optional[int] = None
     ) -> Dict[str, Tensor]:
         return self.step(batch)
+
+    def predict_step(self, batch: Tensor, batch_idx: int, dataloader_idx: Optional[int] = None) -> Any:
+        x, y = batch
+        return self(x)
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.learning_rate)

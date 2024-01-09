@@ -9,7 +9,7 @@ from torch import Tensor
 from torch.nn import Module
 
 from tensorneko_util.util.misc import generate_inf_seq, listdir, with_printed, ifelse, dict_add, as_list, \
-    identity, list_to_dict, compose, circular_pad, load_py, try_until_success
+    identity, list_to_dict, compose, circular_pad, load_py, try_until_success, sample_indexes
 from .type import T, A
 
 
@@ -165,3 +165,4 @@ list_to_dict = list_to_dict
 circular_pad = circular_pad
 load_py = load_py
 try_until_success = try_until_success
+sample_indexes = sample_indexes

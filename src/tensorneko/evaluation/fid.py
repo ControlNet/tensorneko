@@ -90,8 +90,8 @@ class FID:
 
         if progress_bar:
             tqdm = import_tqdm_auto().tqdm
-            pred = tqdm(total=len(pred), desc="Forward predicted features")
-            true = tqdm(total=len(true), desc="Forward ground truth features")
+            pred = tqdm(pred, total=len(pred), desc="Forward predicted features")
+            true = tqdm(true, total=len(true), desc="Forward ground truth features")
 
         for batch in pred:
             self.fid.update(batch.to(self.device), real=False)

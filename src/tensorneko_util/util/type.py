@@ -8,6 +8,7 @@ T = TypeVar('T')  # Any type
 R = TypeVar('R')  # Return type
 P = TypeVar("P", int, float, str, bool)  # Primitive type
 E = TypeVar("E", bound=Enum)
+T_E = TypeVar("T_E", bound=Exception)  # Exception type
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type

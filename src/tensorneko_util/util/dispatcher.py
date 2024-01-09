@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import warnings
-from typing import Callable, Dict, List, Generic, Sequence, Optional
+from typing import Callable, Dict, List, Generic, Sequence, Optional, TYPE_CHECKING, overload
 
 from .type import T
 
@@ -223,3 +223,7 @@ class DispatcherDecorator:
 
 
 dispatch = DispatcherDecorator()
+
+# used for type hint, only `typing.overload` can be used for type hint
+if TYPE_CHECKING:
+    dispatch = overload

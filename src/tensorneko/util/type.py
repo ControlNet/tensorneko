@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Callable, Union, List, Tuple, TypeVar
 
 import numpy as np

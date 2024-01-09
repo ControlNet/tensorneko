@@ -60,7 +60,7 @@ def crop_with_padding(image: ndarray, x1: int, x2: int, y1: int, y2: int, pad_va
 
 
 @dispatch
-def crop_with_padding(image: ndarray, x1: np.int32, x2: np.int32, y1: np.int32, y2: np.int32,
+def crop_with_padding(image: ndarray, x1: ndarray, x2: ndarray, y1: ndarray, y2: ndarray,
     pad_value: Union[int, float] = 0., batch: bool = False
 ) -> ndarray:
     return crop_with_padding(image, int(x1), int(x2), int(y1), int(y2), pad_value, batch)

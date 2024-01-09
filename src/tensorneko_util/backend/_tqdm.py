@@ -1,4 +1,5 @@
 _is_tqdm_available = None
+_is_mita_tqdm_available = None
 
 
 def import_tqdm():
@@ -35,3 +36,21 @@ def import_tqdm_auto():
             return auto
         else:
             raise ImportError("tqdm is not installed. Please install it by `pip install tqdm`")
+
+
+def import_mita_tqdm():
+    global _is_mita_tqdm_available
+    if _is_mita_tqdm_available is None:
+        try:
+            from mita_client import mita_tqdm
+            _is_mita_tqdm_available = True
+            return mita_tqdm
+        except ImportError:
+            _is_mita_tqdm_available = False
+            raise ImportError("mita_client is not installed. Please install it by `pip install mita_client`")
+    else:
+        if _is_mita_tqdm_available:
+            from mita_client import mita_tqdm
+            return mita_tqdm
+        else:
+            raise ImportError("mita_client is not installed. Please install it by `pip install mita_client`")
