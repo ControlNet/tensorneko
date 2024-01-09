@@ -3,16 +3,20 @@ from datetime import timedelta
 from time import time
 from typing import Optional, Union, List, Dict
 
+from lightning.fabric.plugins.precision.precision import _PRECISION_INPUT
+from lightning.fabric.utilities.types import _PATH
 from lightning.pytorch import Trainer, Callback
 from lightning.pytorch.accelerators import Accelerator
 from lightning.pytorch.callbacks import ModelCheckpoint, Checkpoint
 from lightning.pytorch.loggers import Logger, TensorBoardLogger
-from lightning.pytorch.plugins import PLUGIN_INPUT
 from lightning.pytorch.profilers import Profiler
 from lightning.pytorch.strategies import Strategy
 from lightning.pytorch.trainer.connectors.accelerator_connector import _LITERAL_WARN
-from lightning.fabric.plugins.precision.precision import _PRECISION_INPUT
-from lightning.fabric.utilities.types import _PATH
+
+try:
+    from lightning.pytorch.plugins import PLUGIN_INPUT
+except ImportError:
+    from lightning.pytorch.plugins import _PLUGIN_INPUT as PLUGIN_INPUT
 
 from .callback import NilCallback, LrLogger, EpochNumLogger, EpochTimeLogger, GpuStatsLogger, SystemStatsLogger
 
