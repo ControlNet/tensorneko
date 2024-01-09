@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import time
 from functools import wraps
 from typing import Callable, Optional
+
+from .type import T
 
 
 class Timer:
@@ -30,6 +34,12 @@ class Timer:
             time.sleep(1)
             print("f")
 
+        # without parentheses
+        @Timer
+        def g():
+            time.sleep(1)
+            print("f")
+
         # disable verbose and get time manually
         with Timer(verbose=False) as t:
             time.sleep(1)
@@ -49,6 +59,12 @@ class Timer:
         self.names = []
         self.total_time = None
         self.verbose = verbose
+
+    def __new__(cls, *args, **kwargs):
+        if len(args) > 0 and isinstance(args[0], Callable):
+            return cls()(args[0])
+        else:
+            return super().__new__(cls)
 
     def __enter__(self):
         self.times.append(time.perf_counter())
@@ -84,4 +100,3 @@ class Timer:
     @staticmethod
     def _make_str(name: str, t: float):
         return f"[Timer] {name}: {t} sec"
-
