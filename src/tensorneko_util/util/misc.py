@@ -241,9 +241,6 @@ def load_py(path: str) -> ModuleType:
     return module
 
 
-T_E = TypeVar("T_E", bound=Exception)
-
-
 def try_until_success(func: Callable[[Any], T], *args, max_trials: Optional[int] = None, sleep_time: int = 0,
     exception_type: Union[Type[T_E], Tuple[T_E, ...]] = Exception, **kwargs
 ) -> T:
