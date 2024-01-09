@@ -9,7 +9,7 @@ from typing import Callable, List, Dict, Iterable, Sequence, Any, Optional, Type
 import numpy as np
 
 from .fp import F, _, Stream
-from .type import T, R, Param, T_E
+from .type import T, R, T_E
 
 
 def identity(*args, **kwargs):
