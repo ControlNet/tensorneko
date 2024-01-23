@@ -81,8 +81,7 @@ class MnistClassifier(neko.NekoModel):
         # (batch, 10)
         return x
 
-    def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
-        optimizer_idx: Optional[int] = None, hiddens: Optional[Tensor] = None
+    def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None
     ) -> Dict[str, Tensor]:
         x, y = batch
         logit = self(x)

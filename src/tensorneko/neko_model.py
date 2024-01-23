@@ -52,9 +52,7 @@ class NekoModel(LightningModule, NekoModule):
     @abstractmethod
     def training_step(self,
         batch: Optional[Union[Tensor, Sequence[Tensor]]] = None,
-        batch_idx: Optional[int] = None,
-        optimizer_idx: Optional[int] = None,
-        hiddens: Optional[Tensor] = None
+        batch_idx: Optional[int] = None
     ) -> Dict[str, Tensor]:
         """
         The method inherit from :meth:`~lightning.pytorch.core.lightning.LightningModule.training_step`.
@@ -67,11 +65,6 @@ class NekoModel(LightningModule, NekoModule):
                 The output of your :class:`~torch.utils.data.DataLoader`. A tensor, tuple or list.
 
             batch_idx (``int``): Integer displaying index of this batch
-
-            optimizer_idx (``int``, optional): When using multiple optimizers, this argument will also be present.
-
-            hiddens(:class:`~torch.Tensor`, optional): Passed in if
-                :paramref:`~lightning.pytorch.core.lightning.LightningModule.truncated_bptt_steps` > 0.
 
         Returns:
             ``Dict`` [``str``, :class:`~torch.Tensor`]:
