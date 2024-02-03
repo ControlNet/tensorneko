@@ -9,7 +9,10 @@ from ..util import circular_pad
 
 class RoundRobinDataset(Dataset[T_co]):
     """
-    Combine multiple datasets into one dataset by round-robin.
+    A dataset that combines multiple datasets into one by using a round-robin strategy.
+
+    This class is a subclass of the PyTorch Dataset class and is used to combine multiple datasets.
+    It provides the necessary methods for a PyTorch Dataset, such as `__getitem__` and `__len__`.
 
     Args:
         datasets (``List[Dataset]``): The input datasets.
@@ -58,9 +61,24 @@ class RoundRobinDataset(Dataset[T_co]):
                 self.samplers[i] = circular_pad(self.samplers[i], each_length)
 
     def __len__(self) -> int:
+        """
+        Retrieves the total length of the combined dataset.
+
+        Returns:
+            The total length of the combined dataset.
+        """
         return self.total_length
 
     def __getitem__(self, index: int) -> T_co:
+        """
+        Retrieves an item from the combined dataset at a specific index.
+
+        Args:
+            index (int): The index of the item to retrieve.
+
+        Returns:
+            The item at the specified index.
+        """
         dataset_index = self.order[index % len(self.order)]
         sample_index = self.samplers[dataset_index][index // len(self.order)]
         return self.datasets[dataset_index][sample_index]
