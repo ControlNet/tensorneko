@@ -29,14 +29,14 @@ class GpuStatsLogger(Callback):
             return
         for gpu in self.monitor_epoch.average_stats.gpus:
             logged_info = {
-                f"gpu{gpu.index}_memory_used_epoch": gpu.memory_used / 1024,
-                f"gpu{gpu.index}_memory_total_epoch": gpu.memory_total / 1024,
-                f"gpu{gpu.index}_memory_util_epoch": gpu.memory_used / gpu.memory_total,
-                f"gpu{gpu.index}_temperature_epoch": float(gpu.temperature),
-                f"gpu{gpu.index}_utilization_epoch": gpu.utilization / 100,
-                f"gpu{gpu.index}_power_draw_epoch": float(gpu.power_draw),
-                f"gpu{gpu.index}_power_percentage_epoch": gpu.power_draw / gpu.power_limit,
-                f"gpu{gpu.index}_fan_speed_epoch": float(gpu.fan_speed) if gpu.fan_speed is not None else 0.,
+                f"system/gpu{gpu.index}_memory_used_epoch": gpu.memory_used / 1024,
+                f"system/gpu{gpu.index}_memory_total_epoch": gpu.memory_total / 1024,
+                f"system/gpu{gpu.index}_memory_util_epoch": gpu.memory_used / gpu.memory_total,
+                f"system/gpu{gpu.index}_temperature_epoch": float(gpu.temperature),
+                f"system/gpu{gpu.index}_utilization_epoch": gpu.utilization / 100,
+                f"system/gpu{gpu.index}_power_draw_epoch": float(gpu.power_draw),
+                f"system/gpu{gpu.index}_power_percentage_epoch": gpu.power_draw / gpu.power_limit,
+                f"system/gpu{gpu.index}_fan_speed_epoch": float(gpu.fan_speed) if gpu.fan_speed is not None else 0.,
             }
             pl_module.logger.log_metrics(logged_info, step=trainer.global_step)
             pl_module.log_dict(logged_info, logger=False, sync_dist=pl_module.distributed)
@@ -55,14 +55,14 @@ class GpuStatsLogger(Callback):
             return
         for gpu in self.monitor_step.average_stats.gpus:
             logged_info = {
-                f"gpu{gpu.index}_memory_used_step": gpu.memory_used / 1024,
-                f"gpu{gpu.index}_memory_total_step": gpu.memory_total / 1024,
-                f"gpu{gpu.index}_memory_util_step": gpu.memory_used / gpu.memory_total,
-                f"gpu{gpu.index}_temperature_step": float(gpu.temperature),
-                f"gpu{gpu.index}_utilization_step": gpu.utilization / 100,
-                f"gpu{gpu.index}_power_draw_step": float(gpu.power_draw),
-                f"gpu{gpu.index}_power_percentage_step": gpu.power_draw / gpu.power_limit,
-                f"gpu{gpu.index}_fan_speed_step": float(gpu.fan_speed) if gpu.fan_speed is not None else 0.,
+                f"system/gpu{gpu.index}_memory_used_step": gpu.memory_used / 1024,
+                f"system/gpu{gpu.index}_memory_total_step": gpu.memory_total / 1024,
+                f"system/gpu{gpu.index}_memory_util_step": gpu.memory_used / gpu.memory_total,
+                f"system/gpu{gpu.index}_temperature_step": float(gpu.temperature),
+                f"system/gpu{gpu.index}_utilization_step": gpu.utilization / 100,
+                f"system/gpu{gpu.index}_power_draw_step": float(gpu.power_draw),
+                f"system/gpu{gpu.index}_power_percentage_step": gpu.power_draw / gpu.power_limit,
+                f"system/gpu{gpu.index}_fan_speed_step": float(gpu.fan_speed) if gpu.fan_speed is not None else 0.,
             }
             pl_module.logger.log_metrics(logged_info, step=trainer.global_step)
             pl_module.log_dict(logged_info, logger=False, sync_dist=pl_module.distributed)

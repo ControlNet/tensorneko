@@ -38,7 +38,7 @@ class BinaryClassifier(NekoModel):
         acc = self.acc_fn(prob, y)
         f1 = self.f1_fn(prob, y)
         auc = self.auc_fn(prob, y)
-        return {"loss": loss, "acc": acc, "f1": f1, "auc": auc}
+        return {"loss": loss, "metric/acc": acc, "metric/f1": f1, "metric/auc": auc}
 
     def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
         optimizer_idx: Optional[int] = None, hiddens: Optional[Tensor] = None

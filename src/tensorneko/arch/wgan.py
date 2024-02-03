@@ -100,4 +100,4 @@ class WGAN(GAN, ABC):
             gp = torch.tensor(0., device=self.device)
             loss = d_loss
 
-        return {"loss": loss, "d_loss": d_loss, "gp": gp}
+        return {"loss": loss, "loss/d_loss": d_loss, "loss/gp": gp}

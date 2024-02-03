@@ -140,7 +140,7 @@ class GAN(NekoModel, ABC):
 
         # calculate discriminator loss
         d_loss = self.d_loss_fn(self.discriminator(d_batch), d_label)
-        return {"loss": d_loss, "d_loss": d_loss}
+        return {"loss": d_loss, "loss/d_loss": d_loss}
 
     def g_step(self, x: Tensor, z: Tensor) -> Dict[str, Tensor]:
         # forward generator
@@ -150,7 +150,7 @@ class GAN(NekoModel, ABC):
 
         # calculate generator loss
         g_loss = self.g_loss_fn(self.discriminator(fake_image), target_label)
-        return {"loss": g_loss, "g_loss": g_loss}
+        return {"loss": g_loss, "loss/g_loss": g_loss}
 
     def validation_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
         dataloader_idx: Optional[int] = None

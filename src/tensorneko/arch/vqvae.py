@@ -72,7 +72,7 @@ class VQVAE(NekoModel, ABC):
         x_hat, embedding_loss = self(x)
         rec_loss = self.rec_loss_fn(x_hat, x)
         loss = rec_loss + embedding_loss
-        return {"loss": loss, "r_loss": rec_loss, "e_loss": embedding_loss}
+        return {"loss": loss, "loss/r_loss": rec_loss, "loss/e_loss": embedding_loss}
 
     def validation_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
         dataloader_idx: Optional[int] = None
@@ -84,7 +84,7 @@ class VQVAE(NekoModel, ABC):
         x_hat, embedding_loss = self(x)
         rec_loss = self.rec_loss_fn(x_hat, x)
         loss = rec_loss + embedding_loss
-        return {"loss": loss, "r_loss": rec_loss, "e_loss": embedding_loss}
+        return {"loss": loss, "loss/r_loss": rec_loss, "loss/e_loss": embedding_loss}
 
     def predict_step(self, batch: Tensor, batch_idx: int, dataloader_idx: Optional[int] = None) -> Tensor:
         return self(batch)[0]
