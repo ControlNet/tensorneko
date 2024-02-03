@@ -26,7 +26,7 @@ class VideoReader:
 
         Returns:
             :class:`~tensorneko.io.video.video_data.VideoData`:
-                A VideoData object contains a float tensor of video, with value range of 0. to 1,
+                A VideoData object contains a uint8 tensor of video, with value range of 0 to 255,
                 an audio tensor of (T, C) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
         """
         backend = backend or _default_video_io_backend()
