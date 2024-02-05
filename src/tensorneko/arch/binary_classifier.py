@@ -6,16 +6,18 @@ from torch.optim import Adam
 from torchmetrics import Accuracy, F1Score, AUROC
 
 from ..neko_model import NekoModel
+from ..util import Shape
 
 
 class BinaryClassifier(NekoModel):
 
-    def __init__(self, name, model: Module, learning_rate: float = 1e-4, distributed: bool = False):
-        super().__init__(name)
+    def __init__(self, name, model: Module, learning_rate: float = 1e-4, distributed: bool = False,
+        input_shape: Optional[Shape] = None
+    ):
+        super().__init__(name, input_shape=input_shape, distributed=distributed)
         self.save_hyperparameters()
         self.model = model
         self.learning_rate = learning_rate
-        self.distributed = distributed
         self.loss_fn = BCEWithLogitsLoss()
         self.acc_fn = Accuracy(task="binary")
         self.f1_fn = F1Score(task="binary")
@@ -23,9 +25,9 @@ class BinaryClassifier(NekoModel):
 
     @classmethod
     def from_module(cls, model: Module, learning_rate: float = 1e-4, name: str = "binary_classifier",
-        distributed: bool = False
+        distributed: bool = False, input_shape: Optional[Shape] = None
     ):
-        return cls(name, model, learning_rate, distributed)
+        return cls(name, model, learning_rate, distributed, input_shape)
 
     def forward(self, x):
         return self.model(x)
@@ -38,7 +40,7 @@ class BinaryClassifier(NekoModel):
         acc = self.acc_fn(prob, y)
         f1 = self.f1_fn(prob, y)
         auc = self.auc_fn(prob, y)
-        return {"loss": loss, "acc": acc, "f1": f1, "auc": auc}
+        return {"loss": loss, "metric/acc": acc, "metric/f1": f1, "metric/auc": auc}
 
     def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
         optimizer_idx: Optional[int] = None, hiddens: Optional[Tensor] = None

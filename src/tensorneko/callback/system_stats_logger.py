@@ -23,8 +23,8 @@ class SystemStatsLogger(Callback):
         cpu_usage = self.psutil.cpu_percent()
         memory_usage = self.psutil.virtual_memory().percent
         logged_info = {
-            "cpu_usage_epoch": cpu_usage,
-            "memory_usage_epoch": memory_usage
+            "system/cpu_usage_epoch": cpu_usage,
+            "system/memory_usage_epoch": memory_usage
         }
         pl_module.logger.log_metrics(logged_info, step=trainer.global_step)
         pl_module.log_dict(logged_info, logger=False, sync_dist=pl_module.distributed)
@@ -37,8 +37,8 @@ class SystemStatsLogger(Callback):
         cpu_usage = self.psutil.cpu_percent()
         memory_usage = self.psutil.virtual_memory().percent
         logged_info = {
-            "cpu_usage_step": cpu_usage,
-            "memory_usage_step": memory_usage
+            "system/cpu_usage_step": cpu_usage,
+            "system/memory_usage_step": memory_usage
         }
         pl_module.logger.log_metrics(logged_info, step=trainer.global_step)
         pl_module.log_dict(logged_info, logger=False, sync_dist=pl_module.distributed)

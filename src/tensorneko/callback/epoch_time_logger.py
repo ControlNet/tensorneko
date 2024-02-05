@@ -12,5 +12,5 @@ class EpochTimeLogger(Callback):
 
     def on_train_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         elapsed_time = time() - self.start_time
-        pl_module.logger.log_metrics({"epoch_time": elapsed_time}, step=trainer.global_step)
-        pl_module.log("epoch_time", elapsed_time, logger=False, sync_dist=pl_module.distributed)
+        pl_module.logger.log_metrics({"epoch/epoch_time": elapsed_time}, step=trainer.global_step)
+        pl_module.log("epoch/epoch_time", elapsed_time, logger=False, sync_dist=pl_module.distributed)

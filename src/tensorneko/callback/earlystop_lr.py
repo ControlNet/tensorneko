@@ -22,7 +22,7 @@ class EarlyStoppingLR(Callback):
             return
         all_lr = []
         for key, value in metrics.items():
-            if re.match(r"opt\d+_lr\d+", key):
+            if re.match(r"learning_rate/opt\d+_lr\d+", key):
                 all_lr.append(value)
 
         if len(all_lr) == 0:

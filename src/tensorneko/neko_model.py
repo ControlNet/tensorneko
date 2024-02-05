@@ -170,6 +170,7 @@ class NekoModel(LightningModule, NekoModule):
             and self.logger is not None \
             and self.trainer.global_step % self.trainer.log_every_n_steps == 0:
             self.log_on_training_step_end(outputs)
+        super().on_train_batch_end(outputs, batch, batch_idx)
 
     def on_validation_batch_end(
         self, outputs: Optional[STEP_OUTPUT], batch: Any, batch_idx: int, dataloader_idx: int = 0
@@ -177,18 +178,21 @@ class NekoModel(LightningModule, NekoModule):
         """Append the outputs of validation step to the list"""
         outputs = {k: v.detach() for k, v in outputs.items()}
         self.validation_step_outputs.append(outputs)
+        super().on_validation_batch_end(outputs, batch, batch_idx, dataloader_idx)
 
     def on_train_epoch_end(self) -> None:
         """For each training epoch end, log the metrics"""
         if self.trainer.log_on_epoch and self.logger is not None:
             self.log_on_training_epoch_end(self.training_step_outputs)
         self.training_step_outputs.clear()
+        super().on_train_epoch_end()
 
     def on_validation_epoch_end(self) -> None:
         """For each validation epoch end, log the metrics"""
         if self.logger is not None:
             self.log_on_validation_epoch_end(self.validation_step_outputs)
         self.validation_step_outputs.clear()
+        super().on_validation_epoch_end()
 
     def log_on_training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         """Log the training epoch outputs"""
@@ -197,7 +201,8 @@ class NekoModel(LightningModule, NekoModule):
             getter = summarize_dict_by(key, torch.mean)
             value = getter(outputs)
             history_item[key] = value
-            self.logger.log_metrics({key: value}, step=self.trainer.global_step)
+            if self.logger is not None:
+                self.logger.log_metrics({key: value}, step=self.trainer.global_step)
             self.log(key, value, on_epoch=True, on_step=False, logger=False, sync_dist=self.distributed)
         self.history.append(history_item)
 
@@ -210,7 +215,8 @@ class NekoModel(LightningModule, NekoModule):
             getter = summarize_dict_by(key, torch.mean)
             value = getter(outputs)
             self.history[-1]["val_" + key] = value
-            self.logger.log_metrics({key: value}, step=self.trainer.global_step)
+            if self.logger is not None:
+                self.logger.log_metrics({key: value}, step=self.trainer.global_step)
             self.log(key, value, on_epoch=True, on_step=False, logger=False, sync_dist=self.distributed)
             self.log(f"val_{key}", value, on_epoch=True, on_step=False, logger=False, prog_bar=True,
                 sync_dist=self.distributed)
@@ -220,7 +226,8 @@ class NekoModel(LightningModule, NekoModule):
         history_item = {}
         for key, value in output.items():
             history_item[key] = value
-            self.logger.log_metrics({key: value}, step=self.trainer.global_step)
+            if self.logger is not None:
+                self.logger.log_metrics({key: value}, step=self.trainer.global_step)
             self.log(key, value, on_epoch=False, on_step=True, logger=False, prog_bar=key == "loss",
                 sync_dist=self.distributed)
         self.history.append(history_item)
@@ -230,6 +237,7 @@ class NekoModel(LightningModule, NekoModule):
     ) -> None:
         """For each test step end, log the metrics"""
         self.log_dict(outputs, sync_dist=self.distributed)
+        super().on_test_batch_end(outputs, batch, batch_idx, dataloader_idx)
 
     def log_image(self, name: str, image: torch.Tensor) -> None:
         """Log an image to the logger"""
@@ -238,6 +246,15 @@ class NekoModel(LightningModule, NekoModule):
 
         self.logger.experiment.add_image(name, torch.clip(image, 0, 1), self.trainer.global_step)
 
+    def log_histogram(self, name: str, values: torch.Tensor) -> None:
+        """Log a histogram to the logger"""
+        if self.logger is None:
+            return
+
+        self.logger.experiment.add_histogram(name, values, self.trainer.global_step)
+
     def on_train_start(self) -> None:
         """Log the model graph to tensorboard when the input shape is set"""
-        self.logger.log_graph(self, self.example_input_array)
+        if self.can_plot_graph and self.logger is not None:
+            self.logger.log_graph(self, self.example_input_array)
+        super().on_train_start()
