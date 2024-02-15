@@ -11,7 +11,7 @@ ModuleFactory = Union[Callable[[], Module], Callable[[int], Module]]
 """The module builder type of ``() -> torch.nn.Module | (int) -> torch.nn.Module``"""
 
 
-Device = device
+Device = Union[str, device]
 """Device type of :class:`torch.device`"""
 
 
