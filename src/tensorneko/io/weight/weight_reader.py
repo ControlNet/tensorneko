@@ -1,9 +1,7 @@
 from collections import OrderedDict
-from typing import TYPE_CHECKING
 import torch
 
-if TYPE_CHECKING:
-    from ...util import Device
+from ...util import Device
 
 
 class WeightReader:
