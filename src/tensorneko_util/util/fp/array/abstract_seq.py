@@ -5,7 +5,7 @@ from typing import Union, Callable, List, Optional, Iterable
 
 from ..monad.monad import Monad
 from ...type import T, R
-from ....backend._tqdm import import_tqdm_auto
+from ....backend.tqdm import import_tqdm_auto
 from ....backend.parallel import ParallelType
 
 

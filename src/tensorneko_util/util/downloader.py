@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional
 from urllib.request import urlretrieve
 
-from ..backend._tqdm import import_tqdm_auto
+from ..backend.tqdm import import_tqdm_auto
 
 try:
     auto = import_tqdm_auto()
