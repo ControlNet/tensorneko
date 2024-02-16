@@ -1,4 +1,5 @@
-from collections import OrderedDict
+from typing import OrderedDict
+
 import torch
 
 from ...util import Device
@@ -48,6 +49,7 @@ class WeightReader:
             :class:`collections.OrderedDict`[``str``, :class:`torch.Tensor`]: The model weights.
         """
         import safetensors
+        from collections import OrderedDict
         tensors = OrderedDict()
         with safetensors.safe_open(path, framework="pt", device=map_location) as f:
             for key in f.keys():
