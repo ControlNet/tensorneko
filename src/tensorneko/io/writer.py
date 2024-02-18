@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Type
 
 from tensorneko_util.io.writer import Writer as BaseWriter
+from .weight import WeightWriter
 
 try:
     from .mesh import MeshWriter
@@ -16,6 +17,7 @@ class Writer(BaseWriter):
 
     def __init__(self):
         super().__init__()
+        self.weight = WeightWriter
         self._mesh = None
 
     @property

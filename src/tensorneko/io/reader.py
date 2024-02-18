@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Type
 
 from tensorneko_util.io.reader import Reader as BaseReader
+from .weight import WeightReader
 
 try:
     from .mesh import MeshReader
@@ -15,6 +16,7 @@ class Reader(BaseReader):
 
     def __init__(self):
         super().__init__()
+        self.weight = WeightReader
         self._mesh = None
 
     @property

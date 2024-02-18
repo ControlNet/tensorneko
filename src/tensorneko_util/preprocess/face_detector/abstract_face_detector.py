@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from numpy import ndarray
 
-from ...backend._tqdm import import_tqdm_auto
+from ...backend.tqdm import import_tqdm_auto
 
 
 class AbstractFaceDetector(ABC):

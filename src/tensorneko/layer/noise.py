@@ -22,7 +22,7 @@ class GaussianNoise(NekoModule):
         from https://discuss.pytorch.org/t/writing-a-simple-gaussian-noise-layer-in-pytorch/4694/3
     """
 
-    def __init__(self, sigma=0.1, device: Union[Device, str] = "cuda"):
+    def __init__(self, sigma=0.1, device: Device = "cuda"):
         super().__init__()
         self.sigma = sigma
         self.noise = torch.tensor(0.).to(device)
