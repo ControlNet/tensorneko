@@ -6,6 +6,7 @@ from .misc import generate_inf_seq, compose, listdir, with_printed, ifelse, dict
     get_tensorneko_util_path, circular_pad, load_py, try_until_success, sample_indexes
 from .dispatched_misc import sparse2binary, binary2sparse
 from .ref import ref
+from .registry import Registry
 from .timer import Timer
 from .eventbus import Event, EventBus, EventHandler, subscribe
 from .singleton import Singleton
@@ -53,4 +54,5 @@ __all__ = [
     "sample_indexes",
     "download_file",
     "WindowMerger",
+    "Registry"
 ]
