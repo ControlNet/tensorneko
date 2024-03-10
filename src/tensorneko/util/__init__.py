@@ -4,7 +4,7 @@ from tensorneko_util.util import dispatch, AverageMeter, tensorneko_util_path
 from tensorneko_util.util.fp import Seq, AbstractSeq, curry, F, Stream, return_option, Option, Monad, Eval, _, __
 from tensorneko_util.util import ref, Timer, Singleton
 from tensorneko_util.util.eventbus import Event, EventBus, EventHandler, subscribe
-from tensorneko_util.util import download_file, WindowMerger
+from tensorneko_util.util import download_file, WindowMerger, Registry
 from . import type
 from .configuration import Configuration
 from .misc import reduce_dict_by, summarize_dict_by, with_printed_shape, is_bad_num, count_parameters, compose, \
@@ -74,4 +74,5 @@ __all__ = [
     "sample_indexes",
     "download_file",
     "WindowMerger",
+    "Registry",
 ]

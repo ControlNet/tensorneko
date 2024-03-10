@@ -12,7 +12,7 @@
 <div align="center">    
     <a href="https://www.python.org/"><img src="https://img.shields.io/pypi/pyversions/tensorneko?style=flat-square"></a>
     <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-%3E%3D1.9.0-EE4C2C?style=flat-square&logo=pytorch"></a>
-    <a href="https://www.pytorchlightning.ai/"><img src="https://img.shields.io/badge/Lightning-2.0.*%20|%202.1.*-792EE5?style=flat-square&logo=lightning"></a>
+    <a href="https://www.pytorchlightning.ai/"><img src="https://img.shields.io/badge/Lightning-2.0.*%20|%202.1.*%20|%202.2.*-792EE5?style=flat-square&logo=lightning"></a>
 </div>
 
 <div align="center">
@@ -29,7 +29,7 @@ Tensor Neural Engine Kompanion. An util library based on PyTorch and PyTorch Lig
 pip install tensorneko
 ```
 
-To use the library without PyTorch and PyTorch Lightning, you can install the util library (support Python 3.7 ~ 3.10 with limited features) with following command.
+To use the library without PyTorch and PyTorch Lightning, you can install the util library (support Python 3.7 ~ 3.11 with limited features) with following command.
 ```shell
 pip install tensorneko_util
 ```
