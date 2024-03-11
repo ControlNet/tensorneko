@@ -1,4 +1,9 @@
-class Registry:
+from typing import Callable, Generic, Type
+
+from ..util.type import T
+
+
+class Registry(Generic[T]):
     """
     A registry class for easily creating a decorator-based register system.
 
@@ -23,14 +28,17 @@ class Registry:
     """
 
     def __init__(self):
-        self._registry = {}
+        self._registry: dict[str, T] = {}
 
-    def register(self, name: str):
+    def register(self, name: str) -> Callable[[Type[T]], Type[T]]:
         def wrapper(cls):
             self._registry[name] = cls
             return cls
 
         return wrapper
 
-    def __getitem__(self, name: str):
+    def __getitem__(self, name: str) -> T:
         return self._registry[name]
+
+    def items(self):
+        return self._registry.items()
