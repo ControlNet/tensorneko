@@ -88,7 +88,7 @@ def download_file_thread(url: str, dir_path: str = ".", file_path: Optional[str]
     return Thread(target=download_file, args=(url, dir_path, file_path, progress_bar))
 
 
-def download_files_thread(urls: List[str], dir_path: str = ".", file_paths: Optional[list[str]] = None,
+def download_files_thread(urls: List[str], dir_path: str = ".", file_paths: Optional[List[str]] = None,
     progress_bar: Union[bool, int] = True
 ) -> List[Thread]:
     """
