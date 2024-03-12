@@ -1,4 +1,4 @@
-from typing import Type, Dict
+from typing import Type, Dict, Callable
 
 from .type import T
 
@@ -7,12 +7,11 @@ class Singleton:
     """
     Singleton decorator. It is used to define the class as a singleton.
 
-    Note: The constructor should not include any arguments.
-
     Example::
 
         from tensorneko.util import Singleton
 
+        # the singleton without args
         @Singleton
         class MyObject:
             def __init__(self):
@@ -27,6 +26,20 @@ class Singleton:
         MyObject.add(1)
         print(MyObject.value)  # 1
 
+        # the singleton with args
+        @Singleton.args(1, 2)
+        class MyObject:
+            def __init__(self, a, b):
+                self.value = a + b
+
+            def add(self, value):
+                self.value += value
+                return self.value
+
+        print(MyObject.value)  # 3
+        MyObject.add(1)
+        print(MyObject.value) # 4
+
     """
 
     all_instances: Dict[Type, object] = {}
@@ -34,3 +47,10 @@ class Singleton:
     def __new__(cls, clazz: Type[T]) -> T:
         cls.all_instances[clazz] = clazz()
         return cls.all_instances[clazz]
+
+    @classmethod
+    def args(cls, *args, **kwargs) -> Callable[[Type[T]], T]:
+        def wrapper(clazz: Type[T]) -> T:
+            cls.all_instances[clazz] = clazz(*args, **kwargs)
+            return cls.all_instances[clazz]
+        return wrapper
