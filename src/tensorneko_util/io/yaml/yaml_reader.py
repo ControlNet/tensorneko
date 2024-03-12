@@ -3,7 +3,7 @@ from typing import Type, Dict, Any, Union
 import yaml
 from yaml import Loader as Loader_, BaseLoader, FullLoader, SafeLoader, UnsafeLoader
 
-L = Union[Type[Loader_], Type[BaseLoader], Type[FullLoader], Type[SafeLoader], Type[UnsafeLoader]]
+L = Type[Union[Loader_, BaseLoader, FullLoader, SafeLoader, UnsafeLoader]]
 
 
 class YamlReader:
