@@ -10,7 +10,7 @@ from .registry import Registry
 from .timer import Timer
 from .eventbus import Event, EventBus, EventHandler, subscribe
 from .singleton import Singleton
-from .downloader import download_file
+from .downloader import download_file, download_file_thread, download_files_thread
 from .window_merger import WindowMerger
 
 tensorneko_util_path = get_tensorneko_util_path()
@@ -53,6 +53,8 @@ __all__ = [
     "try_until_success",
     "sample_indexes",
     "download_file",
+    "download_file_thread",
+    "download_files_thread",
     "WindowMerger",
     "Registry"
 ]
