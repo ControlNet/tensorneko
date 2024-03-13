@@ -77,7 +77,7 @@ class ImageWriter:
         backend: Optional[VisualLib] = None
     ) -> None:
         """
-        Save as png files from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (C, H, W).
+        Save as png files from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (C, H, W) or (H, W, C).
 
         Args:
             path (``str``): The path of output file.
@@ -95,6 +95,9 @@ class ImageWriter:
             if not VisualLib.opencv_available():
                 raise ValueError("OpenCV is not installed.")
             import cv2
+            # opencv only support ndarray
+            if type(image) is not np.ndarray:
+                image = image.numpy()
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             cv2.imwrite(path, image, [cv2.IMWRITE_PNG_COMPRESSION, compression_level])
         elif backend == VisualLib.MATPLOTLIB:
