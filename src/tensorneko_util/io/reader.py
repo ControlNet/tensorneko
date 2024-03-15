@@ -3,6 +3,7 @@ from typing import Type
 from .audio import AudioReader
 from .image import ImageReader
 from .json import JsonReader
+from .npy import NpyReader
 from .pickle import PickleReader
 from .text import TextReader
 from .video import VideoReader
@@ -42,6 +43,7 @@ class Reader:
         self.image = ImageReader
         self.text = TextReader
         self.json = JsonReader
+        self.npy = NpyReader
         self.video = VideoReader
         self.audio = AudioReader
         self.pickle = PickleReader
@@ -94,6 +96,8 @@ class Reader:
             return self.text(path, *args, **kwargs)
         elif path.endswith(".json"):
             return self.json(path, *args, **kwargs)
+        elif path.endswith(".npy") or path.endswith(".npz"):
+            return self.npy(path, *args, **kwargs)
         elif path.endswith(".mp4") or path.endswith(".avi") or path.endswith(".mov") or path.endswith(".mkv"):
             return self.video(path, *args, **kwargs)
         elif path.endswith(".wav") or path.endswith(".mp3") or path.endswith(".flac"):

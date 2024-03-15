@@ -3,6 +3,7 @@ from typing import Type
 from .audio import AudioWriter
 from .image import ImageWriter
 from .json import JsonWriter
+from .npy import NpyWriter
 from .pickle import PickleWriter
 from .text import TextWriter
 from .video import VideoWriter
@@ -42,6 +43,7 @@ class Writer:
         self.image = ImageWriter
         self.text = TextWriter
         self.json = JsonWriter
+        self.npy = NpyWriter
         self.video = VideoWriter
         self.audio = AudioWriter
         self.pickle = PickleWriter
@@ -94,6 +96,8 @@ class Writer:
             return self.text(path, obj, *args, **kwargs)
         elif path.endswith(".json"):
             return self.json(path, obj, *args, **kwargs)
+        elif path.endswith(".npy") or path.endswith(".npz"):
+            return self.npy(path, obj, *args, **kwargs)
         elif path.endswith(".mp4") or path.endswith(".avi") or path.endswith(".mov") or path.endswith(".mkv"):
             return self.video(path, obj, *args, **kwargs)
         elif path.endswith(".wav") or path.endswith(".mp3") or path.endswith(".flac"):
