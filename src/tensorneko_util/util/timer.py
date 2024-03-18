@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import time
+import inspect
 from functools import wraps
 from typing import Callable, Optional
-
-from .type import T
 
 
 class Timer:
@@ -100,3 +99,39 @@ class Timer:
     @staticmethod
     def _make_str(name: str, t: float):
         return f"[Timer] {name}: {t} sec"
+
+    @classmethod
+    def lines(cls, __f: Callable) -> Callable:
+        source_code = inspect.getsource(__f)
+        # first line should be started from `def`
+        source_code_lines = source_code.split("\n")
+        new_source_code_lines = []
+        # get base indent for the function body
+        base_indent = None
+        body_start_index = 0
+        for i, line in enumerate(source_code_lines):
+            if line == "" or line.strip() == "@Timer.lines":
+                continue
+            if line.lstrip().startswith("def") or line.lstrip().startswith("@"):
+                new_source_code_lines.append(line)
+                body_start_index = i
+            else:
+                if base_indent is None:
+                    # initialize the timer
+                    base_indent = line.index(line.lstrip())
+                    new_source_code_lines.append(f"{' ' * base_indent}__timer = Timer().__enter__()")
+
+                # skip the if, for, this kind of lines ended with :
+                if line.rstrip().endswith(":"):
+                    new_source_code_lines.append(line)
+                # exit the timer before return
+                elif line.lstrip().startswith("return"):
+                    return_line_indent = line.index(line.lstrip())
+                    new_source_code_lines.append(f"{' ' * base_indent}__timer.__exit__(None, None, None)")
+                    new_source_code_lines.append(line)
+                else:
+                    new_source_code_lines.append(line + f'; __timer.time(name="{__f.__name__} line {i - body_start_index}")')
+
+        new_source_code = "\n".join(new_source_code_lines) + "\n"
+        exec(new_source_code)
+        return locals()[__f.__name__]
