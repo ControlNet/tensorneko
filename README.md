@@ -34,6 +34,11 @@ To use the library without PyTorch and PyTorch Lightning, you can install the ut
 pip install tensorneko_util
 ```
 
+Some cpu bound functions are implemented by `pyo3`, and you can install the optimized version with below command.
+```shell
+pip install tensorneko_lib
+```
+
 ## Neko Layers, Modules and Architectures
 
 Build an MLP with linear layers. The activation and normalization will be placed in the hidden layers.
