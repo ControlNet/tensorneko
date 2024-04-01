@@ -78,6 +78,27 @@ jobs:
           cd src
           python -c "import tensorneko"
 
+  build-tensorneko-lib:
+    name: Build Tensorneko Lib
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Remove ambiguous files
+        run: |
+          rm -rf src/tensorneko_util
+          rm -rf src/tensorneko
+          rm setup.py
+          rm setup_util.py
+          mv pyproject_lib.toml pyproject.toml
+
+      - uses: messense/maturin-action@v1
+        with:
+          manylinux: auto
+          command: build
+          args: --release -o dist
+
   unittest:
     name: Unittest
     runs-on: ubuntu-20.04
