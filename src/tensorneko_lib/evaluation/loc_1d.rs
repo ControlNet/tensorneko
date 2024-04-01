@@ -18,10 +18,14 @@ struct Metadata {
     segments: Vec<Vec<f32>>,
 }
 
-fn convert_metadata_info_to_metadata(metadata_info: Map<String, Value>, key: &str) -> Metadata {
+fn convert_metadata_info_to_metadata(
+    metadata_info: Map<String, Value>,
+    file_key: &str,
+    value_key: &str,
+) -> Metadata {
     Metadata {
-        file: metadata_info.get("file").unwrap().as_str().unwrap().to_string(),
-        segments: metadata_info.get(key).unwrap().as_array().unwrap().iter().map(|x| {
+        file: metadata_info.get(file_key).unwrap().as_str().unwrap().to_string(),
+        segments: metadata_info.get(value_key).unwrap().as_array().unwrap().iter().map(|x| {
             x.as_array().unwrap().iter().map(|x| x.as_f64().unwrap() as f32).collect()
         }).collect(),
     }
@@ -286,11 +290,11 @@ struct Proposals {
     pub content: HashMap<String, ProposalRow>,
 }
 
-fn load_json(proposals_path: &str, labels_path: &str, value_key: &str) -> (Vec<Metadata>, Proposals) {
+fn load_json(proposals_path: &str, labels_path: &str, file_key: &str, value_key: &str) -> (Vec<Metadata>, Proposals) {
     let mut proposals_raw = fs::read_to_string(proposals_path).expect("Unable to read proposal file");
     let mut labels_raw = fs::read_to_string(labels_path).expect("Unable to read labels file");
     let labels_infos: Vec<Map<String, Value>> = unsafe { simd_json::serde::from_str(labels_raw.as_mut_str()) }.unwrap();
-    let labels_infos: Vec<_> = labels_infos.into_par_iter().map(|x| convert_metadata_info_to_metadata(x, value_key)).collect();
+    let labels_infos: Vec<_> = labels_infos.into_par_iter().map(|x| convert_metadata_info_to_metadata(x, file_key, value_key)).collect();
     let proposals: Proposals = unsafe { simd_json::serde::from_str(proposals_raw.as_mut_str()) }.unwrap();
     (labels_infos, proposals)
 }
@@ -299,12 +303,12 @@ fn load_json(proposals_path: &str, labels_path: &str, value_key: &str) -> (Vec<M
 pub fn ap_1d<'py>(
     proposals_path: &str,
     labels_path: &str,
-    value_key: &str,
+    file_key: &str, value_key: &str,
     fps: f32,
     iou_thresholds: Vec<f32>,
     py: Python<'py>,
 ) -> Bound<'py, PyDict> {
-    let (labels_infos, proposals) = load_json(proposals_path, labels_path, value_key);
+    let (labels_infos, proposals) = load_json(proposals_path, labels_path, file_key, value_key);
 
     let ap_score = calc_ap_scores(
         &iou_thresholds,
@@ -320,13 +324,13 @@ pub fn ap_1d<'py>(
 pub fn ar_1d<'py>(
     proposals_path: &str,
     labels_path: &str,
-    value_key: &str,
+    file_key: &str, value_key: &str,
     fps: f32,
     n_proposals: Vec<usize>,
     iou_thresholds: Vec<f32>,
     py: Python<'py>,
 ) -> Bound<'py, PyDict> {
-    let (labels_infos, proposals) = load_json(proposals_path, labels_path, value_key);
+    let (labels_infos, proposals) = load_json(proposals_path, labels_path, file_key, value_key);
 
     let ar_score = calc_ar_scores(
         &n_proposals,
@@ -343,14 +347,14 @@ pub fn ar_1d<'py>(
 pub fn ap_ar_1d<'py>(
     proposals_path: &str,
     labels_path: &str,
-    value_key: &str,
+    file_key: &str, value_key: &str,
     fps: f32,
     ap_iou_thresholds: Vec<f32>,
     ar_n_proposals: Vec<usize>,
     ar_iou_thresholds: Vec<f32>,
     py: Python<'py>,
 ) -> Bound<'py, PyDict> {
-    let (labels_infos, proposals) = load_json(proposals_path, labels_path, value_key);
+    let (labels_infos, proposals) = load_json(proposals_path, labels_path, file_key, value_key);
 
     let ap_score = calc_ap_scores(
         &ap_iou_thresholds,
