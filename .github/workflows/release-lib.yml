@@ -21,6 +21,7 @@ jobs:
       with:
         manylinux: auto
         command: build
+        rust-toolchain: nightly
         args: --release -o dist
     - name: Upload wheels
       uses: actions/upload-artifact@v2
@@ -34,16 +35,33 @@ jobs:
     - uses: actions/checkout@v2
     - name: Modify the setup files
       run: |
-        rm -rf src/tensorneko_util
-        rm -rf src/tensorneko
-        rm setup.py
-        rm setup_util.py
-        mv pyproject_lib.toml pyproject.toml
-        new_version=$(cat version.txt) && sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"$new_version\"/" Cargo.toml
+        Remove-Item src/tensorneko_util -Recurse -Force
+        Remove-Item src/tensorneko -Recurse -Force
+        Remove-Item setup.py -Force
+        Remove-Item setup_util.py -Force
+        Move-Item pyproject_lib.toml pyproject.toml
+        $new_version = Get-Content version.txt -Raw
+        $in_package_section = $false
+        (Get-Content Cargo.toml -Raw) -split "`r`n" | ForEach-Object {
+          if ($_ -match '^\[package\]$') {
+            $in_package_section = $true
+          }
+          if ($_ -match '^\[.*\]$' -and $_ -notmatch '^\[package\]$') {
+            $in_package_section = $false
+          }
+          if ($in_package_section -and $_ -match '^version = "') {
+            $_ -replace 'version = "[0-9]*\.[0-9]*\.[0-9]*"', "version = `"$new_version`""
+          } else {
+            $_
+          }
+        } | Set-Content Cargo.toml
+      shell: powershell
+
     - uses: messense/maturin-action@v1
       with:
         command: build
         args: --release --no-sdist -o dist
+        rust-toolchain: nightly
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
@@ -61,11 +79,12 @@ jobs:
         rm setup.py
         rm setup_util.py
         mv pyproject_lib.toml pyproject.toml
-        new_version=$(cat version.txt) && sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"$new_version\"/" Cargo.toml
+        new_version=$(cat version.txt) && sed -i '' "/^\[package\]$/,/^\[/ s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
     - uses: messense/maturin-action@v1
       with:
         command: build
         args: --release --no-sdist -o dist --universal2
+        rust-toolchain: nightly
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
