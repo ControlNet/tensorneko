@@ -1,97 +1,30 @@
-#![feature(iter_map_windows)]
-
 extern crate serde_json;
+extern crate simd_json;
 
-use pyo3::prelude::*;
 use std::collections::HashMap;
 use std::fs;
-use env_logger::Target;
-use ndarray::{arr2, Array, Array1, Array2, Axis, concatenate, OwnedRepr, s, stack, Zip};
+
+use ndarray::{concatenate, OwnedRepr, s, stack, Zip};
 use ndarray::prelude::*;
+use pyo3::prelude::*;
+use pyo3::types::{IntoPyDict, PyDict};
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
-use log::{info};
-
+use serde_json::{Map, Value};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Metadata {
     file: String,
-    original: Option<String>,
-    split: String,
-    n_fakes: usize,
-    duration: f32,
-    fake_periods: Vec<Vec<f32>>,
-    visual_fake_segments: Vec<Vec<f32>>,
-    audio_fake_segments: Vec<Vec<f32>>,
-    modify_type: String,
-    modify_video: bool,
-    modify_audio: bool,
-    //audio_model: String,
-    video_frames: i64,
-    audio_frames: i64,
+    segments: Vec<Vec<f32>>,
 }
 
-impl Metadata {
-    fn new(
-        file: String,
-        original: Option<String>,
-        split: String,
-        fake_segments: Vec<Vec<f32>>,
-        fps: i64,
-        visual_fake_segments: Vec<Vec<f32>>,
-        audio_fake_segments: Vec<Vec<f32>>,
-        //audio_model: String,
-        modify_type: String,
-        video_frames: i64,
-        audio_frames: i64,
-    ) -> Metadata {
-        Metadata {
-            file,
-            original,
-            split,
-            n_fakes: fake_segments.len(),
-            duration: video_frames as f32 / fps as f32,
-            fake_periods: fake_segments,
-            visual_fake_segments,
-            audio_fake_segments,
-            modify_type: modify_type.clone(),
-            modify_video: matches!(modify_type.as_str(), "both-modified" | "visual_modified"),
-            modify_audio: matches!(modify_type.as_str(), "both-modified" | "audio_modified"),
-            //audio_model: audio_model,
-            video_frames,
-            audio_frames,
-        }
+fn convert_metadata_info_to_metadata(metadata_info: Map<String, Value>, key: &str) -> Metadata {
+    Metadata {
+        file: metadata_info.get("file").unwrap().as_str().unwrap().to_string(),
+        segments: metadata_info.get(key).unwrap().as_array().unwrap().iter().map(|x| {
+            x.as_array().unwrap().iter().map(|x| x.as_f64().unwrap() as f32).collect()
+        }).collect(),
     }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct MetadataFileRecord {
-    file: String,
-    original: Option<String>,
-    split: String,
-    fake_segments: Vec<Vec<f32>>,
-    visual_fake_segments: Vec<Vec<f32>>,
-    audio_fake_segments: Vec<Vec<f32>>,
-    modify_type: String,
-    video_frames: i64,
-    audio_frames: i64,
-}
-
-fn convert_metadata_info_to_metadata(metadata_info: MetadataFileRecord, fps: i64) -> Metadata {
-    //let audio_model_default = "default_audio_model".to_string();
-    Metadata::new(
-        metadata_info.file,
-        metadata_info.original,
-        metadata_info.split,
-        metadata_info.fake_segments,
-        fps,
-        metadata_info.visual_fake_segments,
-        metadata_info.audio_fake_segments,
-        //metadata_info.audio_model.unwrap_or(audio_model_default),
-        metadata_info.modify_type,
-        metadata_info.video_frames,
-        metadata_info.audio_frames,
-    )
 }
 
 fn iou_1d(proposal: Array2<f32>, target: &Array2<f32>) -> Array2<f32> {
@@ -198,27 +131,26 @@ fn get_ap_values(
 }
 
 fn calc_ap_scores(
-    iou_thresholds: Vec<f32>,
-    metadatas: &Vec<Metadata>,
+    iou_thresholds: &Vec<f32>,
+    metadata: &Vec<Metadata>,
     proposals_map: &Proposals,
+    fps: f32,
 ) -> Vec<(f32, f32)> {
     iou_thresholds.par_iter().map(|iou| {
-        let (values, labels): (Vec<_>, Vec<isize>) = metadatas
+        let (values, labels): (Vec<_>, Vec<isize>) = metadata
             .par_iter()
             .map(|meta| {
                 let proposals = &proposals_map.content[&meta.file];
-                let rows = meta.fake_periods.len();
-                let x: Vec<f32> = meta.fake_periods.iter().flatten().copied().collect();
+                let rows = meta.segments.len();
+                let x: Vec<f32> = meta.segments.iter().flatten().copied().collect();
                 let labels = Array2::from_shape_vec((rows, 2), x).unwrap().to_owned();
-                let meta_value = get_ap_values(*iou, &proposals.row, &labels, 25.0);
+                let meta_value = get_ap_values(*iou, &proposals.row, &labels, fps);
 
                 (meta_value, labels.len_of(Axis(0)) as isize)
             })
             .unzip();
 
         let n_labels = labels.iter().sum::<isize>() as f32;
-
-        info!("{} completed, n_labels: {}", iou, n_labels);
 
         let (r, n): (Vec<_>, Vec<_>) = values.into_iter().unzip();
         let confidence = concatenate(
@@ -280,7 +212,7 @@ fn calc_ar_values(
     let ious = if n_labels > 0 {
         iou_1d(proposals.slice(s![.., 1..]).mapv(|x| x / fps), labels)
     } else {
-        Array::zeros((max_proposals, 0))  // 这里还能再来个短路什么的
+        Array::zeros((max_proposals, 0))  // TODO: maybe short-circuit
     };
 
     let mut values = Array3::zeros((iou_thresholds.len(), n_proposals_clamped.len(), 2));
@@ -288,7 +220,6 @@ fn calc_ar_values(
         let iou_max = cummax_2d(&ious);  // (n_iou, n_labels)
         for (threshold_idx, &threshold) in iou_thresholds.iter().enumerate() {
             for (n_proposals_idx, &n_proposal) in n_proposals_clamped.iter().enumerate() {
-                //dbg!(iou_max.row(n_proposal - 1));
                 let tp = iou_max.row(n_proposal - 1).iter().filter(|&&iou| iou > threshold).count();
                 values[[threshold_idx, n_proposals_idx, 0]] = tp;
                 values[[threshold_idx, n_proposals_idx, 1]] = n_labels - tp;
@@ -299,19 +230,20 @@ fn calc_ar_values(
 }
 
 fn calc_ar_scores(
-    n_proposals: Vec<usize>,
+    n_proposals: &Vec<usize>,
     iou_thresholds: &Vec<f32>,
     metadata: &Vec<Metadata>,
     proposals_map: &Proposals,
+    fps: f32,
 ) -> Vec<(usize, f32)> {
     let values = metadata.par_iter().map(|meta| {
         let proposals = &proposals_map.content[&meta.file];
 
-        let rows = meta.fake_periods.len();
-        let x: Vec<f32> = meta.fake_periods.iter().flatten().copied().collect();
+        let rows = meta.segments.len();
+        let x: Vec<f32> = meta.segments.iter().flatten().copied().collect();
         let labels = Array2::from_shape_vec((rows, 2), x).unwrap().to_owned();
 
-        calc_ar_values(&n_proposals, iou_thresholds, &proposals.row, &labels, 25.0)
+        calc_ar_values(&n_proposals, iou_thresholds, &proposals.row, &labels, fps)
     }).collect::<Vec<_>>();
 
     let values = stack(
@@ -319,7 +251,7 @@ fn calc_ar_scores(
         &values
             .iter()
             .map(|x| x.view())
-            .collect::<Vec<_>>()
+            .collect::<Vec<_>>(),
     ).unwrap();
 
     let values_sum = values.sum_axis(Axis(0));
@@ -354,8 +286,93 @@ struct Proposals {
     pub content: HashMap<String, ProposalRow>,
 }
 
-#[pyfunction]
-pub fn ap_1d() {}
+fn load_json(proposals_path: &str, labels_path: &str, value_key: &str) -> (Vec<Metadata>, Proposals) {
+    let mut proposals_raw = fs::read_to_string(proposals_path).expect("Unable to read proposal file");
+    let mut labels_raw = fs::read_to_string(labels_path).expect("Unable to read labels file");
+    let labels_infos: Vec<Map<String, Value>> = unsafe { simd_json::serde::from_str(labels_raw.as_mut_str()) }.unwrap();
+    let labels_infos: Vec<_> = labels_infos.into_par_iter().map(|x| convert_metadata_info_to_metadata(x, value_key)).collect();
+    let proposals: Proposals = unsafe { simd_json::serde::from_str(proposals_raw.as_mut_str()) }.unwrap();
+    (labels_infos, proposals)
+}
 
 #[pyfunction]
-pub fn ar_1d() {}
+pub fn ap_1d<'py>(
+    proposals_path: &str,
+    labels_path: &str,
+    value_key: &str,
+    fps: f32,
+    iou_thresholds: Vec<f32>,
+    py: Python<'py>,
+) -> Bound<'py, PyDict> {
+    let (labels_infos, proposals) = load_json(proposals_path, labels_path, value_key);
+
+    let ap_score = calc_ap_scores(
+        &iou_thresholds,
+        &labels_infos,
+        &proposals,
+        fps,
+    );
+
+    ap_score.into_py_dict_bound(py)
+}
+
+#[pyfunction]
+pub fn ar_1d<'py>(
+    proposals_path: &str,
+    labels_path: &str,
+    value_key: &str,
+    fps: f32,
+    n_proposals: Vec<usize>,
+    iou_thresholds: Vec<f32>,
+    py: Python<'py>,
+) -> Bound<'py, PyDict> {
+    let (labels_infos, proposals) = load_json(proposals_path, labels_path, value_key);
+
+    let ar_score = calc_ar_scores(
+        &n_proposals,
+        &iou_thresholds,
+        &labels_infos,
+        &proposals,
+        fps,
+    );
+
+    ar_score.into_py_dict_bound(py)
+}
+
+#[pyfunction]
+pub fn ap_ar_1d<'py>(
+    proposals_path: &str,
+    labels_path: &str,
+    value_key: &str,
+    fps: f32,
+    ap_iou_thresholds: Vec<f32>,
+    ar_n_proposals: Vec<usize>,
+    ar_iou_thresholds: Vec<f32>,
+    py: Python<'py>,
+) -> Bound<'py, PyDict> {
+    let (labels_infos, proposals) = load_json(proposals_path, labels_path, value_key);
+
+    let ap_score = calc_ap_scores(
+        &ap_iou_thresholds,
+        &labels_infos,
+        &proposals,
+        fps,
+    );
+
+    let ar_score = calc_ar_scores(
+        &ar_n_proposals,
+        &ar_iou_thresholds,
+        &labels_infos,
+        &proposals,
+        fps,
+    );
+
+    let ap_dict = ap_score.into_py_dict_bound(py);
+    let ar_dict = ar_score.into_py_dict_bound(py);
+
+    // {"ap": ap_dict, "ar": ar_dict}
+    let dict = PyDict::new_bound(py);
+    dict.set_item("ap", ap_dict).unwrap();
+    dict.set_item("ar", ar_dict).unwrap();
+    dict
+}
