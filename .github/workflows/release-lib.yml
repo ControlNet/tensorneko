@@ -7,6 +7,10 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [x86_64, i686, aarch64, armv7, s390x, ppc64le]
+
     steps:
     - uses: actions/checkout@v2
     - name: Modify the setup files
@@ -22,7 +26,8 @@ jobs:
         manylinux: auto
         command: build
         rust-toolchain: nightly
-        args: --release -o dist
+        target: ${{ matrix.target }}
+        args: --release -o dist -i 3.7 3.8 3.9 3.10 3.11 pypy3.8 pypy3.9
     - name: Upload wheels
       uses: actions/upload-artifact@v2
       with:
@@ -31,6 +36,13 @@ jobs:
 
   windows:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        platform:
+          - target: x64
+            interpreter: 3.7 3.8 3.9 3.10 3.11 pypy3.8 pypy3.9
+          - target: x86
+            interpreter: 3.7 3.8 3.9 3.10 3.11
     steps:
     - uses: actions/checkout@v2
     - name: Modify the setup files
@@ -60,7 +72,8 @@ jobs:
     - uses: PyO3/maturin-action@v1
       with:
         command: build
-        args: --release -o dist
+        target: ${{ matrix.platform.target }}
+        args: --release -o dist -i ${{ matrix.platform.interpreter }}
         rust-toolchain: nightly
     - name: Upload wheels
       uses: actions/upload-artifact@v2
@@ -83,7 +96,8 @@ jobs:
     - uses: PyO3/maturin-action@v1
       with:
         command: build
-        args: --release -o dist --universal2
+        args: --release -o dist -i 3.8 3.9 3.10 3.11 pypy3.8 pypy3.9
+        target: universal2-apple-darwin
         rust-toolchain: nightly
     - name: Upload wheels
       uses: actions/upload-artifact@v2
