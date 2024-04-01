@@ -101,7 +101,7 @@ jobs:
     - uses: PyO3/maturin-action@v1
       with:
         command: build
-        args: --release -o dist -i 3.7 3.8 3.9 3.10 3.11 pypy3.8 pypy3.9
+        args: --release -o dist --sdist -i 3.7 3.8 3.9 3.10 3.11 pypy3.8 pypy3.9
         target: universal2-apple-darwin
         rust-toolchain: nightly
     - name: Upload wheels
