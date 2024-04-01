@@ -1,0 +1,90 @@
+name: Release lib
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Modify the setup files
+      run: |
+        rm -rf src/tensorneko_util
+        rm -rf src/tensorneko
+        rm setup.py
+        rm setup_util.py
+        mv pyproject_lib.toml pyproject.toml
+        new_version=$(cat version.txt) && sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"$new_version\"/" Cargo.toml
+    - uses: messense/maturin-action@v1
+      with:
+        manylinux: auto
+        command: build
+        args: --release -o dist
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: dist
+
+  windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Modify the setup files
+      run: |
+        rm -rf src/tensorneko_util
+        rm -rf src/tensorneko
+        rm setup.py
+        rm setup_util.py
+        mv pyproject_lib.toml pyproject.toml
+        new_version=$(cat version.txt) && sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"$new_version\"/" Cargo.toml
+    - uses: messense/maturin-action@v1
+      with:
+        command: build
+        args: --release --no-sdist -o dist
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: dist
+
+  macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Modify the setup files
+      run: |
+        rm -rf src/tensorneko_util
+        rm -rf src/tensorneko
+        rm setup.py
+        rm setup_util.py
+        mv pyproject_lib.toml pyproject.toml
+        new_version=$(cat version.txt) && sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"$new_version\"/" Cargo.toml
+    - uses: messense/maturin-action@v1
+      with:
+        command: build
+        args: --release --no-sdist -o dist --universal2
+    - name: Upload wheels
+      uses: actions/upload-artifact@v2
+      with:
+        name: wheels
+        path: dist
+
+#  release:
+#    name: Release
+#    runs-on: ubuntu-latest
+#    if: "startsWith(github.ref, 'refs/tags/')"
+#    needs: [ macos, windows, linux ]
+#    steps:
+#      - uses: actions/download-artifact@v2
+#        with:
+#          name: wheels
+#      - name: Publish to PyPI
+#        uses: messense/maturin-action@v1
+#        env:
+#          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+#        with:
+#          command: upload
+#          args: --skip-existing *
