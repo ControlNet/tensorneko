@@ -9,6 +9,25 @@ on:
         required: true
 
 jobs:
+
+  source:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Modify the setup files
+      run: |
+        rm -rf src/tensorneko_util
+        rm -rf src/tensorneko
+        rm setup.py
+        rm setup_util.py
+        mv pyproject_lib.toml pyproject.toml
+        new_version=$(cat version.txt) && sed -i "/^\[package\]$/,/^\[/ s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
+    - uses: PyO3/maturin-action@v1
+      with:
+        command: sdist
+        args: -o dist
+        rust-toolchain: nightly
+
   linux:
     runs-on: ubuntu-latest
     strategy:
@@ -113,7 +132,7 @@ jobs:
 #  release:
 #    name: Release
 #    runs-on: ubuntu-latest
-#    needs: [ macos, windows, linux ]
+#    needs: [ macos, windows, linux, source ]
 #    steps:
 #      - uses: actions/download-artifact@v2
 #        with:
