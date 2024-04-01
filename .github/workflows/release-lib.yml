@@ -17,7 +17,7 @@ jobs:
         rm setup_util.py
         mv pyproject_lib.toml pyproject.toml
         new_version=$(cat version.txt) && sed -i "/^\[package\]$/,/^\[/ s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         manylinux: auto
         command: build
@@ -57,10 +57,10 @@ jobs:
         } | Set-Content Cargo.toml
       shell: powershell
 
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         command: build
-        args: --release --no-sdist -o dist
+        args: --release -o dist
         rust-toolchain: nightly
     - name: Upload wheels
       uses: actions/upload-artifact@v2
@@ -80,10 +80,10 @@ jobs:
         rm setup_util.py
         mv pyproject_lib.toml pyproject.toml
         new_version=$(cat version.txt) && sed -i '' "/^\[package\]$/,/^\[/ s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         command: build
-        args: --release --no-sdist -o dist --universal2
+        args: --release -o dist --universal2
         rust-toolchain: nightly
     - name: Upload wheels
       uses: actions/upload-artifact@v2
