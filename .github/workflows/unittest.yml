@@ -85,19 +85,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Remove ambiguous files
+      - name: Modify the setup files
         run: |
           rm -rf src/tensorneko_util
           rm -rf src/tensorneko
           rm setup.py
           rm setup_util.py
           mv pyproject_lib.toml pyproject.toml
+          new_version=$(cat version.txt) && sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"$new_version\"/" Cargo.toml
 
-      - uses: messense/maturin-action@v1
+      - uses: PyO3/maturin-action@v1
         with:
           manylinux: auto
           command: build
-          args: --release -o dist
+          args: --release
 
   unittest:
     name: Unittest
