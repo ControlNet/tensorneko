@@ -40,6 +40,7 @@ P = TypeVar("P", bound=SubPlot)
 
 
 class MultiPlots:
+
     def __init__(self, n_row: Optional[int] = None, n_col: Optional[int] = None,
         figure: Optional[Figure] = None,
         title: Optional[str] = None,

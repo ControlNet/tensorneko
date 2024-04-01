@@ -1,0 +1,36 @@
+[build-system]
+requires = ["maturin>=1.5,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "tensorneko_lib"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Utilities"
+]
+dynamic = ["version"]
+authors = [
+    {name = "ControlNet", email = "smczx@hotmail.com"}
+]
+readme = "README.md"
+keywords = ["pytorch", "AI"]
+
+[project.urls]
+"Homepage" = "https://github.com/ControlNet/tensorneko"
+"Source Code" = "https://github.com/ControlNet/tensorneko"
+"Bug Tracker" = "https://github.com/ControlNet/tensorneko/issues"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]

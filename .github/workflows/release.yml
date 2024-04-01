@@ -9,15 +9,23 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       local-version: ${{ steps.get-local-version.outputs.version }}
-      remote-version: ${{ steps.get-remote-version.outputs.version }}
+      remote-version-tensorneko: ${{ steps.get-remote-version-tensorneko.outputs.tensorneko-version }}
+      remote-version-tensorneko-util: ${{ steps.get-remote-version-tensorneko-util.outputs.tensorneko-util-version }}
+      remote-version-tensorneko-lib: ${{ steps.get-remote-version-tensorneko-lib.outputs.tensorneko-lib-version }}
     steps:
       - uses: actions/checkout@v2
       - name: Get Local Version
         id: get-local-version
         run: echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT
-      - name: Get Remote Version
-        id: get-remote-version
+      - name: Get Remote Version Tensorneko
+        id: get-remote-version-tensorneko
         run: echo "version=$(curl -s https://pypi.org/pypi/tensorneko/json | jq -r '.info.version')" >> $GITHUB_OUTPUT
+      - name: Get Remote Version Tensorneko Util
+        id: get-remote-version-tensorneko-util
+        run: echo "version=$(curl -s https://pypi.org/pypi/tensorneko_util/json | jq -r '.info.version')" >> $GITHUB_OUTPUT
+      - name: Get Remote Version Tensorneko Lib
+        id: get-remote-version-tensorneko-lib
+        run: echo "version=$(curl -s https://pypi.org/pypi/tensorneko_lib/json | jq -r '.info.version')" >> $GITHUB_OUTPUT
 
   build-web:
     name: Build Web
@@ -98,10 +106,50 @@ jobs:
       - name: Run Test
         run: python -m unittest discover test
 
-  release:
-    name: Release
+  release-tensorneko:
+    name: Release Tensorneko
     needs: [build-web, unittest, check-version]
-    if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version
+    if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        python-version: [3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install wheel
+          python init.py
+
+      - name: Build package for tensorneko
+        run: python setup.py sdist bdist_wheel
+
+      - name: Save to artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tensorneko
+          path: dist/
+
+      - name: Release tensorneko to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  release-tensorneko-util:
+    name: Release Tensorneko Util
+    needs: [build-web, unittest, check-version]
+    if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko-util
     runs-on: ubuntu-20.04
 
     strategy:
@@ -139,34 +187,73 @@ jobs:
       - name: Build package for tensorneko_util
         run: python setup_util.py sdist bdist_wheel
 
+      - name: Save to artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tensorneko-util
+          path: dist/
+
       - name: Release tensorneko_util to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_UTIL_API_TOKEN }}
 
-      - name: Clean build for tensorneko_util
-        run: |
-          rm -rf dist/
-          rm -rf build/
-          rm -rf src/tensorneko_util.egg-info/
+  release-tensorneko-lib:
+    name: Release Tensorneko Lib
+    needs: [check-version]
+    if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko-lib
+    uses: ./.github/workflows/release-lib.yml
+    secrets:
+      PYPI_API_TOKEN: ${{ secrets.PYPI_LIB_API_TOKEN }}
 
-      - name: Build package for tensorneko
-        run: python setup.py sdist bdist_wheel
+  github-release:
+    name: Release
+    needs: [release-tensorneko, release-tensorneko-util, release-tensorneko-lib]
+    runs-on: ubuntu-20.04
 
-      - name: Release tensorneko to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+    strategy:
+      matrix:
+        python-version: [3.9]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
 
       - name: Get the version
         run: |
           VER=$(cat version.txt)
           echo "VERSION=$VER" >> $GITHUB_ENV
 
-      - name: Rebuild tensorneko_util
-        run: python setup_util.py sdist bdist_wheel
+      - name: Download artifacts tensorneko
+        uses: actions/download-artifact@v2
+        with:
+          name: tensorneko
+          path: dist_tensorneko/
+
+      - name: Download artifacts tensorneko-util
+        uses: actions/download-artifact@v2
+        with:
+          name: tensorneko-util
+          path: dist_tensorneko_util/
+
+      - name: Download artifacts tensorneko-lib
+        uses: actions/download-artifact@v2
+        with:
+          name: tensorneko-lib
+          path: dist_tensorneko_lib/
+
+      - name: Merge the artifacts
+        run: |
+          mkdir dist
+          cp -r dist_tensorneko/* dist/
+          cp -r dist_tensorneko_util/* dist/
+          cp -r dist_tensorneko_lib/* dist/
 
       - name: Release to GitHub Release
         uses: marvinpinto/action-automatic-releases@latest

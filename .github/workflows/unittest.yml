@@ -3,6 +3,8 @@ on:
   push:
     branches-ignore:
       - "master"
+  pull_request:
+
 jobs:
   tensorneko-util-import-test:
     name: Import Test / tensorneko-util
@@ -14,7 +16,7 @@ jobs:
         python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v1
@@ -47,7 +49,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v1
@@ -77,6 +79,28 @@ jobs:
         run: |
           cd src
           python -c "import tensorneko"
+
+  build-tensorneko-lib:
+    name: Build Tensorneko Lib
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Modify the setup files
+        run: |
+          rm -rf src/tensorneko_util
+          rm -rf src/tensorneko
+          rm setup.py
+          rm setup_util.py
+          mv pyproject_lib.toml pyproject.toml
+          new_version=$(cat version.txt) && sed -i "/^\[package\]$/,/^\[/ s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
+
+      - uses: PyO3/maturin-action@v1
+        with:
+          manylinux: auto
+          command: build
+          args: --release
 
   unittest:
     name: Unittest
@@ -109,7 +133,7 @@ jobs:
             torch-version: "1.12.*"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -137,7 +161,7 @@ jobs:
     needs: [unittest]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -183,7 +207,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v1
@@ -237,7 +261,7 @@ jobs:
             torch-version: "1.12.*"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -289,7 +313,7 @@ jobs:
             torch-version: "1.12.*"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v2

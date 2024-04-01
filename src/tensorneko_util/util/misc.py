@@ -295,7 +295,7 @@ def sample_indexes(total_frames: int, n_frames: int, sample_rate: int) -> np.nda
 
         >>> sample_indexes(10, 3, 3)
         array([2, 5, 8])
-4
+
     """
 
     start_ind = np.random.randint(0, total_frames - (n_frames * sample_rate) + 2, ())
