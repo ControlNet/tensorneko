@@ -134,17 +134,17 @@ jobs:
       - name: Build package for tensorneko
         run: python setup.py sdist bdist_wheel
 
-      - name: Release tensorneko to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-
       - name: Save to artifact
         uses: actions/upload-artifact@v2
         with:
           name: tensorneko
           path: dist/
+
+      - name: Release tensorneko to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   release-tensorneko-util:
     name: Release Tensorneko Util
@@ -187,17 +187,17 @@ jobs:
       - name: Build package for tensorneko_util
         run: python setup_util.py sdist bdist_wheel
 
-      - name: Release tensorneko_util to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_UTIL_API_TOKEN }}
-
       - name: Save to artifact
         uses: actions/upload-artifact@v2
         with:
           name: tensorneko-util
           path: dist/
+
+      - name: Release tensorneko_util to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_UTIL_API_TOKEN }}
 
   release-tensorneko-lib:
     name: Release Tensorneko Lib
@@ -205,7 +205,7 @@ jobs:
     if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko-lib
     uses: ./.github/workflows/release-lib.yml
     secrets:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      PYPI_API_TOKEN: ${{ secrets.PYPI_LIB_API_TOKEN }}
 
   github-release:
     name: Release
@@ -230,19 +230,19 @@ jobs:
           VER=$(cat version.txt)
           echo "VERSION=$VER" >> $GITHUB_ENV
 
-      - name: Download artifacts
+      - name: Download artifacts tensorneko
         uses: actions/download-artifact@v2
         with:
           name: tensorneko
           path: dist_tensorneko/
 
-      - name: Download artifacts
+      - name: Download artifacts tensorneko-util
         uses: actions/download-artifact@v2
         with:
           name: tensorneko-util
           path: dist_tensorneko_util/
 
-      - name: Download artifacts
+      - name: Download artifacts tensorneko-lib
         uses: actions/download-artifact@v2
         with:
           name: tensorneko-lib
