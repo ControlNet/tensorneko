@@ -266,3 +266,4 @@ scratch*.ipynb
 /watcher
 /src/tensorneko_util/version.txt
 /test/resource/temp_output
+Cargo.lock
