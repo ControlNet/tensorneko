@@ -125,11 +125,23 @@ fn get_ap_values(
 
     let mut is_tp = Array1::from_elem((n_proposals, ), false);
 
+    let mut tp_indexes = Vec::new();
     for i in 0..n_labels {
-        if let Some((index, _)) = potential_tp.column(i).iter().filter(|&&x| x).enumerate().next() {
-            is_tp[index] = true;
+        let potential_tp_col = potential_tp.column(i);
+        let potential_tp_index = potential_tp_col.iter().enumerate().filter(|(_, &x)| x).map(|(j, _)| j);
+        for j in potential_tp_index {
+            if !tp_indexes.contains(&j) {
+                tp_indexes.push(j);
+                break;
+            }
         }
-    };
+    }
+
+    if !tp_indexes.is_empty() {
+        for &j in &tp_indexes {
+            is_tp[j] = true;
+        }
+    }
 
     (confidence, is_tp)
 }
