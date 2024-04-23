@@ -216,6 +216,7 @@ fn calc_ar_values(
     fps: f32,
 ) -> ArrayBase<OwnedRepr<usize>, Ix3> {
     let max_proposals = *n_proposals.iter().max().unwrap();
+    let max_proposals = max_proposals.min(proposals.nrows());
 
     let mut proposals = proposals.slice(s![..max_proposals, ..]).to_owned();
     if proposals.is_empty() {
