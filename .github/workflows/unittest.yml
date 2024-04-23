@@ -100,6 +100,7 @@ jobs:
         with:
           manylinux: auto
           command: build
+          rust-toolchain: nightly
           args: --release
 
   unittest:

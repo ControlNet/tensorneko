@@ -9,7 +9,7 @@ pub mod evaluation;
 #[pymodule]
 fn tensorneko_lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
-    
+
     // tensorneko_lib.evaluation
     m.add_wrapped(wrap_pymodule!(evaluation::evaluation))?;
     let sys = PyModule::import_bound(_py, "sys")?;
