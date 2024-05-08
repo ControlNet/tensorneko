@@ -9,7 +9,7 @@ class EventMeta(type):
     def __call__(cls, *args, **kwargs):
         event = super().__call__(*args, **kwargs)
         event.bus = kwargs.get("bus", EventBus.default)
-        event.bus.emit(event, blocking=_blocking_flag)
+        event.bus.emit(event)
         return event
 
 
