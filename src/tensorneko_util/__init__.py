@@ -20,5 +20,10 @@ __all__ = [
     "write",
 ]
 
+try:
+    from . import _rich
+except ImportError:
+    pass
+
 with open(os.path.join(dirname(__file__), "version.txt"), "r", encoding="UTF-8") as file:
     __version__ = file.read()
