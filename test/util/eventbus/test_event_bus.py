@@ -104,12 +104,15 @@ class EventBusTest(unittest.TestCase):
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_handle_normal_custom_once(self, mock_stdout):
         CustomEvent(100)
+        EventBus.default.wait()
         self.assertEqual(mock_stdout.getvalue(), "custom_handler is called, x = 100\n")
 
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_handle_normal_custom_twice(self, mock_stdout):
         CustomEvent(100)
+        EventBus.default.wait()
         CustomEvent(200)
+        EventBus.default.wait()
         self.assertEqual(mock_stdout.getvalue(), "custom_handler is called, x = 100\n"
                                                  "custom_handler is called, x = 200\n")
 
@@ -148,6 +151,7 @@ class EventBusTest(unittest.TestCase):
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_handle_async_once(self, mock_stdout):
         AsyncEvent(100)
+        EventBus.default.wait()
         all_possibilities = permutations([
             "async_handler_async is called, x = 100\n",
             "async_handler_async2 is called, x = 100\n"
@@ -158,7 +162,9 @@ class EventBusTest(unittest.TestCase):
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_handle_async_twice(self, mock_stdout):
         AsyncEvent(100)
+        EventBus.default.wait()
         AsyncEvent(200)
+        EventBus.default.wait()
         all_possibilities_100 = ["".join(each) for each in permutations([
             "async_handler_async is called, x = 100\n",
             "async_handler_async2 is called, x = 100\n"
@@ -175,6 +181,7 @@ class EventBusTest(unittest.TestCase):
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_all_mixed(self, mock_stdout):
         MixedEvent(100)
+        EventBus.default.wait()
         all_possibilities = permutations([
             "mixed_handler_normal is called, x = 100\n",
             "mixed_handler_thread is called, x = 100\n",
