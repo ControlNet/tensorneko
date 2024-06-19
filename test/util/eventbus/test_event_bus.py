@@ -127,6 +127,7 @@ class EventBusTest(unittest.TestCase):
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_handle_thread_twice(self, mock_stdout):
         ThreadEvent(100)
+        EventBus.default.wait()
         ThreadEvent(200)
         EventBus.default.wait()
         all_possibilities_100 = ["".join(each) for each in permutations([
@@ -185,7 +186,9 @@ class EventBusTest(unittest.TestCase):
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_all_mixed_twice(self, mock_stdout):
         MixedEvent(100)
+        EventBus.default.wait()
         MixedEvent(200)
+        EventBus.default.wait()
         all_possibilities_100 = ["".join(each) for each in permutations([
             "mixed_handler_normal is called, x = 100\n",
             "mixed_handler_thread is called, x = 100\n",
