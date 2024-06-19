@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 from itertools import permutations
 
-from tensorneko_util.util import subscribe, Event
+from tensorneko_util.util import subscribe, Event, EventBus
 
 
 @subscribe
@@ -116,18 +116,19 @@ class EventBusTest(unittest.TestCase):
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_handle_thread_once(self, mock_stdout):
         ThreadEvent(100)
+        EventBus.default.wait()
         all_possibilities = permutations([
             "thread_handler_normal is called, x = 100\n",
             "thread_handler_thread is called, x = 100\n",
             "thread_handler_thread2 is called, x = 100\n"
         ])
-
         self.assertIn(mock_stdout.getvalue(), ["".join(p) for p in all_possibilities])
 
     @patch("sys.stdout", new_callable=io.StringIO)
     def test_handle_thread_twice(self, mock_stdout):
         ThreadEvent(100)
         ThreadEvent(200)
+        EventBus.default.wait()
         all_possibilities_100 = ["".join(each) for each in permutations([
             "thread_handler_normal is called, x = 100\n",
             "thread_handler_thread is called, x = 100\n",

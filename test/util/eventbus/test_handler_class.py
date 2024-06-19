@@ -4,7 +4,7 @@ import time
 import unittest
 
 from tensorneko_util.util import subscribe, Event
-from tensorneko_util.util.eventbus.bus import EventHandler
+from tensorneko_util.util.eventbus.bus import EventHandler, EventBus
 
 
 class AddValueEvent(Event):
@@ -67,6 +67,7 @@ class HandlerClassTest(unittest.TestCase):
     def test_custom_thread_handler_class(self):
         AddValueThreadEvent(10)
         AddValueThreadEvent(20)
+        EventBus.default.wait()
         self.assertEqual(CustomThreadHandler.instance().x, 30)
 
     def test_custom_async_handler_class(self):
