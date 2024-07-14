@@ -7,6 +7,7 @@ from . import visualization
 from . import preprocess
 from . import io
 from . import debug
+from . import msg
 from .io import read, write
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     "preprocess",
     "io",
     "debug",
+    "msg",
     "read",
     "write",
 ]
