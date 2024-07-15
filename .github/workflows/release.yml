@@ -253,7 +253,7 @@ jobs:
 
   github-release:
     name: Release
-    needs: [release-tensorneko, release-tensorneko-util, release-tensorneko-lib]
+    needs: [release-tensorneko, release-tensorneko-util, release-tensorneko-lib, release-tensorneko-tool]
     runs-on: ubuntu-20.04
 
     strategy:
