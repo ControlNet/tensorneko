@@ -100,12 +100,7 @@ class EventBus:
         .. code-block:: python
 
             # useful decorators for default event bus
-            from tensorneko.util import (
-                subscribe, # run in the main thread
-                subscribe_thread, # run in a new thread
-                subscribe_async, # run async
-                subscribe_process # run in a new process
-            )
+            from tensorneko.util import subscribe
             # Event base type
             from tensorneko.util import Event
 

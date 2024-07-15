@@ -481,7 +481,7 @@ This library provides event bus based reactive tools. The API integrates the Pyt
 # useful decorators for default event bus
 from tensorneko.util import subscribe
 # Event base type
-from tensorneko.util import Event
+from tensorneko.util import Event, EventBus
 
 class LogEvent(Event):
     def __init__(self, message: str):
@@ -511,6 +511,7 @@ if __name__ == '__main__':
     # emit an event, and then the event handler will be invoked
     # The sequential order is not guaranteed
     LogEvent("Hello world!")
+    EventBus.default.wait()  # it's not blocking, need to call wait manually before exit.
     # one possible output:
     # Hello world! in another thread
     # Hello world! async
