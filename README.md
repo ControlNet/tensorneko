@@ -39,6 +39,13 @@ Some cpu bound functions are implemented by rust-based `pyo3`, and you can insta
 pip install tensorneko_lib
 ```
 
+Some CLI tools are provided in the `tensorneko_tool` package, and you can install it with below command.
+```shell
+pipx install tensorneko_tool  # or `pip install tensorneko_tool`
+```
+
+Then you can use the CLI tools `tensorneko` in the terminal.
+
 ## Neko Layers, Modules and Architectures
 
 Build an MLP with linear layers. The activation and normalization will be placed in the hidden layers.
