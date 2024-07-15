@@ -654,3 +654,13 @@ Functions list (in `tensorneko`):
 - `with_printed_shape`
 - `is_bad_num`
 - `count_parameters`
+
+## TensorNeko Tools
+
+Some CLI tools are provided in the `tensorneko_tool` package.
+
+The `gotify` can send a message to the Gotify server, with the environment variables `GOTIFY_URL` and `GOTIFY_TOKEN` set.
+
+```shell
+tensorneko gotify "Script finished!"
+```
