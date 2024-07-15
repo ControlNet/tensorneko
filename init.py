@@ -9,6 +9,8 @@ def write_version(version: str) -> None:
         file.write(version)
     with open("src/tensorneko_util/version.txt", "w") as file:
         file.write(version)
+    with open("src/tensorneko_tool/version.txt", "w") as file:
+        file.write(version)
 
 
 def init_version() -> None:

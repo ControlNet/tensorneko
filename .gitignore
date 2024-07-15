@@ -268,3 +268,4 @@ scratch*.ipynb
 /test/resource/temp_output
 Cargo.lock
 wheels
+/src/tensorneko_tool/version.txt

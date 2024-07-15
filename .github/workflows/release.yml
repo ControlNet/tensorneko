@@ -12,8 +12,9 @@ jobs:
       remote-version-tensorneko: ${{ steps.get-remote-version-tensorneko.outputs.tensorneko-version }}
       remote-version-tensorneko-util: ${{ steps.get-remote-version-tensorneko-util.outputs.tensorneko-util-version }}
       remote-version-tensorneko-lib: ${{ steps.get-remote-version-tensorneko-lib.outputs.tensorneko-lib-version }}
+      remote-version-tensorneko-tool: ${{ steps.get-remote-version-tensorneko-tool.outputs.tensorneko-tool-version }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Get Local Version
         id: get-local-version
         run: echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT
@@ -26,16 +27,19 @@ jobs:
       - name: Get Remote Version Tensorneko Lib
         id: get-remote-version-tensorneko-lib
         run: echo "version=$(curl -s https://pypi.org/pypi/tensorneko_lib/json | jq -r '.info.version')" >> $GITHUB_OUTPUT
+      - name: Get Remote Version Tensorneko Tool
+        id: get-remote-version-tensorneko-tool
+        run: echo "version=$(curl -s https://pypi.org/pypi/tensorneko_tool/json | jq -r '.info.version')" >> $GITHUB_OUTPUT
 
   build-web:
     name: Build Web
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 16.x
 
@@ -85,10 +89,10 @@ jobs:
             torch-version: "1.12.*"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -117,10 +121,10 @@ jobs:
         python-version: [3.9]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -135,7 +139,7 @@ jobs:
         run: python setup.py sdist bdist_wheel
 
       - name: Save to artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: tensorneko
           path: dist/
@@ -157,10 +161,10 @@ jobs:
         python-version: [3.9]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 16.x
 
@@ -173,7 +177,7 @@ jobs:
           CI: true
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -188,7 +192,7 @@ jobs:
         run: python setup_util.py sdist bdist_wheel
 
       - name: Save to artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: tensorneko-util
           path: dist/
@@ -207,6 +211,46 @@ jobs:
     secrets:
       PYPI_API_TOKEN: ${{ secrets.PYPI_LIB_API_TOKEN }}
 
+  release-tensorneko-tool:
+    name: Release Tensorneko Tool
+    needs: [build-web, unittest, check-version]
+    if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko-tool
+    runs-on: ubuntu-20.04
+
+    strategy:
+      matrix:
+        python-version: [3.9]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install wheel
+          python init.py
+
+      - name: Build package for tensorneko_tool
+        run: python setup_tool.py sdist bdist_wheel
+
+      - name: Save to artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tensorneko-tool
+          path: dist/
+
+      - name: Release tensorneko_tool to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOOL_API_TOKEN }}
+
   github-release:
     name: Release
     needs: [release-tensorneko, release-tensorneko-util, release-tensorneko-lib]
@@ -217,10 +261,10 @@ jobs:
         python-version: [3.9]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
@@ -231,22 +275,28 @@ jobs:
           echo "VERSION=$VER" >> $GITHUB_ENV
 
       - name: Download artifacts tensorneko
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: tensorneko
           path: dist_tensorneko/
 
       - name: Download artifacts tensorneko-util
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: tensorneko-util
           path: dist_tensorneko_util/
 
       - name: Download artifacts tensorneko-lib
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: tensorneko-lib
           path: dist_tensorneko_lib/
+
+      - name: Download artifacts tensorneko-tool
+        uses: actions/download-artifact@v4
+        with:
+          name: tensorneko-tool
+          path: dist_tensorneko_tool/
 
       - name: Merge the artifacts
         run: |
@@ -254,6 +304,7 @@ jobs:
           cp -r dist_tensorneko/* dist/
           cp -r dist_tensorneko_util/* dist/
           cp -r dist_tensorneko_lib/* dist/
+          cp -r dist_tensorneko_tool/* dist/
 
       - name: Release to GitHub Release
         uses: marvinpinto/action-automatic-releases@latest

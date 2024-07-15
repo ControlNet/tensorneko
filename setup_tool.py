@@ -2,23 +2,24 @@ import init
 import setuptools
 
 long_description = """
-The independent util library for TensorNeko. This library doesn't require PyTorch as a dependency.
+The CLI tools developed based on TensorNeko. This library use tensorneko_util as the dependency.
 """
 
 requirements = []
-with open("requirements_util.txt", "r") as file:
+with open("requirements_tool.txt", "r") as file:
     for line in file:
         requirements.append(line.strip())
 
 version = init.read_version()
 init.write_version(version)
+requirements.append(f"tensorneko_util == {version}")
 
 setuptools.setup(
-    name="tensorneko_util",
+    name="tensorneko_tool",
     version=version,
     author="ControlNet",
     author_email="smczx@hotmail.com",
-    description="The Utils for Library TensorNeko.",
+    description="The CLI Tools for Library TensorNeko.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ControlNet/tensorneko",
@@ -28,13 +29,16 @@ setuptools.setup(
     },
     keywords=["deep learning", "pytorch", "AI", "data processing"],
     package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src", include=["tensorneko_util", "tensorneko_util.*"]),
+    packages=setuptools.find_packages(where="src", include=["tensorneko_tool", "tensorneko_tool.*"]),
     package_data={
-        "tensorneko_util": [
+        "tensorneko_tool": [
             "version.txt",
-            "visualization/watcher/web/dist/index.html",
-            "visualization/watcher/web/dist/assets/*",
-            "visualization/image_browser/web/index.html",
+        ]
+    },
+    # cli tools
+    entry_points={
+        "console_scripts": [
+            "tensorneko = tensorneko_tool.__main__:main",
         ]
     },
     python_requires=">=3.7",

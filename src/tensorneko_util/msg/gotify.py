@@ -28,12 +28,19 @@ def push_gotify(message: str, url: Optional[str] = None, token: Optional[str] = 
     """
     title = title or socket.gethostname()
     url = url or os.environ.get("GOTIFY_URL")
+    if url is None:
+        raise ValueError("URL is not provided. Input url argument or set the environment variable GOTIFY_URL.")
     token = token or os.environ.get("GOTIFY_TOKEN")
+    if token is None:
+        raise ValueError("Token is not provided. Input token argument or set the environment variable GOTIFY_TOKEN.")
     url = f"{url.rstrip('/')}/message?token={token}"
     data = json.dumps(
         {"title": title, "message": message, "priority": priority}
     ).encode("utf-8")
-    req = urllib.request.Request(url, data=data, method="POST", headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(url, data=data, method="POST", headers={
+        "Content-Type": "application/json",
+        "User-Agent": "TensorNeko"
+    })
     try:
         with urllib.request.urlopen(req) as res:
             pass
