@@ -116,10 +116,6 @@ jobs:
     if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko
     runs-on: ubuntu-20.04
 
-    strategy:
-      matrix:
-        python-version: [3.9]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -155,10 +151,6 @@ jobs:
     needs: [build-web, unittest, check-version]
     if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko-util
     runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        python-version: [3.9]
 
     steps:
       - uses: actions/checkout@v4
@@ -217,10 +209,6 @@ jobs:
     if: needs.check-version.outputs.local-version != needs.check-version.outputs.remote-version-tensorneko-tool
     runs-on: ubuntu-20.04
 
-    strategy:
-      matrix:
-        python-version: [3.9]
-
     steps:
       - uses: actions/checkout@v4
 
@@ -255,10 +243,6 @@ jobs:
     name: Release
     needs: [release-tensorneko, release-tensorneko-util, release-tensorneko-lib, release-tensorneko-tool]
     runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        python-version: [3.9]
 
     steps:
       - uses: actions/checkout@v4
