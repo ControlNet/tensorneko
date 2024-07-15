@@ -34,7 +34,7 @@ To use the library without PyTorch and PyTorch Lightning, you can install the ut
 pip install tensorneko_util
 ```
 
-Some cpu bound functions are implemented by `pyo3`, and you can install the optimized version with below command.
+Some cpu bound functions are implemented by rust-based `pyo3`, and you can install the optimized version with below command.
 ```shell
 pip install tensorneko_lib
 ```
