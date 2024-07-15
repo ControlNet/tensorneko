@@ -1,5 +1,6 @@
 import pathlib
 import warnings
+from subprocess import Popen
 from typing import Optional, Union
 
 import numpy as np
@@ -116,7 +117,7 @@ class VideoWriter:
             if not VisualLib.ffmpeg_available():
                 raise ValueError("FFMPEG is not installed.")
             import ffmpeg
-            pipe = ffmpeg.input("pipe:", format="rawvideo", pix_fmt="rgb24", s=f"{video.shape[2]}x{video.shape[1]}") \
+            pipe: Popen = ffmpeg.input("pipe:", format="rawvideo", pix_fmt="rgb24", s=f"{video.shape[2]}x{video.shape[1]}") \
                 .output(path, format=ext[1:], pix_fmt="rgb24", r=video_fps) \
                 .overwrite_output() \
                 .run_async(pipe_stdin=True)

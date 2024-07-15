@@ -16,7 +16,8 @@ class JsonWriter:
             import orjson
             with open(path, "w", encoding=encoding) as file:
                 if indent == 4:
-                    option = orjson.OPT_INDENT_4
+                    warnings.warn("orjson does not support indent 4, will use indent 2 instead.")
+                    option = orjson.OPT_INDENT_2
                 elif indent == 2:
                     option = orjson.OPT_INDENT_2
                 else:

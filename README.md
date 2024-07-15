@@ -34,10 +34,17 @@ To use the library without PyTorch and PyTorch Lightning, you can install the ut
 pip install tensorneko_util
 ```
 
-Some cpu bound functions are implemented by `pyo3`, and you can install the optimized version with below command.
+Some cpu bound functions are implemented by rust-based `pyo3`, and you can install the optimized version with below command.
 ```shell
 pip install tensorneko_lib
 ```
+
+Some CLI tools are provided in the `tensorneko_tool` package, and you can install it with below command.
+```shell
+pipx install tensorneko_tool  # or `pip install tensorneko_tool`
+```
+
+Then you can use the CLI tools `tensorneko` in the terminal.
 
 ## Neko Layers, Modules and Architectures
 
@@ -481,7 +488,7 @@ This library provides event bus based reactive tools. The API integrates the Pyt
 # useful decorators for default event bus
 from tensorneko.util import subscribe
 # Event base type
-from tensorneko.util import Event
+from tensorneko.util import Event, EventBus
 
 class LogEvent(Event):
     def __init__(self, message: str):
@@ -511,6 +518,7 @@ if __name__ == '__main__':
     # emit an event, and then the event handler will be invoked
     # The sequential order is not guaranteed
     LogEvent("Hello world!")
+    EventBus.default.wait()  # it's not blocking, need to call wait manually before exit.
     # one possible output:
     # Hello world! in another thread
     # Hello world! async
@@ -646,3 +654,13 @@ Functions list (in `tensorneko`):
 - `with_printed_shape`
 - `is_bad_num`
 - `count_parameters`
+
+## TensorNeko Tools
+
+Some CLI tools are provided in the `tensorneko_tool` package.
+
+The `gotify` can send a message to the Gotify server, with the environment variables `GOTIFY_URL` and `GOTIFY_TOKEN` set.
+
+```shell
+tensorneko gotify "Script finished!"
+```

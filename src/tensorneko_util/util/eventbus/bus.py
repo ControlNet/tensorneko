@@ -6,7 +6,8 @@ from abc import ABC, abstractmethod
 from concurrent.futures import wait
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Type, Callable, TYPE_CHECKING, Any, Coroutine, Union, Set, TypeVar
+from typing import Dict, Type, Callable, TYPE_CHECKING, Any, Coroutine, Union, Set, TypeVar, List
+from concurrent.futures import Future
 
 from ...backend.parallel import ExecutorPool, ParallelType
 
@@ -99,12 +100,7 @@ class EventBus:
         .. code-block:: python
 
             # useful decorators for default event bus
-            from tensorneko.util import (
-                subscribe, # run in the main thread
-                subscribe_thread, # run in a new thread
-                subscribe_async, # run async
-                subscribe_process # run in a new process
-            )
+            from tensorneko.util import subscribe
             # Event base type
             from tensorneko.util import Event
 
@@ -117,15 +113,15 @@ class EventBus:
             def log_information(event: LogEvent):
                 print(event.message)
 
-            @subscribe_thread
+            @subscribe.thread
             def log_information_thread(event: LogEvent):
                 print(event.message, "in another thread")
 
-            @subscribe_async
+            @subscribe.coro
             async def log_information_async(event: LogEvent):
                 print(event.message, "async")
 
-            @subscribe_process
+            @subscribe.process
             def log_information_process(event: LogEvent):
                 print(event.message, "in a new process")
 
@@ -171,6 +167,7 @@ class EventBus:
 
     def __init__(self):
         self.listeners: Dict[Type[E], Set[Listener]] = {}
+        self.futures: List[Future] = []
 
     def register(self,
         event_type: Type[E],
@@ -185,7 +182,7 @@ class EventBus:
             self.listeners[event_type] = set()
         self.listeners[event_type].add(Listener(func, func_name, emit_type))
 
-    def emit(self, event: E, blocking: bool = True) -> None:
+    def emit(self, event: E) -> None:
         event_type: Type[E] = type(event)
         if event_type in self.listeners:
             normal_listeners = set()
@@ -216,8 +213,14 @@ class EventBus:
             for listener in normal_listeners:
                 listener.func(event)
 
-            if blocking:
-                wait(futures)
+            self.futures.extend(futures)
+
+    def wait(self):
+        """
+        Wait for all the futures to be completed.
+        """
+        wait(self.futures)
+        self.futures.clear()
 
     @staticmethod
     async def emit_async(async_listeners: Set[Listener], event: E) -> None:
