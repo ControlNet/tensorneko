@@ -14,7 +14,7 @@ class JsonWriter:
                 json.dump(obj, file, indent=indent, ensure_ascii=ensure_ascii)
         else:
             import orjson
-            with open(path, "w", encoding=encoding) as file:
+            with open(path, "wb") as file:
                 if indent == 4:
                     warnings.warn("orjson does not support indent 4, will use indent 2 instead.")
                     option = orjson.OPT_INDENT_2
