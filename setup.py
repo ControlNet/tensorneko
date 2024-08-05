@@ -5,9 +5,13 @@ with open("README.md", "r") as file:
     long_description = file.read()
 
 requirements = []
+extra_requirements = []
 with open("requirements.txt", "r") as file:
     for line in file:
-        requirements.append(line.strip())
+        if line.startswith("lightning") or line.startswith("tensorboard"):
+            extra_requirements.append(line.strip())
+        else:
+            requirements.append(line.strip())
 
 
 version = init.read_version()
@@ -37,6 +41,9 @@ setuptools.setup(
     },
     python_requires=">=3.8",
     install_requires=requirements,
+    extras_require={
+        "lightning": extra_requirements
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
