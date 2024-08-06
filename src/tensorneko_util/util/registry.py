@@ -28,7 +28,7 @@ class Registry(Generic[T]):
     """
 
     def __init__(self):
-        self._registry: dict[str, T] = {}
+        self._registry: dict[str, Type[T]] = {}
 
     def register(self, name: str) -> Callable[[Type[T]], Type[T]]:
         def wrapper(cls):
@@ -37,7 +37,7 @@ class Registry(Generic[T]):
 
         return wrapper
 
-    def __getitem__(self, name: str) -> T:
+    def __getitem__(self, name: str) -> Type[T]:
         return self._registry[name]
 
     def items(self):

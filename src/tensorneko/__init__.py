@@ -1,7 +1,6 @@
 import os.path
 
 from . import backend
-from . import callback
 from . import dataset
 from . import debug
 from . import evaluation
@@ -14,14 +13,11 @@ from . import preprocess
 from . import util
 from . import visualization
 from .io import read, write
-from .neko_model import NekoModel
 from .neko_module import NekoModule
-from .neko_trainer import NekoTrainer
 
 __version__ = io.read.text(os.path.join(util.get_tensorneko_path(), "version.txt"))
 
 __all__ = [
-    "callback",
     "dataset",
     "backend",
     "evaluation",
@@ -34,11 +30,28 @@ __all__ = [
     "util",
     "visualization",
     "debug",
-    "NekoModel",
-    "NekoTrainer",
     "NekoModule",
     "read",
     "write",
 ]
 
+try:
+    from . import callback
+except ImportError:
+    pass
+else:
+    __all__.append("callback")
 
+try:
+    from .neko_model import NekoModel
+except ImportError:
+    pass
+else:
+    __all__.append("NekoModel")
+
+try:
+    from .neko_trainer import NekoTrainer
+except ImportError:
+    pass
+else:
+    __all__.append("NekoTrainer")

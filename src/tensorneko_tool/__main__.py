@@ -14,6 +14,10 @@ def main():
     parser_gotify.add_argument("--url", help="The URL of the Gotify server", type=str)
     parser_gotify.add_argument("--token", help="The token of the Gotify server", type=str)
 
+    parser_dep_check = sub_parser.add_parser("dep_check", help="Check current dependencies against requirements.txt")
+    parser_dep_check.add_argument("-r", "--requirements", help="The path to the requirements.txt file", type=str, default="requirements.txt")
+    parser_dep_check.add_argument("--overwrite", action="store_true", help="Overwrite mismatched library versions in the requirements file")
+
     args = parser.parse_args()
 
     if args.version:
@@ -24,7 +28,10 @@ def main():
         from tensorneko_util.msg.gotify import push_gotify
         push_gotify(args.message, args.url, args.token, args.title, args.priority)
         exit(0)
-
+    elif args.sub_command == "dep_check":
+        from .dep_check import dep_check
+        dep_check(args.requirements, args.overwrite)
+        exit(0)
 
 if __name__ == "__main__":
     main()
