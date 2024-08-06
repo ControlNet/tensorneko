@@ -16,6 +16,7 @@ def main():
 
     parser_dep_check = sub_parser.add_parser("dep_check", help="Check current dependencies against requirements.txt")
     parser_dep_check.add_argument("-r", "--requirements", help="The path to the requirements.txt file", type=str, default="requirements.txt")
+    parser_dep_check.add_argument("--overwrite", action="store_true", help="Overwrite mismatched library versions in the requirements file")
 
     args = parser.parse_args()
 
@@ -29,7 +30,7 @@ def main():
         exit(0)
     elif args.sub_command == "dep_check":
         from .dep_check import dep_check
-        dep_check(args.requirements)
+        dep_check(args.requirements, args.overwrite)
         exit(0)
 
 if __name__ == "__main__":

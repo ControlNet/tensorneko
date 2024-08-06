@@ -71,7 +71,22 @@ def _display_results(missing_packages, version_mismatches):
                 border_style="yellow"))
 
 
-def dep_check(requirements_file: str):
+def _overwrite_requirements(requirements_file, requirements, mismatched_packages):
+    """Overwrite mismatched library versions in the requirements file with the installed versions."""
+    new_requirements = []
+    mismatched_dict = {pkg: installed_version for pkg, installed_version, _ in mismatched_packages}
+
+    for req in requirements:
+        if req.name in mismatched_dict:
+            new_requirements.append(f"{req.name}=={mismatched_dict[req.name]}")
+        else:
+            new_requirements.append(str(req))
+
+    with open(requirements_file, 'w') as file:
+        file.write("\n".join(new_requirements))
+
+
+def dep_check(requirements_file: str, overwrite: bool):
     """Main function to check dependencies against a requirements file."""
     requirements = _read_requirements(requirements_file)
 
@@ -79,3 +94,8 @@ def dep_check(requirements_file: str):
         missing_packages, version_mismatches = _check_requirements(requirements)
 
     _display_results(missing_packages, version_mismatches)
+
+    if overwrite and version_mismatches:
+        _overwrite_requirements(requirements_file, requirements, version_mismatches)
+        console.print(
+            f"[bold green]Requirements file {requirements_file} has been updated with installed versions.[/bold green]")
