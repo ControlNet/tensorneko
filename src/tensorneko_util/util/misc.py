@@ -242,6 +242,7 @@ def load_py(path: str) -> ModuleType:
 
 
 def try_until_success(func: Callable[[Any], T], *args, max_trials: Optional[int] = None, sleep_time: int = 0,
+    exception_callback: Optional[Callable[[Exception], None]] = None,
     exception_type: Union[Type[T_E], Tuple[T_E, ...]] = Exception, **kwargs
 ) -> T:
     """
@@ -251,6 +252,7 @@ def try_until_success(func: Callable[[Any], T], *args, max_trials: Optional[int]
         func (``(...) -> T``): The function to run.
         max_trials (``int``, optional): The max try times. None for unlimited. Default: None.
         sleep_time (``int``, optional): The sleep time between each try. Default: 0.
+        exception_callback (``(Exception) -> None``, optional): The callback function when exception occurs.
         exception_type (``Type[Exception] | (Type[Exception], ...)``, optional): The exception types to catch.
             Default: Exception.
         *args: The args for the function.
@@ -268,6 +270,8 @@ def try_until_success(func: Callable[[Any], T], *args, max_trials: Optional[int]
             return func(*args, **kwargs)
         except exception_type as e:
             trials += 1
+            if exception_callback is not None:
+                exception_callback(e)
             if max_trials is not None and trials > max_trials:
                 raise e
         if sleep_time > 0:
