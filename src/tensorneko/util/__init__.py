@@ -15,6 +15,7 @@ from .dispatched_misc import sparse2binary, binary2sparse
 from .reproducibility import Seed
 from .string_getter import get_activation, get_loss
 from .type import ModuleFactory, Shape, Device
+from .gc import run_gc
 
 Rearrange = _Rearrange
 
@@ -77,4 +78,5 @@ __all__ = [
     "download_files_thread",
     "WindowMerger",
     "Registry",
+    "run_gc"
 ]
