@@ -16,7 +16,7 @@ def push_gotify(message: str, url: Optional[str] = None, token: Optional[str] = 
         message (``str``): The message to be sent.
         url (``str``, optional): The URL of the Gotify server. If not provided, it will be read from the environment variable GOTIFY_URL.
         token (``str``, optional): The token for the Gotify server. If not provided, it will be read from the environment variable GOTIFY_TOKEN.
-        title (``str``, optional): The title of the message. Default is the hostname of the machine.
+        title (``str``, optional): The title of the message. Default is GOTIFY_TITLE then the hostname of the machine.
         priority (``int``, optional): The priority of the message. Default is 0.
 
     Examples::
@@ -26,7 +26,7 @@ def push_gotify(message: str, url: Optional[str] = None, token: Optional[str] = 
         # title = "<HOST_NAME>", message = "This is a test message", priority = 0
 
     """
-    title = title or socket.gethostname()
+    title = title or os.environ.get("GOTIFY_TITLE") or socket.gethostname()
     url = url or os.environ.get("GOTIFY_URL")
     if url is None:
         raise ValueError("URL is not provided. Input url argument or set the environment variable GOTIFY_URL.")
