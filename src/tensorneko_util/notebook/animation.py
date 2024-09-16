@@ -13,7 +13,7 @@ def to_animation_html(frames: Union[Sequence[np.ndarray], np.ndarray], interval:
         im.set_array(frames[i])
         return [im]
 
-    return FuncAnimation(fig, update_frame, frames=len(frames), interval=50).to_jshtml()
+    return FuncAnimation(fig, update_frame, frames=len(frames), interval=interval).to_jshtml()
 
 
 def show_animation(frames: Union[Sequence[np.ndarray], np.ndarray], interval: int = 100):
