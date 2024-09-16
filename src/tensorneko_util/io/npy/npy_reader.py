@@ -57,7 +57,6 @@ class NpyReader:
         path = _path2str(path)
         return np.loadtxt(path, delimiter=delimiter, dtype=dtype)
 
-    @classmethod
     def __new__(cls, path: Union[str, Path], *args, **kwargs) -> Union[np.ndarray, NpzFile]:
         path = _path2str(path)
         ext = path.split(".")[-1]

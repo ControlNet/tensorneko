@@ -66,7 +66,6 @@ class NpyWriter:
         path = _path2str(path)
         np.savetxt(path, arr, delimiter=delimiter, newline=newline)
 
-    @classmethod
     def __new__(cls, path: Union[str, Path], *args, **kwargs) -> None:
         path = _path2str(path)
         ext = path.split(".")[-1]
