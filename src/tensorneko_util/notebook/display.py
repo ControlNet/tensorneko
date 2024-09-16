@@ -1,5 +1,5 @@
 import IPython
-from IPython.display import Audio, Video, YouTubeVideo, Code, Image
+from IPython.display import Audio, Video, YouTubeVideo, Code, Image, HTML
 import sys
 
 
@@ -33,6 +33,10 @@ def code(path: str, language: str = None):
     IPython.display.Code._repr_html_ = _jupyterlab_repr_html_
     return IPython.display.display(Code(path, language=language))
 
+def html(source: str):
+    # render HTML in Jupyter
+    return IPython.display.HTML(source)
+
 
 class Display:
     audio = staticmethod(audio)
@@ -40,6 +44,7 @@ class Display:
     image = staticmethod(image)
     youtube_video = staticmethod(youtube_video)
     code = staticmethod(code)
+    html = staticmethod(html)
 
     def __call__(self, path: str, *args, **kwargs):
         ext = path.split(".")[-1]
