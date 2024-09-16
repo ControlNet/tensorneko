@@ -1,5 +1,7 @@
-from typing import Type
+from typing import Type, Union, Any
+from pathlib import Path
 
+from ._path_conversion import _path2str
 from .audio import AudioReader
 from .image import ImageReader
 from .json import JsonReader
@@ -88,8 +90,10 @@ class Reader:
         else:
             raise ImportError("To use the toml reader, please install toml.")
 
-    def __call__(self, path: str, *args, **kwargs):
+    def __call__(self, path: Union[str, Path], *args, **kwargs) -> Any:
         """Automatically infer the file type and return the corresponding result. """
+        path = _path2str(path)
+
         if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".bmp"):
             return self.image(path, *args, **kwargs)
         elif path.endswith(".txt"):

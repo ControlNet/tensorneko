@@ -1,5 +1,7 @@
-from typing import Type
+from typing import Type, Union
+from pathlib import Path
 
+from ._path_conversion import _path2str
 from .audio import AudioWriter
 from .image import ImageWriter
 from .json import JsonWriter
@@ -88,8 +90,10 @@ class Writer:
         else:
             raise ImportError("To use the toml writer, please install toml.")
 
-    def __call__(self, path: str, obj, *args, **kwargs):
+    def __call__(self, path: Union[str, Path], obj, *args, **kwargs):
         """Automatically infer the file type and return the corresponding result. """
+        path = _path2str(path)
+
         if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".bmp"):
             self.image(path, obj, *args, **kwargs)
         elif path.endswith(".txt"):

@@ -1,11 +1,13 @@
 import pathlib
-from typing import Optional
+from typing import Optional, Union
+from pathlib import Path
 
 import numpy as np
 from einops import rearrange
 from numpy import ndarray
 
 from .._default_backends import _default_image_io_backend
+from .._path_conversion import _path2str
 from ...backend.visual_lib import VisualLib
 from ...util.type import T_ARRAY
 
@@ -37,14 +39,14 @@ class ImageWriter:
         return img_out
 
     @classmethod
-    def to_jpeg(cls, path: str, image: T_ARRAY, quality: int = 75, channel_first: bool = False,
+    def to_jpeg(cls, path: Union[str, Path], image: T_ARRAY, quality: int = 75, channel_first: bool = False,
         backend: Optional[VisualLib] = None
     ) -> None:
         """
         Save as jpeg files from :class:`~torch.Tensor` or :class:`~numpy.ndarray`. The value range is [0, 1].
 
         Args:
-            path (``str``): The path of output file.
+            path (``str`` | ``pathlib.Path``): The path of output file.
             image (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The image tensor for output.
             quality (``int``, optional): The quality level for jpg from 0 to 100. Higher means quality is better.
                 Default: 75.
@@ -54,6 +56,7 @@ class ImageWriter:
                 Default: "opencv" if installed else "matplotlib".
         """
         backend = backend or _default_image_io_backend()
+        path = _path2str(path)
         image = cls._convert_img_format(image, backend, channel_first)
 
         if backend == VisualLib.OPENCV:
@@ -73,14 +76,14 @@ class ImageWriter:
             raise ValueError("Unknown backend library.")
 
     @classmethod
-    def to_png(cls, path: str, image: T_ARRAY, compression_level: int = 6, channel_first: bool = False,
+    def to_png(cls, path: Union[str, Path], image: T_ARRAY, compression_level: int = 6, channel_first: bool = False,
         backend: Optional[VisualLib] = None
     ) -> None:
         """
         Save as png files from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (C, H, W) or (H, W, C).
 
         Args:
-            path (``str``): The path of output file.
+            path (``str`` | ``pathlib.Path``): The path of output file.
             image (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The image tensor for output.
             compression_level (``int``, optional): The compression level png from 0 to 9. Higher means quality is worse.
                 Default: 6
@@ -90,6 +93,7 @@ class ImageWriter:
                 Default: "opencv" if installed else "matplotlib".
         """
         backend = backend or _default_image_io_backend()
+        path = _path2str(path)
         image = cls._convert_img_format(image, backend, channel_first)
         if backend == VisualLib.OPENCV:
             if not VisualLib.opencv_available():
@@ -119,16 +123,17 @@ class ImageWriter:
             raise ValueError("Unknown backend library.")
 
     @classmethod
-    def to(cls, path: str, image: T_ARRAY, *args, **kwargs) -> None:
+    def to(cls, path: Union[str, Path], image: T_ARRAY, *args, **kwargs) -> None:
         """
         Save as png files from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (C, H, W).
 
         Args:
-            path (``str``): The path of output file.
+            path (``str`` | ``pathlib.Path``): The path of output file.
             image (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The image tensor for output.
             *args: The arguments for :meth:`ImageWriter.to_jpeg` or :meth:`ImageWriter.to_png`.
             **kwargs: The keyword arguments for :meth:`ImageWriter.to_jpeg` or :meth:`ImageWriter.to_png`.
         """
+        path = _path2str(path)
         ext = pathlib.Path(path).suffix
         if ext in ('.jpg', '.jpeg'):
             cls.to_jpeg(path, image, *args, **kwargs)
@@ -137,6 +142,6 @@ class ImageWriter:
         else:
             raise ValueError("Unknown file extension. Now only support .jpg, .jpeg and .png.")
 
-    def __new__(cls, path: str, image: T_ARRAY, *args, **kwargs) -> None:
+    def __new__(cls, path: Union[str, Path], image: T_ARRAY, *args, **kwargs) -> None:
         """Alias of :meth:`ImageWriter.to`"""
         cls.to(path, image, *args, **kwargs)

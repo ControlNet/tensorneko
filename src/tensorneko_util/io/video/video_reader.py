@@ -1,11 +1,13 @@
 from itertools import islice, takewhile
-from typing import Optional
+from typing import Optional, Union
+from pathlib import Path
 
 import numpy as np
 from einops import rearrange
 
 from .video_data import VideoData
 from .._default_backends import _default_video_io_backend
+from .._path_conversion import _path2str
 from ...backend.visual_lib import VisualLib
 from ...util import dispatch
 
@@ -13,12 +15,12 @@ from ...util import dispatch
 class VideoReader:
 
     @classmethod
-    def of(cls, path: str, channel_first: bool = True, backend: Optional[VisualLib] = None) -> VideoData:
+    def of(cls, path: Union[str, Path], channel_first: bool = True, backend: Optional[VisualLib] = None) -> VideoData:
         """
         Read video array from given file.
 
         Args:
-            path (``str``): Path to the video file.
+            path (``str`` | ``pathlib.Path``): Path to the video file.
             channel_first (``bool``, optional): Get image dimension (T, H, W, C) if False or (T, C, H, W) if True.
                 Default: True.
             backend (:class:`~tensorneko.backend.visual_lib.VisualLib`, optional): VisualLib backend.
@@ -30,6 +32,7 @@ class VideoReader:
                 an audio tensor of (T, C) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
         """
         backend = backend or _default_video_io_backend()
+        path = _path2str(path)
         if backend == VisualLib.OPENCV:
             if not VisualLib.opencv_available():
                 raise ValueError("OpenCV is not installed.")
@@ -83,13 +86,13 @@ class VideoReader:
             raise ValueError("Unknown backend: {}".format(backend))
 
     @classmethod
-    def with_indexes(cls, path: str, indexes: np.ndarray,
+    def with_indexes(cls, path: Union[str, Path], indexes: np.ndarray,
         channel_first: bool = True, backend: Optional[VisualLib] = None
     ) -> VideoData:
         """
         Get a video frames with indexes. The audio will be ignored.
         Args:
-            path (``str``): Path to the video file.
+            path (``str`` | ``pathlib.Path``): Path to the video file.
             indexes (``np.ndarray``): Indexes of the video.
             channel_first (``bool``, optional): Get image dimension (T, H, W, C) if False or (T, C, H, W) if True.
                 Default: True.
@@ -102,6 +105,7 @@ class VideoReader:
                 an audio tensor of (T, C) and a :class:`~tensorneko.io.video.video_data.VideoInfo` contains fps info.
         """
         backend = backend or _default_video_io_backend()
+        path = _path2str(path)
         if backend == VisualLib.OPENCV:
             if not VisualLib.opencv_available():
                 raise ValueError("OpenCV is not installed.")
@@ -176,10 +180,11 @@ class VideoReader:
 
     @classmethod
     @dispatch
-    def with_range(cls, path: str, start: int, end: int, step: int, channel_first: bool = True,
+    def with_range(cls, path: Union[str, Path], start: int, end: int, step: int, channel_first: bool = True,
         backend: Optional[VisualLib] = None
     ) -> VideoData:
         backend = backend or _default_video_io_backend()
+        path = _path2str(path)
         if backend == VisualLib.PYTORCH:
             if not VisualLib.pytorch_available():
                 raise ValueError("Torchvision is not installed.")
@@ -202,11 +207,13 @@ class VideoReader:
 
     @classmethod
     @dispatch
-    def with_range(cls, path: str, end: int, channel_first: bool = True,
+    def with_range(cls, path: Union[str, Path], end: int, channel_first: bool = True,
         backend: Optional[VisualLib] = None
     ) -> VideoData:
+        path = _path2str(path)
         return cls.with_range(path, 0, end, 1, channel_first, backend)
 
-    def __new__(cls, path: str, channel_first: bool = False, backend: Optional[VisualLib] = None) -> VideoData:
+    def __new__(cls, path: Union[str, Path], channel_first: bool = False, backend: Optional[VisualLib] = None) -> VideoData:
         """Alias of :meth:`~.VideoReader.of`"""
+        path = _path2str(path)
         return cls.of(path, channel_first, backend)
