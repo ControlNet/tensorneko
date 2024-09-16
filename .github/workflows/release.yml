@@ -135,7 +135,7 @@ jobs:
         run: python setup.py sdist bdist_wheel
 
       - name: Save to artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: tensorneko
           path: dist/
@@ -184,7 +184,7 @@ jobs:
         run: python setup_util.py sdist bdist_wheel
 
       - name: Save to artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: tensorneko-util
           path: dist/
@@ -228,7 +228,7 @@ jobs:
         run: python setup_tool.py sdist bdist_wheel
 
       - name: Save to artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: tensorneko-tool
           path: dist/
@@ -259,25 +259,25 @@ jobs:
           echo "VERSION=$VER" >> $GITHUB_ENV
 
       - name: Download artifacts tensorneko
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: tensorneko
           path: dist_tensorneko/
 
       - name: Download artifacts tensorneko-util
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: tensorneko-util
           path: dist_tensorneko_util/
 
       - name: Download artifacts tensorneko-lib
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: tensorneko-lib
           path: dist_tensorneko_lib/
 
       - name: Download artifacts tensorneko-tool
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
           name: tensorneko-tool
           path: dist_tensorneko_tool/
