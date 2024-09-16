@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from typing import Type
+from pathlib import Path
+from typing import Type, Union
 
+from tensorneko_util.io._path_conversion import _path2str
 from tensorneko_util.io.writer import Writer as BaseWriter
 from .weight import WeightWriter
 
@@ -29,3 +31,12 @@ class Writer(BaseWriter):
             return self._mesh
         else:
             raise ImportError("To use the mesh writer, please install pytorch3d.")
+
+    def __call__(self, path: Union[str, Path], obj, *args, **kwargs):
+        """Automatically infer the file type and return the corresponding result. """
+        path = _path2str(path)
+
+        if path.endswith(".pt") or path.endswith(".pth") or path.endswith(".ckpt") or path.endswith(".safetensors"):
+            return self.weight(path, obj)
+        else:
+            return super().__call__(path, obj, *args, **kwargs)

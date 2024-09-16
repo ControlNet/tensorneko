@@ -1,8 +1,10 @@
-from typing import Optional
+from typing import Optional, Union
+from pathlib import Path
 
 import numpy as np
 from einops import rearrange
 
+from .._path_conversion import _path2str
 from ...backend.visual_lib import VisualLib
 from ...util.type import T_ARRAY
 from .._default_backends import _default_image_io_backend
@@ -12,12 +14,12 @@ class ImageReader:
     """ImageReader for reading images as :class:`~torch.Tensor`"""
 
     @classmethod
-    def of(cls, path: str, channel_first: bool = False, backend: Optional[VisualLib] = None) -> T_ARRAY:
+    def of(cls, path: Union[str, Path], channel_first: bool = False, backend: Optional[VisualLib] = None) -> T_ARRAY:
         """
         Read image tensor of given file.
 
         Args:
-            path (``str``): Path of the JPEG or PNG image.
+            path (``str`` | ``pathlib.Path``): Path of the JPEG or PNG image.
             channel_first (``bool``, optional): Get image dimension (H, W, C) if False or (C, H, W) if True.
                 Default: False.
             backend (:class:`~tensorneko_util.backend.visual_lib.VisualLib`, optional): The backend library for saving.
@@ -27,6 +29,7 @@ class ImageReader:
             :class:`~numpy.ndarray` | :class:`~torch.Tensor`: A float tensor of image, with value range of 0. to 1.
         """
         backend = backend or _default_image_io_backend()
+        path = _path2str(path)
 
         if backend == VisualLib.OPENCV:
             if not VisualLib.opencv_available():
@@ -61,6 +64,6 @@ class ImageReader:
 
         return img
 
-    def __new__(cls, path: str, channel_first: bool = True, backend: Optional[VisualLib] = None) -> T_ARRAY:
+    def __new__(cls, path: Union[str, Path], channel_first: bool = True, backend: Optional[VisualLib] = None) -> T_ARRAY:
         """Alias of :meth:`~ImageReader.of`"""
         return cls.of(path, channel_first, backend)

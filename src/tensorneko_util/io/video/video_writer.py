@@ -1,13 +1,15 @@
 import pathlib
 import warnings
 from subprocess import Popen
-from typing import Optional, Union
+from typing import Union
+from pathlib import Path
 
 import numpy as np
 from einops import rearrange
 
 from .video_data import VideoData
 from .._default_backends import _default_video_io_backend
+from .._path_conversion import _path2str
 from ...backend.visual_lib import VisualLib
 from ...util import dispatch
 from ...util.type import T_ARRAY
@@ -18,14 +20,14 @@ class VideoWriter:
 
     @classmethod
     @dispatch
-    def to(cls, path: str, video: VideoData, audio_codec: str = None, channel_first: bool = False,
+    def to(cls, path: Union[str, Path], video: VideoData, audio_codec: str = None, channel_first: bool = False,
         backend: VisualLib = None
     ) -> None:
         """
         Write to video file from :class:`~tensorneko.io.video.video_data.VideoData`.
 
         Args:
-            path (``str``): The path of output file.
+            path (``str`` | ``pathlib.Path``): The path of output file.
             video (:class:`~tensorneko.io.video.video_data.VideoData`): The VideoData object for output.
             audio_codec (``str``, optional): The audio codec if audio is required. Default: None.
             channel_first (``bool``, optional): Get image dimension (T, H, W, C) if False or (T, C, H, W) if True.
@@ -33,11 +35,12 @@ class VideoWriter:
             backend (:class:`~tensorneko.backend.visual_lib.VisualLib`, optional): VisualLib backend.
                 Default: opencv if installed, then torchvision if installed, then ffmpeg if available.
         """
+        path = _path2str(path)
         cls.to(path, video.video, video.info.video_fps, video.audio, video.info.audio_fps, audio_codec, channel_first, backend)
 
     @classmethod
     @dispatch
-    def to(cls, path: str, video: T_ARRAY, video_fps: float, audio: T_ARRAY = None,
+    def to(cls, path: Union[str, Path], video: T_ARRAY, video_fps: float, audio: T_ARRAY = None,
         audio_fps: int = None, audio_codec: str = None, channel_first: bool = False,
         backend: VisualLib = None
     ) -> None:
@@ -45,7 +48,7 @@ class VideoWriter:
         Write to video file from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (T, C, H, W).
         TODO: Buggy when the argument is too much.
         Args:
-            path (``str``): The path of output file.
+            path (``str`` | ``pathlib.Path``): The path of output file.
             video (:class:`~torch.Tensor` | :class:`~numpy.ndarray`): The video tensor or array with (T, C, H, W) for
                 output.
             video_fps (``float``): The video fps.
@@ -62,6 +65,7 @@ class VideoWriter:
             if audio_codec is None:
                 raise ValueError("audio_codec is required if audio is required.")
         backend = backend or _default_video_io_backend()
+        path = _path2str(path)
         if channel_first:
             video = rearrange(video, "t c h w -> t h w c")
 
@@ -130,6 +134,7 @@ class VideoWriter:
         else:
             raise ValueError("Unknown backend. Should be one of VisualLib.OPENCV, VisualLib.PYTORCH, VisualLib.FFMPEG.")
 
-    def __new__(cls, path: str, video: Union[T_ARRAY, VideoData], *args, **kwargs):
+    def __new__(cls, path: Union[str, Path], video: Union[T_ARRAY, VideoData], *args, **kwargs):
         """Alias of :func:`~tensorneko.io.video.video_io.to`."""
+        path = _path2str(path)
         return cls.to(path, video, *args, **kwargs)

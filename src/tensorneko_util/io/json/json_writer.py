@@ -1,6 +1,9 @@
 import json
 import warnings
 from typing import Union
+from pathlib import Path
+
+from .._path_conversion import _path2str
 
 
 class JsonWriter:
@@ -25,14 +28,14 @@ class JsonWriter:
                 file.write(orjson.dumps(obj, option=option))
 
     @classmethod
-    def to(cls, path: str, obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 4,
+    def to(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 4,
         ensure_ascii: bool = False, fast: bool = True
     ) -> None:
         """
         Save as Json file from a dictionary, list or json_dict.
 
         Args:
-            path (``str``): The path of output file.
+            path (``str`` | ``pathlib.Path``): The path of output file.
             obj (``dict`` | ``list`` | ``object``): The json data which need to be used for output. The type should be
                 ``dict``, ``list`` or the ``object`` decorated by :func:`~tensorneko.io.text.text_reader.json_data`.
             encoding (``str``, optional): Python file IO encoding parameter. Default: "UTF-8".
@@ -41,6 +44,7 @@ class JsonWriter:
             fast (``bool``, optional): Whether to use faster `orjson`. If `orjson` is not installed, use
                 `json` library. Default: True
         """
+        path = _path2str(path)
         if fast:
             try:
                 import orjson
@@ -64,8 +68,9 @@ class JsonWriter:
         else:
             raise TypeError("Not implemented type. Only support dict, list, json_data.")
 
-    def __new__(cls, path: str, obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 4,
+    def __new__(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 4,
         ensure_ascii: bool = False, fast: bool = True
     ) -> None:
         """Alias of :meth:`~tensorneko.io.json.json_writer.JsonWriter.to`."""
+        path = _path2str(path)
         cls.to(path, obj, encoding, indent, ensure_ascii, fast)

@@ -1,6 +1,7 @@
 import os
 import unittest
 from typing import List
+from pathlib import Path
 
 import numpy
 
@@ -145,3 +146,7 @@ class JsonReaderTest(unittest.TestCase):
         self.assertEqual(matrix_info.values[0][0].name, "A")
         self.assertEqual(matrix_info.values[1][2].name, "F")
         self.assertEqual(matrix_info.values[2][1].name, "H")
+
+    def test_pathlib_path(self):
+        data = read.json.of(Path("test") / "resource" / "test_read_json" / "test_read_json_as_dict.json")
+        self.assertEqual(data, {"x": 1, "y": 2})

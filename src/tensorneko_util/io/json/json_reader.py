@@ -1,7 +1,9 @@
 import json
 import warnings
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Union
+from pathlib import Path
 
+from .._path_conversion import _path2str
 from ...util.type import T
 
 
@@ -18,13 +20,13 @@ class JsonReader:
                 return orjson.loads(file.read())
 
     @classmethod
-    def of(cls, path: str, clazz: Optional[T] = None, encoding: str = "UTF-8", fast: bool = True
+    def of(cls, path: Union[str, Path], clazz: Optional[T] = None, encoding: str = "UTF-8", fast: bool = True
     ) -> Union[T, dict, list]:
         """
         Read json files to ``list`` or ``dict``.
 
         Args:
-            path (``str``): Json file path.
+            path (``str`` | ``pathlib.Path``): Json file path.
             clazz: (``T``, optional): The object of the json read for. The type should be decorated by
                 :func:`json_data`. This should be ``T`` or ``List[T]`` or ``List[List[T]]``
             encoding (``str``, optional): The encoding for python ``open`` function. Default: "UTF-8"
@@ -34,6 +36,7 @@ class JsonReader:
         Returns:
             ``dict`` | ``list`` | ``object``: The object of given json.
         """
+        path = _path2str(path)
         if fast:
             try:
                 import orjson
@@ -73,13 +76,13 @@ class JsonReader:
 
 
     @classmethod
-    def of_jsonl(cls, path: str, clazz: Optional[T] = None, encoding: str = "UTF-8", fast: bool = True
+    def of_jsonl(cls, path: Union[str, Path], clazz: Optional[T] = None, encoding: str = "UTF-8", fast: bool = True
     ) -> List[Union[T, dict, list]]:
         """
         Read jsonl files to ``list`` or ``dict``.
 
         Args:
-            path (``str``): Jsonl file path.
+            path (``str`` | ``pathlib.Path``): Jsonl file path.
             clazz: (``T``, optional): The object of the jsonl read for. The type should be decorated by
                 :func:`json_data`. This should be ``T`` or ``List[T]`` or ``List[List[T]]``
             encoding (``str``, optional): The encoding for python ``open`` function. Default: "UTF-8"
@@ -89,6 +92,7 @@ class JsonReader:
         Returns:
             ``List[dict]`` | ``List[list]`` | ``List[T]``: The object of given jsonl.
         """
+        path = _path2str(path)
         if fast:
             try:
                 import orjson
@@ -139,12 +143,12 @@ class JsonReader:
 
         return obj
 
-    def __new__(cls, path: str, clazz: T = None, encoding: str = "UTF-8", fast: bool = True) -> Union[T, dict, list]:
+    def __new__(cls, path: Union[str, Path], clazz: T = None, encoding: str = "UTF-8", fast: bool = True) -> Union[T, dict, list]:
         """
         Read json or jsonl file smartly.
 
         Args:
-            path (``str``): Json or jsonl file path.
+            path (``str`` | ``pathlib.Path``): Json or jsonl file path.
             clazz: (``T``, optional): The object of the json read for. The type should be decorated by
                 :func:`json_data`. This should be ``T`` or ``List[T]`` or ``List[List[T]]``
             encoding (``str``, optional): The encoding for python ``open`` function. Default: "UTF-8"
@@ -154,6 +158,7 @@ class JsonReader:
         Returns:
             ``dict`` | ``list`` | ``object``: The object of given json or jsonl.
         """
+        path = _path2str(path)
         if path.endswith(".jsonl"):
             return cls.of_jsonl(path, clazz, encoding, fast)
         else:
