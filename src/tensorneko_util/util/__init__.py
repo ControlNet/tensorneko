@@ -12,6 +12,7 @@ from .eventbus import Event, EventBus, EventHandler, subscribe
 from .singleton import Singleton
 from .downloader import download_file, download_file_thread, download_files_thread
 from .window_merger import WindowMerger
+from .multi_layer_indexer import MultiLayerIndexer
 
 tensorneko_util_path = get_tensorneko_util_path()
 
@@ -56,5 +57,6 @@ __all__ = [
     "download_file_thread",
     "download_files_thread",
     "WindowMerger",
-    "Registry"
+    "Registry",
+    "MultiLayerIndexer"
 ]

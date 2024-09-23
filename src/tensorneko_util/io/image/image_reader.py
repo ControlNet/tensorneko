@@ -35,7 +35,10 @@ class ImageReader:
             if not VisualLib.opencv_available():
                 raise ValueError("OpenCV is not installed.")
             import cv2
-            img = cv2.imread(path).astype(np.float32) / 255.0
+            img = cv2.imread(path)
+            if img is None:
+                raise ValueError("Invalid image path: {}".format(path))
+            img = img.astype(np.float32) / 255.0
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         elif backend == VisualLib.MATPLOTLIB:
             if not VisualLib.matplotlib_available():
