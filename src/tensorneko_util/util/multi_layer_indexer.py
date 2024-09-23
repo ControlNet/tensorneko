@@ -101,6 +101,8 @@ class MultiLayerIndexer:
             ``ValueError``: If the counts structure is invalid.
         """
         if isinstance(counts, int):
+            if counts < 0:
+                raise ValueError("Counts cannot be negative")
             return counts
         elif isinstance(counts, list):
             return sum(cls._total_counts(c) for c in counts)
