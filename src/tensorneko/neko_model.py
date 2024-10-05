@@ -214,12 +214,12 @@ class NekoModel(LightningModule, NekoModule):
         for key in outputs[0].keys():
             getter = summarize_dict_by(key, torch.mean)
             value = getter(outputs)
-            self.history[-1]["val_" + key] = value
+            self.history[-1]["val_" + key.split("/")[-1]] = value
             if self.logger is not None:
                 self.logger.log_metrics({key: value}, step=self.trainer.global_step)
             self.log(key, value, on_epoch=True, on_step=False, logger=False, sync_dist=self.distributed)
-            self.log(f"val_{key}", value, on_epoch=True, on_step=False, logger=False, prog_bar=True,
-                sync_dist=self.distributed)
+            self.log(f"val_{key.split('/')[-1]}", value, on_epoch=True, on_step=False, logger=False,
+                prog_bar=True, sync_dist=self.distributed)
 
     def log_on_training_step_end(self, output: STEP_OUTPUT) -> None:
         """Log the training step outputs"""
