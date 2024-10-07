@@ -9,7 +9,7 @@ from .._path_conversion import _path2str
 class JsonWriter:
 
     @staticmethod
-    def _write_json(path: str, obj: Union[dict, list], encoding: str = "UTF-8", indent: int = 4,
+    def _write_json(path: str, obj: Union[dict, list], encoding: str = "UTF-8", indent: int = 2,
         ensure_ascii: bool = False, fast: bool = True
     ) -> None:
         if not fast:
@@ -28,7 +28,7 @@ class JsonWriter:
                 file.write(orjson.dumps(obj, option=option))
 
     @classmethod
-    def to(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 4,
+    def to(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 2,
         ensure_ascii: bool = False, fast: bool = True
     ) -> None:
         """
@@ -68,7 +68,7 @@ class JsonWriter:
         else:
             raise TypeError("Not implemented type. Only support dict, list, json_data.")
 
-    def __new__(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 4,
+    def __new__(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 2,
         ensure_ascii: bool = False, fast: bool = True
     ) -> None:
         """Alias of :meth:`~tensorneko.io.json.json_writer.JsonWriter.to`."""
