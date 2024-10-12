@@ -6,7 +6,7 @@ from typing import Optional
 from urllib.error import HTTPError
 
 
-def push_gotify(message: str, url: Optional[str] = None, token: Optional[str] = None, title: Optional[str] = None,
+def push(message: str, url: Optional[str] = None, token: Optional[str] = None, title: Optional[str] = None,
     priority: int = 0
 ):
     """
@@ -21,7 +21,7 @@ def push_gotify(message: str, url: Optional[str] = None, token: Optional[str] = 
 
     Examples::
 
-        push_gotify("This is a test message", "<URL>", "<APP_TOKEN>")
+        push("This is a test message", "<URL>", "<APP_TOKEN>")
         # then the message will be sent to the Gotify server.
         # title = "<HOST_NAME>", message = "This is a test message", priority = 0
 

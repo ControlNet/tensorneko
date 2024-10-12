@@ -49,7 +49,7 @@ pipx install tensorneko_tool  # or `pip install tensorneko_tool`
 
 Then you can use the CLI tools `tensorneko` in the terminal.
 
-## Neko Layers, Modules and Architectures
+## Layers, Modules and Architectures
 
 Build an MLP with linear layers. The activation and normalization will be placed in the hidden layers.
 
@@ -138,7 +138,7 @@ print(f(torch.rand(16)).shape)
 # torch.Size([1])
 ```
 
-## Neko IO
+## IO
 
 Easily load and save different modal data.
 
@@ -188,7 +188,7 @@ neko.io.write.json("path/to/json.json", json_obj)
 Besides, the read/write for `mat` and `pickle` files is also supported.
 
 
-## Neko preprocessing
+## Preprocessing
 
 ```python
 import tensorneko as neko
@@ -215,7 +215,7 @@ if `ffmpeg` is available, you can use below ffmpeg wrappers.
 - `resample_video_fps`
 - `mp32wav`
 
-## Neko Visualization
+## Visualization
 
 ### Variable Web Watcher
 Start a web server to watch the variable status when the program (e.g. training, inference, data preprocessing) is running.
@@ -366,14 +366,14 @@ trainer = neko.NekoTrainer(log_every_n_steps=100, gpus=1, logger=model.name, pre
 trainer.fit(model, dm)
 ```
 
-## Neko Callbacks
+## Callbacks
 
 Some simple but useful pytorch-lightning callbacks are provided.
 
 - `DisplayMetricsCallback`
 - `EarlyStoppingLR`: Early stop training when learning rate reaches threshold.
 
-## Neko Notebook Helpers
+## Notebook Helpers
 Here are some helper functions to better interact with Jupyter Notebook.
 ```python
 import tensorneko as neko
@@ -385,7 +385,7 @@ neko.notebook.display.audio("path/to/audio.wav")
 neko.notebook.display.code("path/to/code.java")
 ```
 
-## Neko Debug Tools
+## Debug Tools
 
 Get the default values from `ArgumentParser` args. It's convenient to use this in the notebook.
 ```python
@@ -401,7 +401,7 @@ print(args.integers)  # [1, 2, 3]
 print(args.accumulate)  # <function sum at ...>
 ```
 
-## Neko Evaluation
+## Evaluation
 
 Some metrics function for evaluation are provided.
 
@@ -412,8 +412,36 @@ Some metrics function for evaluation are provided.
 - `ssim_video`
 - `ssim_image`
 
+## Message (Access to other services)
 
-## Neko Utilities
+### Gotify
+
+Send a message to the Gotify server.
+
+The title, URL and APP_TOKEN is the environment variable `GOTIFY_TITLE`, `GOTIFY_URL` and `GOTIFY_TOKEN`, or overwritten 
+in the function arguments.
+
+```python
+from tensorneko.msg import gotify
+gotify.push("This is a test message", "<URL>", "<APP_TOKEN>")
+# then the message will be sent to the Gotify server.
+# title = "<HOST_NAME>", message = "This is a test message", priority = 0
+```
+
+### Postgres
+
+Require the `psycopg` package. Provide one single function to execute one SQL query with a temp connection.
+
+The database URL is the environment variable `DB_URL`, or overwritten in the function arguments.
+```python
+from tensorneko.msg import postgres
+result = postgres.execute("<SQL>", "<DB_URL>")
+# also async version is provided
+result = await postgres.execute_async("<SQL>", "<DB_URL>")
+```
+
+
+## Utilities
 
 ### Misc functions
 
