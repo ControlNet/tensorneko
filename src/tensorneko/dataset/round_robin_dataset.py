@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 try:
     # for pytorch < 2.5
     from torch.utils.data.dataset import T_co
-except IndexError:
+except ImportError:
     # For pytorch >= 2.5
     from torch.utils.data.dataset import _T_co as T_co
 
