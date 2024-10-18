@@ -1,6 +1,13 @@
 from typing import Sized
 
-from torch.utils.data.sampler import Sampler, T_co
+from torch.utils.data.sampler import Sampler
+
+try:
+    # for pytorch < 2.5
+    from torch.utils.data.sampler import T_co
+except ImportError:
+    # For pytorch >= 2.5
+    from torch.utils.data.sampler import _T_co as T_co
 
 
 class SequentialIterSampler(Sampler[T_co]):

@@ -1,6 +1,7 @@
 from typing import List
 
 from torch.utils.data.dataset import Dataset
+
 try:
     # for pytorch < 2.5
     from torch.utils.data.dataset import T_co

@@ -3,6 +3,7 @@ from typing import Tuple
 
 import numpy as np
 from torch.utils.data.dataset import Dataset
+
 try:
     # for pytorch < 2.5
     from torch.utils.data.dataset import T_co
