@@ -2,7 +2,12 @@ import random
 from typing import List, Optional
 
 from torch.utils.data import Dataset
-from torch.utils.data.dataset import T_co
+try:
+    # for pytorch < 2.5
+    from torch.utils.data.dataset import T_co
+except IndexError:
+    # For pytorch >= 2.5
+    from torch.utils.data.dataset import _T_co as T_co
 
 from ..util import circular_pad
 
