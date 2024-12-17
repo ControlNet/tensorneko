@@ -25,8 +25,8 @@ def main():
         exit(0)
 
     if args.sub_command == "gotify":
-        from tensorneko_util.msg.gotify import push_gotify
-        push_gotify(args.message, args.url, args.token, args.title, args.priority)
+        from tensorneko_util.msg import gotify
+        gotify.push(args.message, args.url, args.token, args.title, args.priority)
         exit(0)
     elif args.sub_command == "dep_check":
         from .dep_check import dep_check

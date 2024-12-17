@@ -2,7 +2,14 @@ from abc import abstractmethod, ABC
 from typing import Tuple
 
 import numpy as np
-from torch.utils.data.dataset import Dataset, T_co
+from torch.utils.data.dataset import Dataset
+
+try:
+    # for pytorch < 2.5
+    from torch.utils.data.dataset import T_co
+except ImportError:
+    # For pytorch >= 2.5
+    from torch.utils.data.dataset import _T_co as T_co
 
 
 class NestedDataset(Dataset[T_co], ABC):

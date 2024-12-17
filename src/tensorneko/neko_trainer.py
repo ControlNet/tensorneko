@@ -1,4 +1,5 @@
 import os
+import warnings
 from datetime import timedelta
 from time import time
 from typing import Optional, Union, List, Dict
@@ -70,6 +71,7 @@ class NekoTrainer(Trainer):
             callbacks = []
         # build checkpoint callback or from user defined
         if enable_checkpointing and len([c for c in callbacks if isinstance(c, Checkpoint)]) == 0:
+            warnings.warn("Checkpoint callback is not defined, using default checkpoint callback.")
             # use default checkpoint callback
             new_callback = ModelCheckpoint(
                 dirpath=os.path.join("logs", self.log_name, "checkpoints"),
