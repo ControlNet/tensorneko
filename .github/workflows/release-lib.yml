@@ -76,7 +76,7 @@ jobs:
         Remove-Item setup.py -Force
         Remove-Item setup_util.py -Force
         Move-Item pyproject_lib.toml pyproject.toml
-        $new_version = Get-Content version.txt -Raw
+        $new_version = (Get-Content version.txt -Raw).Trim()
         $in_package_section = $false
         (Get-Content Cargo.toml -Raw) -split "`r`n" | ForEach-Object {
           if ($_ -match '^\[package\]$') {
