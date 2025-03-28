@@ -32,7 +32,7 @@ pip install tensorneko  # for PyTorch only
 pip install tensorneko[lightning]  # for PyTorch and Lightning
 ```
 
-To use the library without PyTorch and PyTorch Lightning, you can install the util library (support Python 3.7 ~ 3.12 with limited features) with following command.
+To use the library without PyTorch and PyTorch Lightning, you can install the util library (support Python 3.7 ~ 3.13 with limited features) with following command.
 ```shell
 pip install tensorneko_util
 ```
