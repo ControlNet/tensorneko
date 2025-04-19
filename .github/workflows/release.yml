@@ -224,6 +224,11 @@ jobs:
           pip install -r requirements_test.txt
           python init.py
 
+      - name: Fix python 3.8 packages
+        if: ${{ matrix.python-version }} == "3.8"
+        run: |
+          pip install "fsspec<2025.3.1"
+
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
