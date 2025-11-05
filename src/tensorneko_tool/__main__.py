@@ -1,36 +1,41 @@
 import argparse
 
-from .utils import version
+from .utils import version, set_quiet
+from . import utils
+from .gotify import register_subparser as register_gotify
+from .dep_check import register_subparser as register_dep_check
 
 def main():
     parser = argparse.ArgumentParser(description="TensorNeko CLI Tools")
-    parser.add_argument("--version", action="store_true")
+    parser.add_argument("-v", "--version", action="store_true")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress all stdout output")
+    parser.add_argument("-b", "--banner", action="store_true", help="Show TensorNeko title banner")
 
     sub_parser = parser.add_subparsers(dest="sub_command")
-    parser_gotify = sub_parser.add_parser("gotify", help="Send message to Gotify server")
-    parser_gotify.add_argument("message", help="The message to send", type=str)
-    parser_gotify.add_argument("--title", help="The title of the message", type=str)
-    parser_gotify.add_argument("--priority", help="The priority of the message", type=int, default=0)
-    parser_gotify.add_argument("--url", help="The URL of the Gotify server", type=str)
-    parser_gotify.add_argument("--token", help="The token of the Gotify server", type=str)
-
-    parser_dep_check = sub_parser.add_parser("dep_check", help="Check current dependencies against requirements.txt")
-    parser_dep_check.add_argument("-r", "--requirements", help="The path to the requirements.txt file", type=str, default="requirements.txt")
-    parser_dep_check.add_argument("--overwrite", action="store_true", help="Overwrite mismatched library versions in the requirements file")
+    register_gotify(sub_parser)
+    register_dep_check(sub_parser)
 
     args = parser.parse_args()
 
+    # Apply quiet mode globally before any output
+    set_quiet(getattr(args, "quiet", False))
+
+    if args.banner and not args.quiet:
+        utils.print_banner()
+
     if args.version:
-        print(version.value)
+        if not args.quiet and args.banner:
+            # a more fancy version
+            utils.console.print(utils.make_panel(version.value, "TensorNeko Version", "info"))
+        elif not args.quiet:
+            print(version.value)
         exit(0)
 
-    if args.sub_command == "gotify":
-        from tensorneko_util.msg import gotify
-        gotify.push(args.message, args.url, args.token, args.title, args.priority)
-        exit(0)
-    elif args.sub_command == "dep_check":
-        from .dep_check import dep_check
-        dep_check(args.requirements, args.overwrite)
+    if hasattr(args, "func"):
+        code = args.func(args)
+        exit(code if isinstance(code, int) else 0)
+    else:
+        parser.print_help()
         exit(0)
 
 if __name__ == "__main__":
