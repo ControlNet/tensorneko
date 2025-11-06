@@ -1,4 +1,9 @@
-import importlib.metadata as metadata
+try:
+    import importlib.metadata as metadata
+except Exception:  # Python < 3.8
+    disable_dep_check = True
+else:
+    disable_dep_check = False
 
 from packaging.requirements import Requirement
 from packaging.version import Version, InvalidVersion
@@ -107,5 +112,8 @@ def register_subparser(subparsers):
 
 
 def run(args):
+    if disable_dep_check:
+        utils.console.print("[error]dep_check is only available in Python 3.8 and above.[/error]")
+        return 1
     dep_check(args.requirements, args.overwrite)
     return 0
