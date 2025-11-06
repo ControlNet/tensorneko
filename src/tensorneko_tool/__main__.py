@@ -3,7 +3,11 @@ import argparse
 from .utils import version, set_quiet
 from . import utils
 from .gotify import register_subparser as register_gotify
-from .dep_check import register_subparser as register_dep_check
+try:
+    from .dep_check import register_subparser as register_dep_check
+except ImportError:
+    def register_dep_check(*args, **kwargs):
+        pass
 
 def main():
     parser = argparse.ArgumentParser(description="TensorNeko CLI Tools")
