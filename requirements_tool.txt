@@ -1,0 +1,3 @@
+psutil >= 5.9.0
+rich >= 12
+packaging; python_version >= '3.8'
