@@ -41,7 +41,7 @@ jobs:
           python -c "import tensorneko_util"
 
   tensorneko-tool-import-test:
-    name: Import Test / tensorneko-util
+    name: Import Test / tensorneko-tool
     runs-on: ubuntu-22.04
 
     strategy:
