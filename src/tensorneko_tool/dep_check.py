@@ -1,4 +1,7 @@
-import importlib.metadata as metadata
+try:
+    import importlib.metadata as metadata
+except Exception:  # Python < 3.8
+    import importlib_metadata as metadata  # type: ignore
 
 from packaging.requirements import Requirement
 from packaging.version import Version, InvalidVersion
