@@ -30,9 +30,9 @@ jobs:
         args: -o dist
         rust-toolchain: nightly
     - name: Upload dist
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
-        name: tensorneko-lib
+        name: tensorneko-lib-source
         path: dist
 
   linux:
@@ -60,9 +60,9 @@ jobs:
         target: ${{ matrix.target }}
         args: --release -o dist -i 3.7 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
-        name: tensorneko-lib
+        name: tensorneko-lib-linux-${{ matrix.target }}
         path: dist
 
   windows:
@@ -76,7 +76,7 @@ jobs:
         Remove-Item setup.py -Force
         Remove-Item setup_util.py -Force
         Move-Item pyproject_lib.toml pyproject.toml
-        $new_version = Get-Content version.txt -Raw
+        $new_version = (Get-Content version.txt -Raw).Trim()
         $in_package_section = $false
         (Get-Content Cargo.toml -Raw) -split "`r`n" | ForEach-Object {
           if ($_ -match '^\[package\]$') {
@@ -100,9 +100,9 @@ jobs:
         args: --release -o dist -i 3.7 3.8 3.9 3.10 3.11 3.12 3.13
         rust-toolchain: nightly
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
-        name: tensorneko-lib
+        name: tensorneko-lib-windows
         path: dist
 
   macos:
@@ -124,9 +124,9 @@ jobs:
         target: universal2-apple-darwin
         rust-toolchain: nightly
     - name: Upload wheels
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5
       with:
-        name: tensorneko-lib
+        name: tensorneko-lib-macos
         path: dist
 
   release:
@@ -134,9 +134,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ macos, windows, linux, source ]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v5
         with:
-          name: tensorneko-lib
+          pattern: tensorneko-lib-*
+          path: .
+          merge-multiple: true
       - name: Publish to PyPI
         uses: messense/maturin-action@v1
         env:
