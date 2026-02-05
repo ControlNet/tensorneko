@@ -1,0 +1,288 @@
+{
+  "python-version": [
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13"
+  ],
+  "torch-version": [
+    "1.11.*",
+    "1.12.*",
+    "1.13.*",
+    "2.0.*",
+    "2.1.*",
+    "2.2.*",
+    "2.3.*",
+    "2.4.*",
+    "2.5.*",
+    "2.6.*"
+  ],
+  "lightning-version": [
+    "2.0.*",
+    "2.1.*",
+    "2.2.*",
+    "2.3.*",
+    "2.4.*",
+    "2.5.*"
+  ],
+  "exclude": [
+    {
+      "python-version": "3.8",
+      "lightning-version": "2.4.*"
+    },
+    {
+      "python-version": "3.8",
+      "lightning-version": "2.5.*"
+    },
+    {
+      "python-version": "3.11",
+      "lightning-version": "2.0.*"
+    },
+    {
+      "python-version": "3.12",
+      "lightning-version": "2.0.*"
+    },
+    {
+      "python-version": "3.12",
+      "lightning-version": "2.1.*"
+    },
+    {
+      "python-version": "3.12",
+      "lightning-version": "2.2.*"
+    },
+    {
+      "python-version": "3.12",
+      "lightning-version": "2.3.*"
+    },
+    {
+      "lightning-version": "2.5.*",
+      "torch-version": "1.11.*"
+    },
+    {
+      "lightning-version": "2.5.*",
+      "torch-version": "1.12.*"
+    },
+    {
+      "lightning-version": "2.5.*",
+      "torch-version": "1.13.*"
+    },
+    {
+      "lightning-version": "2.5.*",
+      "torch-version": "2.0.*"
+    },
+    {
+      "lightning-version": "2.5.*",
+      "torch-version": "2.1.*"
+    },
+    {
+      "lightning-version": "2.4.*",
+      "torch-version": "1.11.*"
+    },
+    {
+      "lightning-version": "2.4.*",
+      "torch-version": "1.12.*"
+    },
+    {
+      "lightning-version": "2.4.*",
+      "torch-version": "1.13.*"
+    },
+    {
+      "lightning-version": "2.4.*",
+      "torch-version": "2.0.*"
+    },
+    {
+      "lightning-version": "2.3.*",
+      "torch-version": "1.11.*"
+    },
+    {
+      "lightning-version": "2.3.*",
+      "torch-version": "1.12.*"
+    },
+    {
+      "lightning-version": "2.3.*",
+      "torch-version": "1.13.*"
+    },
+    {
+      "lightning-version": "2.3.*",
+      "torch-version": "2.4.*"
+    },
+    {
+      "lightning-version": "2.3.*",
+      "torch-version": "2.5.*"
+    },
+    {
+      "lightning-version": "2.3.*",
+      "torch-version": "2.6.*"
+    },
+    {
+      "lightning-version": "2.2.*",
+      "torch-version": "1.11.*"
+    },
+    {
+      "lightning-version": "2.2.*",
+      "torch-version": "1.12.*"
+    },
+    {
+      "lightning-version": "2.2.*",
+      "torch-version": "2.3.*"
+    },
+    {
+      "lightning-version": "2.2.*",
+      "torch-version": "2.4.*"
+    },
+    {
+      "lightning-version": "2.2.*",
+      "torch-version": "2.5.*"
+    },
+    {
+      "lightning-version": "2.2.*",
+      "torch-version": "2.6.*"
+    },
+    {
+      "lightning-version": "2.1.*",
+      "torch-version": "1.11.*"
+    },
+    {
+      "lightning-version": "2.1.*",
+      "torch-version": "2.2.*"
+    },
+    {
+      "lightning-version": "2.1.*",
+      "torch-version": "2.3.*"
+    },
+    {
+      "lightning-version": "2.1.*",
+      "torch-version": "2.4.*"
+    },
+    {
+      "lightning-version": "2.1.*",
+      "torch-version": "2.5.*"
+    },
+    {
+      "lightning-version": "2.1.*",
+      "torch-version": "2.6.*"
+    },
+    {
+      "lightning-version": "2.0.*",
+      "torch-version": "2.1.*"
+    },
+    {
+      "lightning-version": "2.0.*",
+      "torch-version": "2.2.*"
+    },
+    {
+      "lightning-version": "2.0.*",
+      "torch-version": "2.3.*"
+    },
+    {
+      "lightning-version": "2.0.*",
+      "torch-version": "2.4.*"
+    },
+    {
+      "lightning-version": "2.0.*",
+      "torch-version": "2.5.*"
+    },
+    {
+      "lightning-version": "2.0.*",
+      "torch-version": "2.6.*"
+    },
+    {
+      "python-version": "3.10",
+      "torch-version": "1.9.*"
+    },
+    {
+      "python-version": "3.10",
+      "torch-version": "1.10.*"
+    },
+    {
+      "python-version": "3.11",
+      "torch-version": "1.9.*"
+    },
+    {
+      "python-version": "3.11",
+      "torch-version": "1.10.*"
+    },
+    {
+      "python-version": "3.11",
+      "torch-version": "1.11.*"
+    },
+    {
+      "python-version": "3.11",
+      "torch-version": "1.12.*"
+    },
+    {
+      "python-version": "3.12",
+      "torch-version": "1.9.*"
+    },
+    {
+      "python-version": "3.12",
+      "torch-version": "1.10.*"
+    },
+    {
+      "python-version": "3.12",
+      "torch-version": "1.11.*"
+    },
+    {
+      "python-version": "3.12",
+      "torch-version": "1.12.*"
+    },
+    {
+      "python-version": "3.12",
+      "torch-version": "1.13.*"
+    },
+    {
+      "python-version": "3.12",
+      "torch-version": "2.0.*"
+    },
+    {
+      "python-version": "3.12",
+      "torch-version": "2.1.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "1.9.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "1.10.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "1.11.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "1.12.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "1.13.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "2.0.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "2.1.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "2.2.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "2.3.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "2.4.*"
+    },
+    {
+      "python-version": "3.13",
+      "torch-version": "2.5.*"
+    }
+  ]
+}
