@@ -18,12 +18,7 @@ jobs:
 
       - id: matrices
         run: |
-          python - <<'PY' > /tmp/torch_lightning.json
-          import json
-          import pathlib
-          data = json.loads(pathlib.Path(".github/matrices/torch_lightning.json").read_text())
-          print(json.dumps(data))
-          PY
+          python .github/scripts/build_matrix.py > /tmp/torch_lightning.json
           echo "torch_lightning=$(cat /tmp/torch_lightning.json)" >> "$GITHUB_OUTPUT"
 
   tensorneko-util-import-test:
