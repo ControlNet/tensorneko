@@ -7,14 +7,28 @@ on:
   workflow_call:
 
 jobs:
+  matrices:
+    name: Load Matrices
+    runs-on: ubuntu-24.04
+    outputs:
+      torch_lightning: ${{ steps.matrices.outputs.torch_lightning }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: matrices
+        run: |
+          python .github/scripts/build_matrix.py > /tmp/torch_lightning.json
+          echo "torch_lightning=$(cat /tmp/torch_lightning.json)" >> "$GITHUB_OUTPUT"
+
   tensorneko-util-import-test:
     name: Import Test / tensorneko-util
     runs-on: ubuntu-22.04
 
-    strategy:
+    strategy: &import_python_strategy
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -30,9 +44,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r requirements_util.txt
+          uv pip install --system -r requirements_util.txt
           python init.py
 
       - name: Try importing package
@@ -44,10 +63,7 @@ jobs:
     name: Import Test / tensorneko-tool
     runs-on: ubuntu-22.04
 
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+    strategy: *import_python_strategy
 
     steps:
       - uses: actions/checkout@v4
@@ -63,10 +79,15 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r requirements_tool.txt
-          pip install -r requirements_util.txt
+          uv pip install --system -r requirements_tool.txt
+          uv pip install --system -r requirements_util.txt
           python init.py
 
       - name: Try importing package
@@ -105,16 +126,21 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install -r requirements_util.txt
+          uv pip install --system -r requirements.txt
+          uv pip install --system -r requirements_util.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
 
       - name: Try importing package
         run: |
@@ -148,153 +174,11 @@ jobs:
   unittest:
     name: Unittest
     runs-on: ubuntu-24.04
-    needs: [tensorneko-util-import-test, tensorneko-import-test]
+    needs: [matrices, tensorneko-util-import-test, tensorneko-import-test]
 
     strategy:
       fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        torch-version: ["1.11.*", "1.12.*", "1.13.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*", "2.6.*"]
-        lightning-version: ["2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*"]
-        exclude:
-          - python-version: "3.8"
-            lightning-version: "2.4.*"
-          - python-version: "3.8"
-            lightning-version: "2.5.*"
-          - python-version: "3.11"
-            lightning-version: "2.0.*"
-          - python-version: "3.12"
-            lightning-version: "2.0.*"
-          - python-version: "3.12"
-            lightning-version: "2.1.*"
-          - python-version: "3.12"
-            lightning-version: "2.2.*"
-          - python-version: "3.12"
-            lightning-version: "2.3.*"
-
-          - lightning-version: "2.5.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.5.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.5.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.5.*"
-            torch-version: "2.0.*"
-          - lightning-version: "2.5.*"
-            torch-version: "2.1.*"
-
-          - lightning-version: "2.4.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.4.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.4.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.4.*"
-            torch-version: "2.0.*"
-
-          - lightning-version: "2.3.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.3.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.3.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.2.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.2.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.1.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.2.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.0.*"
-            torch-version: "2.1.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.2.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.6.*"
-
-          - python-version: "3.10"
-            torch-version: "1.9.*"
-          - python-version: "3.10"
-            torch-version: "1.10.*"
-
-          - python-version: "3.11"
-            torch-version: "1.9.*"
-          - python-version: "3.11"
-            torch-version: "1.10.*"
-          - python-version: "3.11"
-            torch-version: "1.11.*"
-          - python-version: "3.11"
-            torch-version: "1.12.*"
-
-          - python-version: "3.12"
-            torch-version: "1.9.*"
-          - python-version: "3.12"
-            torch-version: "1.10.*"
-          - python-version: "3.12"
-            torch-version: "1.11.*"
-          - python-version: "3.12"
-            torch-version: "1.12.*"
-          - python-version: "3.12"
-            torch-version: "1.13.*"
-          - python-version: "3.12"
-            torch-version: "2.0.*"
-          - python-version: "3.12"
-            torch-version: "2.1.*"
-
-          - python-version: "3.13"
-            torch-version: "1.9.*"
-          - python-version: "3.13"
-            torch-version: "1.10.*"
-          - python-version: "3.13"
-            torch-version: "1.11.*"
-          - python-version: "3.13"
-            torch-version: "1.12.*"
-          - python-version: "3.13"
-            torch-version: "1.13.*"
-          - python-version: "3.13"
-            torch-version: "2.0.*"
-          - python-version: "3.13"
-            torch-version: "2.1.*"
-          - python-version: "3.13"
-            torch-version: "2.2.*"
-          - python-version: "3.13"
-            torch-version: "2.3.*"
-          - python-version: "3.13"
-            torch-version: "2.4.*"
-          - python-version: "3.13"
-            torch-version: "2.5.*"
+      matrix: ${{ fromJSON(needs.matrices.outputs.torch_lightning) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -305,16 +189,27 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install torch==${{ matrix.torch-version }} lightning==${{ matrix.lightning-version }}
-          pip install -r requirements_test.txt
+          sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
+          sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
+
+      - name: Fix pillow for torch 1.11/1.12/1.13
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
+        run: |
+          uv pip install --system "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -337,11 +232,16 @@ jobs:
           python-version: "3.10"
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
-          pip install coverage pytest coveralls
+          uv pip install --system coverage pytest coveralls
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -400,154 +300,12 @@ jobs:
 
   simulate-training-classifier:
     name: Simulate Training / Classifier
-    needs: [unittest, build-web]
+    needs: [matrices, unittest, build-web]
     runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        torch-version: ["1.11.*", "1.12.*", "1.13.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*", "2.6.*"]
-        lightning-version: ["2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*"]
-        exclude:
-          - python-version: "3.8"
-            lightning-version: "2.4.*"
-          - python-version: "3.8"
-            lightning-version: "2.5.*"
-          - python-version: "3.11"
-            lightning-version: "2.0.*"
-          - python-version: "3.12"
-            lightning-version: "2.0.*"
-          - python-version: "3.12"
-            lightning-version: "2.1.*"
-          - python-version: "3.12"
-            lightning-version: "2.2.*"
-          - python-version: "3.12"
-            lightning-version: "2.3.*"
-
-          - lightning-version: "2.5.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.5.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.5.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.5.*"
-            torch-version: "2.0.*"
-          - lightning-version: "2.5.*"
-            torch-version: "2.1.*"
-
-          - lightning-version: "2.4.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.4.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.4.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.4.*"
-            torch-version: "2.0.*"
-
-          - lightning-version: "2.3.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.3.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.3.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.2.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.2.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.1.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.2.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.0.*"
-            torch-version: "2.1.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.2.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.6.*"
-
-          - python-version: "3.10"
-            torch-version: "1.9.*"
-          - python-version: "3.10"
-            torch-version: "1.10.*"
-
-          - python-version: "3.11"
-            torch-version: "1.9.*"
-          - python-version: "3.11"
-            torch-version: "1.10.*"
-          - python-version: "3.11"
-            torch-version: "1.11.*"
-          - python-version: "3.11"
-            torch-version: "1.12.*"
-
-          - python-version: "3.12"
-            torch-version: "1.9.*"
-          - python-version: "3.12"
-            torch-version: "1.10.*"
-          - python-version: "3.12"
-            torch-version: "1.11.*"
-          - python-version: "3.12"
-            torch-version: "1.12.*"
-          - python-version: "3.12"
-            torch-version: "1.13.*"
-          - python-version: "3.12"
-            torch-version: "2.0.*"
-          - python-version: "3.12"
-            torch-version: "2.1.*"
-
-          - python-version: "3.13"
-            torch-version: "1.9.*"
-          - python-version: "3.13"
-            torch-version: "1.10.*"
-          - python-version: "3.13"
-            torch-version: "1.11.*"
-          - python-version: "3.13"
-            torch-version: "1.12.*"
-          - python-version: "3.13"
-            torch-version: "1.13.*"
-          - python-version: "3.13"
-            torch-version: "2.0.*"
-          - python-version: "3.13"
-            torch-version: "2.1.*"
-          - python-version: "3.13"
-            torch-version: "2.2.*"
-          - python-version: "3.13"
-            torch-version: "2.3.*"
-          - python-version: "3.13"
-            torch-version: "2.4.*"
-          - python-version: "3.13"
-            torch-version: "2.5.*"
+      matrix: ${{ fromJSON(needs.matrices.outputs.torch_lightning) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -558,17 +316,27 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install torch==${{ matrix.torch-version }}
-          pip install lightning==${{ matrix.lightning-version }}
-          pip install -r requirements_test.txt
+          sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
+          sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
+
+      - name: Fix pillow for torch 1.11/1.12/1.13
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
+        run: |
+          uv pip install --system "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -578,154 +346,12 @@ jobs:
 
   simulate-training-gan:
     name: Simulate Training / GAN
-    needs: [unittest, build-web]
+    needs: [matrices, unittest, build-web]
     runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        torch-version: ["1.11.*", "1.12.*", "1.13.*", "2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*", "2.6.*"]
-        lightning-version: ["2.0.*", "2.1.*", "2.2.*", "2.3.*", "2.4.*", "2.5.*"]
-        exclude:
-          - python-version: "3.8"
-            lightning-version: "2.4.*"
-          - python-version: "3.8"
-            lightning-version: "2.5.*"
-          - python-version: "3.11"
-            lightning-version: "2.0.*"
-          - python-version: "3.12"
-            lightning-version: "2.0.*"
-          - python-version: "3.12"
-            lightning-version: "2.1.*"
-          - python-version: "3.12"
-            lightning-version: "2.2.*"
-          - python-version: "3.12"
-            lightning-version: "2.3.*"
-
-          - lightning-version: "2.5.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.5.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.5.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.5.*"
-            torch-version: "2.0.*"
-          - lightning-version: "2.5.*"
-            torch-version: "2.1.*"
-
-          - lightning-version: "2.4.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.4.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.4.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.4.*"
-            torch-version: "2.0.*"
-
-          - lightning-version: "2.3.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.3.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.3.*"
-            torch-version: "1.13.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.3.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.2.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.2.*"
-            torch-version: "1.12.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.2.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.1.*"
-            torch-version: "1.11.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.2.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.1.*"
-            torch-version: "2.6.*"
-
-          - lightning-version: "2.0.*"
-            torch-version: "2.1.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.2.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.3.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.4.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.5.*"
-          - lightning-version: "2.0.*"
-            torch-version: "2.6.*"
-
-          - python-version: "3.10"
-            torch-version: "1.9.*"
-          - python-version: "3.10"
-            torch-version: "1.10.*"
-
-          - python-version: "3.11"
-            torch-version: "1.9.*"
-          - python-version: "3.11"
-            torch-version: "1.10.*"
-          - python-version: "3.11"
-            torch-version: "1.11.*"
-          - python-version: "3.11"
-            torch-version: "1.12.*"
-
-          - python-version: "3.12"
-            torch-version: "1.9.*"
-          - python-version: "3.12"
-            torch-version: "1.10.*"
-          - python-version: "3.12"
-            torch-version: "1.11.*"
-          - python-version: "3.12"
-            torch-version: "1.12.*"
-          - python-version: "3.12"
-            torch-version: "1.13.*"
-          - python-version: "3.12"
-            torch-version: "2.0.*"
-          - python-version: "3.12"
-            torch-version: "2.1.*"
-
-          - python-version: "3.13"
-            torch-version: "1.9.*"
-          - python-version: "3.13"
-            torch-version: "1.10.*"
-          - python-version: "3.13"
-            torch-version: "1.11.*"
-          - python-version: "3.13"
-            torch-version: "1.12.*"
-          - python-version: "3.13"
-            torch-version: "1.13.*"
-          - python-version: "3.13"
-            torch-version: "2.0.*"
-          - python-version: "3.13"
-            torch-version: "2.1.*"
-          - python-version: "3.13"
-            torch-version: "2.2.*"
-          - python-version: "3.13"
-            torch-version: "2.3.*"
-          - python-version: "3.13"
-            torch-version: "2.4.*"
-          - python-version: "3.13"
-            torch-version: "2.5.*"
+      matrix: ${{ fromJSON(needs.matrices.outputs.torch_lightning) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -736,20 +362,31 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install torch==${{ matrix.torch-version }}
-          pip install lightning==${{ matrix.lightning-version }}
-          pip install -r requirements_test.txt
+          sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
+          sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
+
+      - name: Fix pillow for torch 1.11/1.12/1.13
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
+        run: |
+          uv pip install --system "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
       - name: Run Simulation
         run: python test/simulate/simulate_train_mnist_gan.py
+
