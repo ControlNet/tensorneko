@@ -32,7 +32,10 @@ class SequentialIterSampler(Sampler[T_co]):
     """
 
     def __init__(self, data_source: Sized, num_samples: int):
-        super().__init__(data_source)
+        try:
+            super().__init__(data_source)
+        except TypeError:
+            super().__init__()
         self.data_source = data_source
         self.num_samples = num_samples
         self.total_size = len(data_source)
