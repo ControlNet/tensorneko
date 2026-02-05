@@ -98,7 +98,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install torch==${{ matrix.torch-version }} lightning==${{ matrix.lightning-version }}
+          sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
+          sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
           pip install -r requirements_test.txt
           python init.py
 
