@@ -91,22 +91,27 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
           sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
           sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
-          pip install -r requirements_test.txt
+          uv pip install -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          pip install "fsspec<2025.3.1"
+          uv pip install "fsspec<2025.3.1"
 
       - name: Fix pillow for torch 1.11/1.12/1.13
         if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
         run: |
-          pip install "pillow<10"
+          uv pip install "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -129,10 +134,15 @@ jobs:
           python-version: "3.11"
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install wheel
+          uv pip install -r requirements.txt
+          uv pip install wheel
           python init.py
 
       - name: Build package for tensorneko
@@ -178,10 +188,15 @@ jobs:
           python-version: "3.11"
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install wheel
+          uv pip install -r requirements.txt
+          uv pip install wheel
           python init.py
 
       - name: Build package for tensorneko_util
@@ -222,10 +237,15 @@ jobs:
           python-version: "3.11"
           architecture: x64
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          pip install wheel
+          uv pip install -r requirements.txt
+          uv pip install wheel
           python init.py
 
       - name: Build package for tensorneko_tool
