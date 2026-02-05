@@ -103,6 +103,11 @@ jobs:
         run: |
           pip install "fsspec<2025.3.1"
 
+      - name: Fix pillow for torch 1.12/1.13
+        if: ${{ matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
+        run: |
+          pip install "pillow<10"
+
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
