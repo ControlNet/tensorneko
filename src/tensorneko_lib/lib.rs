@@ -12,8 +12,8 @@ fn tensorneko_lib(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     // tensorneko_lib.evaluation
     m.add_wrapped(wrap_pymodule!(evaluation::evaluation))?;
-    let sys = PyModule::import_bound(_py, "sys")?;
-    let sys_module: Bound<'_, PyDict> = sys.getattr("modules")?.downcast_into()?;
+    let sys = PyModule::import(_py, "sys")?;
+    let sys_module: Bound<'_, PyDict> = sys.getattr("modules")?.cast_into_exact()?;
     sys_module.set_item("tensorneko_lib.evaluation", m.getattr("evaluation")?)?;
     Ok(())
 }
