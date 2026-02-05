@@ -213,6 +213,10 @@
       "torch-version": "1.12.*"
     },
     {
+      "python-version": "3.11",
+      "torch-version": "1.13.*"
+    },
+    {
       "python-version": "3.12",
       "torch-version": "1.9.*"
     },
