@@ -1,10 +1,26 @@
 from __future__ import annotations
 
 import inspect
+import sys
 import warnings
 from typing import Callable, Dict, List, Generic, Sequence, Optional, TYPE_CHECKING, overload
 
 from .type import T
+
+
+def _is_union_type(annotation) -> bool:
+    """
+    Check if the annotation is a Union type.
+    Compatible with Python 3.8 ~ 3.14+
+    """
+    if sys.version_info >= (3, 14):
+        # Python 3.14+: str(Union[int, str]) returns "int | str"
+        # Use typing.get_origin() for reliable detection
+        from typing import Union, get_origin
+        return get_origin(annotation) is Union
+    else:
+        # Python < 3.14: str(Union[int, str]) returns "typing.Union[int, str]"
+        return str(annotation)[:13] == "typing.Union["
 
 
 class DispatcherTypeWarning(Warning):
@@ -38,8 +54,7 @@ class Dispatcher:
             possible_types = [[]]
 
             for param in parameters:
-                # if is union type
-                is_union = str(param.annotation)[:13] == "typing.Union["
+                is_union = _is_union_type(param.annotation)
 
                 # if no default value and not union, just append to each possible types
                 if param.default is inspect.Signature.empty and not is_union:
