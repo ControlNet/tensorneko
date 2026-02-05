@@ -51,7 +51,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install -r requirements_util.txt
+          uv pip install --system -r requirements_util.txt
           python init.py
 
       - name: Try importing package
@@ -86,8 +86,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install -r requirements_tool.txt
-          uv pip install -r requirements_util.txt
+          uv pip install --system -r requirements_tool.txt
+          uv pip install --system -r requirements_util.txt
           python init.py
 
       - name: Try importing package
@@ -133,14 +133,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install -r requirements.txt
-          uv pip install -r requirements_util.txt
+          uv pip install --system -r requirements.txt
+          uv pip install --system -r requirements_util.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          uv pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
 
       - name: Try importing package
         run: |
@@ -198,18 +198,18 @@ jobs:
         run: |
           sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
           sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
-          uv pip install -r requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          uv pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
 
       - name: Fix pillow for torch 1.11/1.12/1.13
         if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
         run: |
-          uv pip install "pillow<10"
+          uv pip install --system "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -239,9 +239,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install -r requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
-          uv pip install coverage pytest coveralls
+          uv pip install --system coverage pytest coveralls
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -325,18 +325,18 @@ jobs:
         run: |
           sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
           sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
-          uv pip install -r requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          uv pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
 
       - name: Fix pillow for torch 1.11/1.12/1.13
         if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
         run: |
-          uv pip install "pillow<10"
+          uv pip install --system "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -371,21 +371,22 @@ jobs:
         run: |
           sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
           sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
-          uv pip install -r requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          uv pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
 
       - name: Fix pillow for torch 1.11/1.12/1.13
         if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
         run: |
-          uv pip install "pillow<10"
+          uv pip install --system "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
       - name: Run Simulation
         run: python test/simulate/simulate_train_mnist_gan.py
+

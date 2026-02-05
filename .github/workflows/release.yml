@@ -100,18 +100,18 @@ jobs:
         run: |
           sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
           sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
-          uv pip install -r requirements_test.txt
+          uv pip install --system -r requirements_test.txt
           python init.py
 
       - name: Fix python 3.8 packages
         if: ${{ matrix.python-version }} == "3.8"
         run: |
-          uv pip install "fsspec<2025.3.1"
+          uv pip install --system "fsspec<2025.3.1"
 
       - name: Fix pillow for torch 1.11/1.12/1.13
         if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
         run: |
-          uv pip install "pillow<10"
+          uv pip install --system "pillow<10"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
@@ -141,8 +141,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install -r requirements.txt
-          uv pip install wheel
+          uv pip install --system -r requirements.txt
+          uv pip install --system wheel
           python init.py
 
       - name: Build package for tensorneko
@@ -195,8 +195,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install -r requirements.txt
-          uv pip install wheel
+          uv pip install --system -r requirements.txt
+          uv pip install --system wheel
           python init.py
 
       - name: Build package for tensorneko_util
@@ -244,8 +244,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv pip install -r requirements.txt
-          uv pip install wheel
+          uv pip install --system -r requirements.txt
+          uv pip install --system wheel
           python init.py
 
       - name: Build package for tensorneko_tool
@@ -324,3 +324,4 @@ jobs:
           prerelease: false
           files: "dist/*"
           draft: true
+
