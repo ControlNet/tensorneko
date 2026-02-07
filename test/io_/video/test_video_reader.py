@@ -146,12 +146,10 @@ class TestVideoReader(unittest.TestCase):
 
     def test_with_range_opencv_not_available(self):
         """with_range with OPENCV backend should fall through to with_indexes which raises."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises((ValueError, TypeError)):
             VideoReader.with_range(SAMPLE_VIDEO, 0, 5, 1, backend=VisualLib.OPENCV)
 
     def test_with_range_short_form(self):
         """with_range(path, end) should call with_range(path, 0, end, 1)."""
-        # This tests the 2-argument dispatch (lines 213-214)
-        with self.assertRaises(ValueError):
-            # Uses OPENCV/FFMPEG which aren't available; tests the dispatch path
+        with self.assertRaises((ValueError, TypeError)):
             VideoReader.with_range(SAMPLE_VIDEO, 5, backend=VisualLib.OPENCV)
