@@ -180,7 +180,17 @@ class DatasetVisualizer:
         assert self._server is not None
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(self._server.serve())
+        try:
+            loop.run_until_complete(self._server.serve())
+        finally:
+            # Let pending tasks (e.g. starlette lifespan) finish cleanly
+            pending = asyncio.all_tasks(loop)
+            if pending:
+                loop.run_until_complete(
+                    asyncio.gather(*pending, return_exceptions=True)
+                )
+            loop.run_until_complete(loop.shutdown_asyncgens())
+            loop.close()
 
     def stop(self) -> None:
         """Signal shutdown and wait for the server thread to exit."""

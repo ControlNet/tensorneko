@@ -58,8 +58,8 @@ class NestedDataset(Dataset[T_co], ABC):
         Returns:
             A tuple containing the outer and inner indices.
         """
-        outer_index = np.searchsorted(self._acc, index, "left")
-        inner_index = index - self._acc[outer_index - 1]
+        outer_index = np.searchsorted(self._acc, index, "right")
+        inner_index = index if outer_index == 0 else index - self._acc[outer_index - 1]
         return outer_index, inner_index
 
     def __getitem__(self, index: int) -> T_co:
