@@ -14,3 +14,11 @@ pyyaml == 6.*
 toml >= 0.10.0
 safetensors >= 0.3.1
 psycopg == 3.*
+fastapi >= 0.100.0
+uvicorn >= 0.23.0
+h5py >= 3.0.0
+psutil >= 5.9.0
+rich >= 13.0.0
+packaging >= 21.0
+orjson >= 3.8.0
+tqdm >= 4.64.0
