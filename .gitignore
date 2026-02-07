@@ -269,3 +269,4 @@ scratch*.ipynb
 Cargo.lock
 wheels
 /src/tensorneko_tool/version.txt
+.beads

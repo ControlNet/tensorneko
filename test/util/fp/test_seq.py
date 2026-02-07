@@ -44,7 +44,10 @@ class UtilSeqTest(unittest.TestCase):
         s = Seq.of(1, 2, 3)
         s = s.map(self.f, parallel_type=ParallelType.PROCESS)
         self.assertEqual(s.to_list(), [2, 3, 4])
-        self.assertRaises(NotImplementedError, lambda: s.map(lambda x: x + 1, parallel_type=ParallelType.PROCESS))
+        self.assertRaises(
+            NotImplementedError,
+            lambda: s.map(lambda x: x + 1, parallel_type=ParallelType.PROCESS),
+        )
 
     def test_seq_for_each(self):
         s = Seq.of(1, 2, 3)
@@ -104,3 +107,45 @@ class UtilSeqTest(unittest.TestCase):
     def test_stream_skip(self):
         s = Seq.of(1, 2, 3, 4, 5)
         self.assertEqual(s.skip(2).to_list(), [3, 4, 5])
+
+    def test_seq_from_seq_and_collection_protocols(self):
+        base = Seq.of(1, 2, 3)
+        copied = Seq(base)
+        cloned = Seq.from_seq(base)
+
+        self.assertEqual(copied.to_list(), [1, 2, 3])
+        self.assertEqual(cloned.to_list(), [1, 2, 3])
+        self.assertEqual(list(iter(base)), [1, 2, 3])
+        self.assertEqual(len(base), 3)
+        self.assertTrue(2 in base)
+
+    def test_seq_index_error_and_slice_helpers(self):
+        s = Seq.of(1, 2, 3, 4)
+        self.assertRaises(TypeError, lambda: s[1.5])
+        self.assertEqual(s.take(2).to_list(), [1, 2])
+        self.assertEqual(s.head, 1)
+        self.assertEqual(s.tail.to_list(), [2, 3, 4])
+
+    def test_seq_for_each_thread_and_with_for_each(self):
+        s = Seq.of(1, 2, 3)
+        out = []
+
+        def collect(x):
+            out.append(x * 2)
+
+        s.for_each(collect, parallel_type=ParallelType.THREAD)
+        self.assertCountEqual(out, [2, 4, 6])
+
+        out2 = []
+        result = s.with_for_each(out2.append)
+        self.assertIs(result, s)
+        self.assertEqual(out2, [1, 2, 3])
+
+    def test_seq_flatten_repeat_length_and_size(self):
+        mixed = Seq.of(Seq.of(1, 2), 3)
+        self.assertEqual(mixed.flatten().to_list(), [1, 2, 3])
+
+        repeated = Seq.of("a", "b").repeat(2)
+        self.assertEqual(repeated.to_list(), [["a", "b"], ["a", "b"]])
+        self.assertEqual(repeated.length, 2)
+        self.assertEqual(repeated.size, 2)

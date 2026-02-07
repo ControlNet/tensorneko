@@ -25,7 +25,7 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual(6, (_ / 2 + 1)(10))
         self.assertEqual([1, 2, 3], list(map(_ / 10, [10, 20, 30])))
         # operator **
-        self.assertEqual(100, (_ ** 2)(10))
+        self.assertEqual(100, (_**2)(10))
         # operator %
         self.assertEqual(1, (_ % 2)(11))
         # operator <<
@@ -33,10 +33,10 @@ class UtilUnderscoreTest(unittest.TestCase):
         # operator >>
         self.assertEqual(2, (_ >> 2)(8))
         # operator (-a)
-        self.assertEqual(10,  (-_)(-10))
+        self.assertEqual(10, (-_)(-10))
         self.assertEqual(-10, (-_)(10))
         # operator (+a)
-        self.assertEqual(10,  (+_)(10))
+        self.assertEqual(10, (+_)(10))
         self.assertEqual(-10, (+_)(-10))
         # operator (~a)
         self.assertEqual(-11, (~_)(10))
@@ -126,9 +126,9 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual(["test-case"], (_.call("split", "-", 0))("test-case"))
 
     def test_call_method_kwargs(self):
-        test_dict = {'num': 23}
+        test_dict = {"num": 23}
         _.call("update", num=42)(test_dict)
-        self.assertEqual({'num': 42}, (test_dict))
+        self.assertEqual({"num": 42}, (test_dict))
 
     def test_comparator(self):
         self.assertTrue((_ < 7)(1))
@@ -172,8 +172,8 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual([0, 1, 2], list(filter(_ < 5, [0, 1, 2, 10, 11, 12])))
 
     def test_slicing(self):
-        self.assertEqual(0,       (_[0])(list(range(10))))
-        self.assertEqual(9,       (_[-1])(list(range(10))))
+        self.assertEqual(0, (_[0])(list(range(10))))
+        self.assertEqual(9, (_[-1])(list(range(10))))
         self.assertEqual([3, 4, 5], (_[3:])(list(range(6))))
         self.assertEqual([0, 1, 2], (_[:3])(list(range(10))))
         self.assertEqual([1, 2, 3], (_[1:4])(list(range(10))))
@@ -192,19 +192,19 @@ class UtilUnderscoreTest(unittest.TestCase):
 
     def test_more_than_2_operations(self):
         self.assertEqual(12, (_ * 2 + 10)(1))
-        self.assertEqual(6,  (_ + _ + _)(1, 2, 3))
+        self.assertEqual(6, (_ + _ + _)(1, 2, 3))
         self.assertEqual(10, (_ + _ + _ + _)(1, 2, 3, 4))
-        self.assertEqual(7,  (_ + _ * _)(1, 2, 3))
+        self.assertEqual(7, (_ + _ * _)(1, 2, 3))
 
     def test_string_converting(self):
         self.assertEqual("(x1) => x1", str(_))
 
-        self.assertEqual("(x1) => (x1 + 2)",  str(_ + 2))
-        self.assertEqual("(x1) => (x1 - 2)",  str(_ - 2))
-        self.assertEqual("(x1) => (x1 * 2)",  str(_ * 2))
-        self.assertEqual("(x1) => (x1 / 2)",  str(_ / 2))
-        self.assertEqual("(x1) => (x1 % 2)",  str(_ % 2))
-        self.assertEqual("(x1) => (x1 ** 2)", str(_ ** 2))
+        self.assertEqual("(x1) => (x1 + 2)", str(_ + 2))
+        self.assertEqual("(x1) => (x1 - 2)", str(_ - 2))
+        self.assertEqual("(x1) => (x1 * 2)", str(_ * 2))
+        self.assertEqual("(x1) => (x1 / 2)", str(_ / 2))
+        self.assertEqual("(x1) => (x1 % 2)", str(_ % 2))
+        self.assertEqual("(x1) => (x1 ** 2)", str(_**2))
 
         self.assertEqual("(x1) => (x1 & 2)", str(_ & 2))
         self.assertEqual("(x1) => (x1 | 2)", str(_ | 2))
@@ -213,8 +213,8 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual("(x1) => (x1 >> 2)", str(_ >> 2))
         self.assertEqual("(x1) => (x1 << 2)", str(_ << 2))
 
-        self.assertEqual("(x1) => (x1 < 2)",  str(_ < 2))
-        self.assertEqual("(x1) => (x1 > 2)",  str(_ > 2))
+        self.assertEqual("(x1) => (x1 < 2)", str(_ < 2))
+        self.assertEqual("(x1) => (x1 > 2)", str(_ > 2))
         self.assertEqual("(x1) => (x1 <= 2)", str(_ <= 2))
         self.assertEqual("(x1) => (x1 >= 2)", str(_ >= 2))
         self.assertEqual("(x1) => (x1 == 2)", str(_ == 2))
@@ -223,12 +223,12 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual("(x1) => ((x1 * 2) + 1)", str((_ * 2 + 1)))
 
     def test_rigthside_string_converting(self):
-        self.assertEqual("(x1) => (2 + x1)",  str(2 + _))
-        self.assertEqual("(x1) => (2 - x1)",  str(2 - _))
-        self.assertEqual("(x1) => (2 * x1)",  str(2 * _))
-        self.assertEqual("(x1) => (2 / x1)",  str(2 / _))
-        self.assertEqual("(x1) => (2 % x1)",  str(2 % _))
-        self.assertEqual("(x1) => (2 ** x1)", str(2 ** _))
+        self.assertEqual("(x1) => (2 + x1)", str(2 + _))
+        self.assertEqual("(x1) => (2 - x1)", str(2 - _))
+        self.assertEqual("(x1) => (2 * x1)", str(2 * _))
+        self.assertEqual("(x1) => (2 / x1)", str(2 / _))
+        self.assertEqual("(x1) => (2 % x1)", str(2 % _))
+        self.assertEqual("(x1) => (2 ** x1)", str(2**_))
 
         self.assertEqual("(x1) => (2 & x1)", str(2 & _))
         self.assertEqual("(x1) => (2 | x1)", str(2 | _))
@@ -248,7 +248,7 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual("(x1, x2) => (x1 - x2)", str(_ - _))
         self.assertEqual("(x1, x2) => (x1 / x2)", str(_ / _))
         self.assertEqual("(x1, x2) => (x1 % x2)", str(_ % _))
-        self.assertEqual("(x1, x2) => (x1 ** x2)", str(_ ** _))
+        self.assertEqual("(x1, x2) => (x1 ** x2)", str(_**_))
 
         self.assertEqual("(x1, x2) => (x1 & x2)", str(_ & _))
         self.assertEqual("(x1, x2) => (x1 | x2)", str(_ | _))
@@ -257,17 +257,14 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual("(x1, x2) => (x1 >> x2)", str(_ >> _))
         self.assertEqual("(x1, x2) => (x1 << x2)", str(_ << _))
 
-        self.assertEqual("(x1, x2) => (x1 > x2)",  str(_ > _))
-        self.assertEqual("(x1, x2) => (x1 < x2)",  str(_ < _))
+        self.assertEqual("(x1, x2) => (x1 > x2)", str(_ > _))
+        self.assertEqual("(x1, x2) => (x1 < x2)", str(_ < _))
         self.assertEqual("(x1, x2) => (x1 >= x2)", str(_ >= _))
         self.assertEqual("(x1, x2) => (x1 <= x2)", str(_ <= _))
         self.assertEqual("(x1, x2) => (x1 == x2)", str(_ == _))
         self.assertEqual("(x1, x2) => (x1 != x2)", str(_ != _))
 
-        self.assertEqual(
-            "(x1, x2) => (((x1 / x2) - 1) * 100)",
-            str((_ / _ - 1) * 100)
-        )
+        self.assertEqual("(x1, x2) => (((x1 / x2) - 1) * 100)", str((_ / _ - 1) * 100))
 
     def test_reverse_string_converting(self):
         self.assertEqual("(x1, x2, x3) => ((x1 + x2) + x3)", str(_ + _ + _))
@@ -278,13 +275,9 @@ class UtilUnderscoreTest(unittest.TestCase):
     def test_multi_underscore_string_converting(self):
         self.assertEqual("(x1) => (x1 + '_')", str(_ + "_"))
         self.assertEqual(
-            "(x1, x2) => getattr((x1 + x2), '__and_now__')",
-            str((_ + _).__and_now__)
+            "(x1, x2) => getattr((x1 + x2), '__and_now__')", str((_ + _).__and_now__)
         )
-        self.assertEqual(
-            "(x1, x2) => x1['__name__'][x2]",
-            str(_['__name__'][_])
-        )
+        self.assertEqual("(x1, x2) => x1['__name__'][x2]", str(_["__name__"][_]))
 
     def test_repr(self):
         self.assertEqual(_ / 2, eval(repr(_ / 2)))
@@ -292,8 +285,21 @@ class UtilUnderscoreTest(unittest.TestCase):
         self.assertEqual(_ + _ * _, eval(repr(_ + _ * _)))
 
     def test_repr_parse_str(self):
-        self.assertEqual('=> ' + _, eval(repr('=> ' + _)))
+        self.assertEqual("=> " + _, eval(repr("=> " + _)))
         self.assertEqual(
-            reduce(lambda f, n: f.format(n), ('({0} & _)',) * 11).format('_'),
+            reduce(lambda f, n: f.format(n), ("({0} & _)",) * 11).format("_"),
             repr(reduce(_ & _, (_,) * 12)),
         )
+
+    def test_arity_error_str(self):
+        """Line 63: ArityError.__str__ formatting."""
+        err = underscore.ArityError("func", 1, 2)
+        s = str(err)
+        self.assertIn("func", s)
+        self.assertIn("1", s)
+        self.assertIn("2", s)
+
+    def test_getattr_wrapped_raises(self):
+        """Line 97: __getattr__ guard for __wrapped__."""
+        with self.assertRaises(AttributeError):
+            _.__wrapped__

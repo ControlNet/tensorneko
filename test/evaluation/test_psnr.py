@@ -7,7 +7,6 @@ from tensorneko.evaluation.enum import Reduction
 
 
 class TestPsnr(unittest.TestCase):
-
     def test_psnr_image_from_tensor_single(self):
         x = torch.rand(3, 256, 256)
         y = torch.rand(3, 256, 256)
@@ -36,6 +35,27 @@ class TestPsnr(unittest.TestCase):
         psnr = psnr_video(x, y)
         self.assertTrue(psnr.shape == torch.Size([]))
 
+    def test_psnr_image_from_tensor_batch_reduce_sum(self):
+        x = torch.rand(10, 3, 256, 256)
+        y = torch.rand(10, 3, 256, 256)
 
-if __name__ == '__main__':
+        psnr = psnr_image(x, y, reduction=Reduction.SUM)
+        self.assertTrue(psnr.shape == torch.Size([]))
+
+    def test_psnr_image_from_uint8_tensor(self):
+        x = torch.randint(0, 256, (10, 3, 256, 256), dtype=torch.uint8)
+        y = torch.randint(0, 256, (10, 3, 256, 256), dtype=torch.uint8)
+
+        psnr = psnr_image(x, y)
+        self.assertTrue(psnr.shape == torch.Size([]))
+
+    def test_psnr_image_3d_input(self):
+        x = torch.rand(3, 32, 32)
+        y = torch.rand(3, 32, 32)
+
+        psnr = psnr_image(x, y)
+        self.assertTrue(psnr.shape == torch.Size([]))
+
+
+if __name__ == "__main__":
     unittest.main()

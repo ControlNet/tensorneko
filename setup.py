@@ -33,17 +33,18 @@ setuptools.setup(
     },
     keywords=["deep learning", "pytorch", "AI", "data processing"],
     package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src", include=["tensorneko", "tensorneko.*"]),
+    packages=setuptools.find_packages(
+        where="src", include=["tensorneko", "tensorneko.*"]
+    ),
     package_data={
         "tensorneko": [
-            "version.txt"
+            "version.txt",
+            "visualization/dataset_viewer/web/index.html",
         ]
     },
     python_requires=">=3.8",
     install_requires=requirements,
-    extras_require={
-        "lightning": extra_requirements
-    },
+    extras_require={"lightning": extra_requirements},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
@@ -56,6 +57,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
         "Intended Audience :: Developers",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
-        "Topic :: Utilities"
+        "Topic :: Utilities",
     ],
 )

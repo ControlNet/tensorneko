@@ -16,6 +16,7 @@ __all__ = [
 if VisualLib.matplotlib_available():
     from . import matplotlib
     from tensorneko_util.visualization import MultiPlots
+
     __all__.extend(["matplotlib", "MultiPlots"])
 
 try:
@@ -24,3 +25,10 @@ except ImportError:
     pass
 else:
     __all__.append("seaborn")
+
+try:
+    from .dataset_viewer import DatasetVisualizer
+except ImportError:
+    pass
+else:
+    __all__.append("DatasetVisualizer")
