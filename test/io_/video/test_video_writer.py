@@ -11,28 +11,6 @@ from tensorneko_util.io.video.video_data import VideoData, VideoInfo
 from tensorneko_util.backend.visual_lib import VisualLib
 
 
-def _write_video_works() -> bool:
-    """Probe whether torchvision.io.write_video works (older av is incompatible)."""
-    try:
-        import torchvision
-
-        with tempfile.TemporaryDirectory() as td:
-            torchvision.io.write_video(
-                os.path.join(td, "probe.mp4"),
-                torch.zeros(2, 8, 8, 3, dtype=torch.uint8),
-                1,
-            )
-        return True
-    except Exception:
-        return False
-
-
-_can_write = _write_video_works()
-
-
-@unittest.skipUnless(
-    _can_write, "torchvision.io.write_video incompatible with current av version"
-)
 class TestVideoWriter(unittest.TestCase):
     """Tests for VideoWriter using the torchvision (PYTORCH) backend."""
 
