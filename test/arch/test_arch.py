@@ -320,16 +320,16 @@ class TestNekoModelLifecycle(unittest.TestCase):
     def _make_model(self):
         """Create a _SimpleModel with mocked trainer/logger so lifecycle hooks work."""
         model = _SimpleModel()
-        # Mock trainer attributes
-        model.trainer = MagicMock()
-        model.trainer.global_step = 10
-        model.trainer.log_every_n_steps = 1
-        model.trainer.log_on_step = True
-        model.trainer.log_on_epoch = True
-        model.trainer.training = True
-        # Mock logger
-        model.trainer.logger = MagicMock()
-        # Patch log/log_dict to avoid Lightning internals
+        # Lightning 2.0/2.1 wraps trainer in weakref.proxy when torch < 2.0 (pytorch#95857)
+        mock_trainer = MagicMock()
+        mock_trainer.global_step = 10
+        mock_trainer.log_every_n_steps = 1
+        mock_trainer.log_on_step = True
+        mock_trainer.log_on_epoch = True
+        mock_trainer.training = True
+        mock_trainer.logger = MagicMock()
+        model.trainer = mock_trainer
+        model._mock_trainer_ref = mock_trainer
         model.log = MagicMock()
         model.log_dict = MagicMock()
         return model
