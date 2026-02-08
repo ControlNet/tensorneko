@@ -15,6 +15,38 @@ from ...util import dispatch
 from ...util.type import T_ARRAY
 
 
+_av_patched = False
+
+
+def _patch_av_avrational():
+    """Patch av.utils.to_avrational to accept numpy scalar types.
+
+    Old torchvision (< 0.22) internally converts fps via ``np.round``
+    which returns ``numpy.float64``.  PyAV >= 12.3 expects a Python
+    int/float/Fraction in ``to_avrational``, causing an
+    ``AttributeError`` on ``.numerator``.  This one-time patch converts
+    numpy scalars to native Python types before the original function
+    sees them.
+    """
+    global _av_patched
+    if _av_patched:
+        return
+    try:
+        import av.utils as _av_utils
+
+        _original = _av_utils.to_avrational
+
+        def _safe_to_avrational(value):
+            if isinstance(value, np.generic):
+                value = value.item()
+            return _original(value)
+
+        _av_utils.to_avrational = _safe_to_avrational
+    except (ImportError, AttributeError):
+        pass
+    _av_patched = True
+
+
 class VideoWriter:
     """The VideoWriter for writing video file"""
 
@@ -149,8 +181,7 @@ class VideoWriter:
                 raise ValueError("Torchvision is not installed.")
             import torchvision
 
-            # Cast fps to Python float to avoid numpy.float64 being rejected
-            # by av.utils.to_avrational in PyAV >= 15.
+            _patch_av_avrational()
             torchvision.io.write_video(
                 path,
                 video,
