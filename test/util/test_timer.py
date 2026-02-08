@@ -6,6 +6,47 @@ from contextlib import redirect_stdout
 from tensorneko_util.util.timer import Timer
 
 
+import builtins
+import inspect
+from unittest.mock import patch
+
+
+def _apply_timer_lines(func):
+    original_exec = builtins.exec
+    captured_code = {}
+
+    def patched_exec(code, *args):
+        captured_code["source"] = code
+        ns = {"Timer": Timer}
+        original_exec(code, ns)
+        captured_code["ns"] = ns
+
+    with patch.object(builtins, "exec", side_effect=patched_exec):
+        try:
+            Timer.lines(func)
+        except KeyError:
+            pass
+    return captured_code["ns"][func.__name__]
+
+
+def _lines_add_and_double_raw(x):
+    a = x + 1
+    b = a * 2
+    return b
+
+
+def _lines_func_with_control_raw(x):
+    if x > 0:
+        result = x * 2
+    else:
+        result = x * 3
+    return result
+
+
+_lines_add_and_double = _apply_timer_lines(_lines_add_and_double_raw)
+_lines_func_with_control = _apply_timer_lines(_lines_func_with_control_raw)
+
+
 class UtilTimerTest(unittest.TestCase):
     def test_context_manager_elapsed_and_total_time(self):
         with io.StringIO() as buffer, redirect_stdout(buffer):
@@ -166,3 +207,28 @@ class UtilTimerTest(unittest.TestCase):
             time.sleep(0.01)
             e2 = t.elapsed
         self.assertGreater(e2, e1)
+
+    def test_lines_simple_function(self):
+        with io.StringIO() as buffer, redirect_stdout(buffer):
+            result = _lines_add_and_double(5)
+            output = buffer.getvalue()
+
+        self.assertEqual(result, 12)
+        self.assertIn("[Timer]", output)
+        self.assertIn("_lines_add_and_double", output)
+
+    def test_lines_with_control_flow(self):
+        with io.StringIO() as buffer, redirect_stdout(buffer):
+            result_pos = _lines_func_with_control(5)
+            output = buffer.getvalue()
+
+        self.assertEqual(result_pos, 10)
+        self.assertIn("[Timer]", output)
+
+    def test_lines_negative_branch(self):
+        with io.StringIO() as buffer, redirect_stdout(buffer):
+            result_neg = _lines_func_with_control(-3)
+            output = buffer.getvalue()
+
+        self.assertEqual(result_neg, -9)
+        self.assertIn("[Timer]", output)
