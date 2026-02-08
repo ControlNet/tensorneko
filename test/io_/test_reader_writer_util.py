@@ -114,11 +114,8 @@ class TestUtilReaderCall(unittest.TestCase):
         result = self.reader(path)
         self.assertEqual(result, "pathlib")
 
-    def test_mat_property_raises(self):
-        """mat property raises ImportError when scipy unavailable."""
-        with self.assertRaises(ImportError) as ctx:
-            _ = self.reader.mat
-        self.assertIn("Scipy", str(ctx.exception))
+    def test_mat_property_returns(self):
+        self.assertIsNotNone(self.reader.mat)
 
     def test_yaml_property_returns(self):
         """yaml property returns YamlReader."""
@@ -227,11 +224,8 @@ class TestUtilWriterCall(unittest.TestCase):
             self.writer(path, "data")
         self.assertIn("Unknown file type", str(ctx.exception))
 
-    def test_mat_property_raises(self):
-        """mat property raises ImportError when scipy unavailable."""
-        with self.assertRaises(ImportError) as ctx:
-            _ = self.writer.mat
-        self.assertIn("Scipy", str(ctx.exception))
+    def test_mat_property_returns(self):
+        self.assertIsNotNone(self.writer.mat)
 
     def test_yaml_property_returns(self):
         self.assertIsNotNone(self.writer.yaml)
