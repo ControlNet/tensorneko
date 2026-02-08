@@ -211,6 +211,11 @@ jobs:
         run: |
           uv pip install --system "pillow<10"
 
+      - name: Fix av for old torchvision (torch < 2.8)
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' || matrix.torch-version == '2.0.*' || matrix.torch-version == '2.1.*' || matrix.torch-version == '2.2.*' || matrix.torch-version == '2.3.*' || matrix.torch-version == '2.4.*' || matrix.torch-version == '2.5.*' || matrix.torch-version == '2.6.*' || matrix.torch-version == '2.7.*' }}
+        run: |
+          uv pip install --system "av>=8.0.3,<13.1"
+
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
@@ -338,6 +343,11 @@ jobs:
         run: |
           uv pip install --system "pillow<10"
 
+      - name: Fix av for old torchvision (torch < 2.8)
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' || matrix.torch-version == '2.0.*' || matrix.torch-version == '2.1.*' || matrix.torch-version == '2.2.*' || matrix.torch-version == '2.3.*' || matrix.torch-version == '2.4.*' || matrix.torch-version == '2.5.*' || matrix.torch-version == '2.6.*' || matrix.torch-version == '2.7.*' }}
+        run: |
+          uv pip install --system "av>=8.0.3,<13.1"
+
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
@@ -383,6 +393,11 @@ jobs:
         if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
         run: |
           uv pip install --system "pillow<10"
+
+      - name: Fix av for old torchvision (torch < 2.8)
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' || matrix.torch-version == '2.0.*' || matrix.torch-version == '2.1.*' || matrix.torch-version == '2.2.*' || matrix.torch-version == '2.3.*' || matrix.torch-version == '2.4.*' || matrix.torch-version == '2.5.*' || matrix.torch-version == '2.6.*' || matrix.torch-version == '2.7.*' }}
+        run: |
+          uv pip install --system "av>=8.0.3,<13.1"
 
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
