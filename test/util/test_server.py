@@ -106,11 +106,12 @@ class TestHttpThreadServerLifecycle(unittest.TestCase):
 
     def test_restart(self):
         """Test that calling start() when already running restarts the server."""
-        port = PORT_BASE + 7
-        server = MinimalServer(self.tmpdir, port=port, name="test-restart")
+        port1 = PORT_BASE + 7
+        port2 = PORT_BASE + 10
+        server = MinimalServer(self.tmpdir, port=port1, name="test-restart")
         server.start()
         old_process = server.process
-        # start again triggers stop + re-start
+        server.port = port2
         server.start()
         self.assertIsNotNone(server.process)
         self.assertIsNot(server.process, old_process)

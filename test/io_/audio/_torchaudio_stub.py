@@ -1,6 +1,6 @@
 import wave
 from pathlib import Path
-from typing import Any, Union
+from typing import Any, Tuple, Union
 
 import numpy as np
 import torch
@@ -45,7 +45,7 @@ def load_wav_stub(
     channels_first: bool = True,
     *args,
     **kwargs,
-) -> tuple[torch.Tensor, int]:
+) -> Tuple[torch.Tensor, int]:
     with wave.open(str(path), "rb") as wav_file:
         channels = wav_file.getnchannels()
         sample_rate = wav_file.getframerate()

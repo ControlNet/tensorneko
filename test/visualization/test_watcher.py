@@ -453,7 +453,8 @@ class TestWatcherServer(unittest.TestCase):
         server = Server("restart_view", port=18807)
         server.start()
         old_process = server.process
-        server.start()  # should stop old, start new
+        server.port = 18813
+        server.start()
         server.stop()
 
     @patch.object(Server, "_prepare")
