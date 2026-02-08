@@ -22,18 +22,18 @@ class Aggregation(NekoModule):
         x_pooled = max_pooling(x)
 
     """
+
     def __init__(self, mode: str = "mean", dim: Union[int, Sequence[int]] = None):
         super().__init__()
-        if mode == "mean":
-            self.agg_func = F(torch.mean, dim=dim)
-        elif mode == "sum":
-            self.agg_func = F(torch.sum, dim=dim)
-        elif mode == "max":
-            self.agg_func = F(torch.max, dim=dim)
-        elif mode == "min":
-            self.agg_func = F(torch.min, dim=dim)
-        else:
+        func_map = {
+            "mean": torch.mean,
+            "sum": torch.sum,
+            "max": torch.max,
+            "min": torch.min,
+        }
+        if mode not in func_map:
             raise ValueError("Wrong mode value. It should be in [mean, sum, max, min]")
+        self.agg_func = F(func_map[mode]) if dim is None else F(func_map[mode], dim=dim)
 
     def forward(self, x: Tensor) -> Tensor:
         return self.agg_func(x)
