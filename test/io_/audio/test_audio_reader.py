@@ -2,6 +2,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Tuple
 from unittest.mock import patch
 
 import torch
@@ -27,7 +28,7 @@ class TestAudioReader(unittest.TestCase):
         sample_rate: int = 16000,
         channels: int = 1,
         duration: int = 16000,
-    ) -> tuple[str, torch.Tensor]:
+    ) -> Tuple[str, torch.Tensor]:
         waveform = torch.randn(channels, duration)
         path = os.path.join(directory, "sample.wav")
         torchaudio.save(path, waveform, sample_rate)

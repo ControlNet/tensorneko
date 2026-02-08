@@ -490,17 +490,14 @@ class TestWatcherServer(unittest.TestCase):
         import threading
 
         server = Server("blocking_view", port=18811)
-        # First start normally
         server.start()
         self.assertIsNotNone(server.process)
-        # Now call start_blocking in a separate thread (it blocks)
-        # and stop it immediately after
+        server.port = 18814
         blocking_thread = threading.Thread(target=server.start_blocking, daemon=True)
         blocking_thread.start()
         import time
 
         time.sleep(0.05)
-        # Server should be running in blocking mode
         if server.httpd:
             server.httpd.shutdown()
         blocking_thread.join(timeout=2)
