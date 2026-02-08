@@ -15,70 +15,13 @@ from ...util import dispatch
 from ...util.type import T_ARRAY
 
 
-def _write_video_av(
-    path: str,
-    video,
-    video_fps: float,
-    audio=None,
-    audio_fps=None,
-    audio_codec: str = None,
-    video_codec: str = "libx264",
-):
-    """Write video using PyAV directly, bypassing torchvision.io.write_video.
-
-    Old torchvision (< 0.22) passes ``numpy.float64`` fps into
-    ``av.container.output.OutputContainer.add_stream(rate=...)``,
-    triggering ``AttributeError`` in ``av.utils.to_avrational``
-    (a Cython ``cdef`` function that cannot be monkey-patched).
-    Calling PyAV directly lets us control the ``rate`` type.
-    """
-    import av
-    import torch
-
-    fps = int(round(float(video_fps)))
-
-    with av.open(path, mode="w") as container:
-        v_stream = container.add_stream(video_codec, rate=fps)
-        v_stream.width = video.shape[2]
-        v_stream.height = video.shape[1]
-        v_stream.pix_fmt = "yuv420p"
-
-        if audio is not None and audio_codec is not None:
-            a_stream = container.add_stream(audio_codec, rate=int(audio_fps))
-            if isinstance(audio, torch.Tensor):
-                audio = audio.numpy()
-            audio_frame = av.AudioFrame.from_ndarray(
-                audio, format="flt", layout="mono" if audio.shape[0] == 1 else "stereo"
-            )
-            audio_frame.sample_rate = int(audio_fps)
-            for packet in a_stream.encode(audio_frame):
-                container.mux(packet)
-
-        for i in range(video.shape[0]):
-            if isinstance(video, torch.Tensor):
-                frame_data = video[i].to(torch.uint8).numpy()
-            else:
-                frame_data = np.asarray(video[i], dtype=np.uint8)
-            frame = av.VideoFrame.from_ndarray(frame_data, format="rgb24")
-            for packet in v_stream.encode(frame):
-                container.mux(packet)
-
-        for packet in v_stream.encode():
-            container.mux(packet)
-
-
 class VideoWriter:
     """The VideoWriter for writing video file"""
 
     @classmethod
     @dispatch
-    def to(
-        cls,
-        path: Union[str, Path],
-        video: VideoData,
-        audio_codec: str = None,
-        channel_first: bool = False,
-        backend: VisualLib = None,
+    def to(cls, path: Union[str, Path], video: VideoData, audio_codec: str = None, channel_first: bool = False,
+        backend: VisualLib = None
     ) -> None:
         """
         Write to video file from :class:`~tensorneko.io.video.video_data.VideoData`.
@@ -93,29 +36,13 @@ class VideoWriter:
                 Default: opencv if installed, then torchvision if installed, then ffmpeg if available.
         """
         path = _path2str(path)
-        cls.to(
-            path,
-            video.video,
-            video.info.video_fps,
-            video.audio,
-            video.info.audio_fps,
-            audio_codec,
-            channel_first,
-            backend,
-        )
+        cls.to(path, video.video, video.info.video_fps, video.audio, video.info.audio_fps, audio_codec, channel_first, backend)
 
     @classmethod
     @dispatch
-    def to(
-        cls,
-        path: Union[str, Path],
-        video: T_ARRAY,
-        video_fps: float,
-        audio: T_ARRAY = None,
-        audio_fps: int = None,
-        audio_codec: str = None,
-        channel_first: bool = False,
-        backend: VisualLib = None,
+    def to(cls, path: Union[str, Path], video: T_ARRAY, video_fps: float, audio: T_ARRAY = None,
+        audio_fps: int = None, audio_codec: str = None, channel_first: bool = False,
+        backend: VisualLib = None
     ) -> None:
         """
         Write to video file from :class:`~torch.Tensor` or :class:`~numpy.ndarray` with (T, C, H, W).
@@ -146,32 +73,23 @@ class VideoWriter:
         # to uint8
         if isinstance(video, np.ndarray):
             if video.dtype == np.uint8:
-                warnings.warn(
-                    "The video array is already a uint8 array. The output video may be incorrect."
-                )
+                warnings.warn("The video array is already a uint8 array. The output video may be incorrect.")
             video = (video * 255).astype(np.uint8)
         else:
             try:
                 import torch
-
                 if isinstance(video, torch.Tensor):
                     if video.dtype == torch.uint8:
-                        warnings.warn(
-                            "The video tensor is already a uint8 tensor. The output video may be incorrect."
-                        )
+                        warnings.warn("The video tensor is already a uint8 tensor. The output video may be incorrect.")
 
                     if backend == VisualLib.PYTORCH:
                         video = (video * 255).type(torch.IntTensor)
                     else:
                         video = (video.numpy() * 255).astype(np.uint8)
                 else:
-                    raise ValueError(
-                        "Unknown data type. The image array type must be numpy.ndarray or torch.Tensor."
-                    )
+                    raise ValueError("Unknown data type. The image array type must be numpy.ndarray or torch.Tensor.")
             except ImportError:
-                raise ValueError(
-                    "Unknown data type. The image array type must be numpy.ndarray or torch.Tensor."
-                )
+                raise ValueError("Unknown data type. The image array type must be numpy.ndarray or torch.Tensor.")
 
         ext = pathlib.Path(path).suffix
 
@@ -181,50 +99,32 @@ class VideoWriter:
             if not VisualLib.opencv_available():
                 raise ValueError("Opencv is not installed.")
             import cv2
-
             if ext == ".avi":
                 fourcc = cv2.VideoWriter_fourcc(*"XVID")
             elif ext == ".mp4":
                 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
             else:
-                raise NotImplementedError(
-                    "Only .avi and .mp4 are supported in opencv backend."
-                )
-            writer = cv2.VideoWriter(
-                path, fourcc, video_fps, (video.shape[2], video.shape[1])
-            )
+                raise NotImplementedError("Only .avi and .mp4 are supported in opencv backend.")
+            writer = cv2.VideoWriter(path, fourcc, video_fps, (video.shape[2], video.shape[1]))
             for i in range(video.shape[0]):
                 writer.write(cv2.cvtColor(video[i], cv2.COLOR_RGB2BGR))
             writer.release()
         elif backend == VisualLib.PYTORCH:
             if not VisualLib.pytorch_available():
                 raise ValueError("Torchvision is not installed.")
-            _write_video_av(
-                path,
-                video,
-                video_fps,
-                audio=audio,
-                audio_fps=audio_fps,
-                audio_codec=audio_codec,
-            )
+            import torchvision
+            torchvision.io.write_video(path, video, video_fps, audio_fps=audio_fps, audio_array=audio,
+                audio_codec=audio_codec)
         elif backend == VisualLib.FFMPEG:
             if audio is not None:
                 raise ValueError("Write audio is not supported in ffmpeg backend.")
             if not VisualLib.ffmpeg_available():
                 raise ValueError("FFMPEG is not installed.")
             import ffmpeg
-
-            pipe: Popen = (
-                ffmpeg.input(
-                    "pipe:",
-                    format="rawvideo",
-                    pix_fmt="rgb24",
-                    s=f"{video.shape[2]}x{video.shape[1]}",
-                )
-                .output(path, format=ext[1:], pix_fmt="rgb24", r=video_fps)
-                .overwrite_output()
+            pipe: Popen = ffmpeg.input("pipe:", format="rawvideo", pix_fmt="rgb24", s=f"{video.shape[2]}x{video.shape[1]}") \
+                .output(path, format=ext[1:], pix_fmt="rgb24", r=video_fps) \
+                .overwrite_output() \
                 .run_async(pipe_stdin=True)
-            )
 
             for i in range(video.shape[0]):
                 pipe.stdin.write(video[i].tobytes())
@@ -232,13 +132,9 @@ class VideoWriter:
             pipe.stdin.close()
             pipe.wait()
         else:
-            raise ValueError(
-                "Unknown backend. Should be one of VisualLib.OPENCV, VisualLib.PYTORCH, VisualLib.FFMPEG."
-            )
+            raise ValueError("Unknown backend. Should be one of VisualLib.OPENCV, VisualLib.PYTORCH, VisualLib.FFMPEG.")
 
-    def __new__(
-        cls, path: Union[str, Path], video: Union[T_ARRAY, VideoData], *args, **kwargs
-    ):
+    def __new__(cls, path: Union[str, Path], video: Union[T_ARRAY, VideoData], *args, **kwargs):
         """Alias of :func:`~tensorneko.io.video.video_io.to`."""
         path = _path2str(path)
         return cls.to(path, video, *args, **kwargs)
