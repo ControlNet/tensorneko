@@ -252,7 +252,7 @@ jobs:
         run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
 
       - name: Run Coverage
-        run: coverage run --source=tensorneko,tensorneko_util -m pytest
+        run: coverage run --source=tensorneko,tensorneko_util,tensorneko_tool -m pytest
 
       - name: Coveralls
         run: coveralls --service=github
