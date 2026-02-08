@@ -15,36 +15,56 @@ from ...util import dispatch
 from ...util.type import T_ARRAY
 
 
-_av_patched = False
+def _write_video_av(
+    path: str,
+    video,
+    video_fps: float,
+    audio=None,
+    audio_fps=None,
+    audio_codec: str = None,
+    video_codec: str = "libx264",
+):
+    """Write video using PyAV directly, bypassing torchvision.io.write_video.
 
-
-def _patch_av_avrational():
-    """Patch av.utils.to_avrational to accept numpy scalar types.
-
-    Old torchvision (< 0.22) internally converts fps via ``np.round``
-    which returns ``numpy.float64``.  PyAV >= 12.3 expects a Python
-    int/float/Fraction in ``to_avrational``, causing an
-    ``AttributeError`` on ``.numerator``.  This one-time patch converts
-    numpy scalars to native Python types before the original function
-    sees them.
+    Old torchvision (< 0.22) passes ``numpy.float64`` fps into
+    ``av.container.output.OutputContainer.add_stream(rate=...)``,
+    triggering ``AttributeError`` in ``av.utils.to_avrational``
+    (a Cython ``cdef`` function that cannot be monkey-patched).
+    Calling PyAV directly lets us control the ``rate`` type.
     """
-    global _av_patched
-    if _av_patched:
-        return
-    try:
-        import av.utils as _av_utils
+    import av
+    import torch
 
-        _original = _av_utils.to_avrational
+    fps = int(round(float(video_fps)))
 
-        def _safe_to_avrational(value):
-            if isinstance(value, np.generic):
-                value = value.item()
-            return _original(value)
+    with av.open(path, mode="w") as container:
+        v_stream = container.add_stream(video_codec, rate=fps)
+        v_stream.width = video.shape[2]
+        v_stream.height = video.shape[1]
+        v_stream.pix_fmt = "yuv420p"
 
-        _av_utils.to_avrational = _safe_to_avrational
-    except (ImportError, AttributeError):
-        pass
-    _av_patched = True
+        if audio is not None and audio_codec is not None:
+            a_stream = container.add_stream(audio_codec, rate=int(audio_fps))
+            if isinstance(audio, torch.Tensor):
+                audio = audio.numpy()
+            audio_frame = av.AudioFrame.from_ndarray(
+                audio, format="flt", layout="mono" if audio.shape[0] == 1 else "stereo"
+            )
+            audio_frame.sample_rate = int(audio_fps)
+            for packet in a_stream.encode(audio_frame):
+                container.mux(packet)
+
+        for i in range(video.shape[0]):
+            if isinstance(video, torch.Tensor):
+                frame_data = video[i].to(torch.uint8).numpy()
+            else:
+                frame_data = np.asarray(video[i], dtype=np.uint8)
+            frame = av.VideoFrame.from_ndarray(frame_data, format="rgb24")
+            for packet in v_stream.encode(frame):
+                container.mux(packet)
+
+        for packet in v_stream.encode():
+            container.mux(packet)
 
 
 class VideoWriter:
@@ -179,15 +199,12 @@ class VideoWriter:
         elif backend == VisualLib.PYTORCH:
             if not VisualLib.pytorch_available():
                 raise ValueError("Torchvision is not installed.")
-            import torchvision
-
-            _patch_av_avrational()
-            torchvision.io.write_video(
+            _write_video_av(
                 path,
                 video,
-                float(video_fps),
+                video_fps,
+                audio=audio,
                 audio_fps=audio_fps,
-                audio_array=audio,
                 audio_codec=audio_codec,
             )
         elif backend == VisualLib.FFMPEG:
