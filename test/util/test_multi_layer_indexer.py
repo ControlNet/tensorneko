@@ -33,7 +33,9 @@ class UtilMultiLayerIndexerTest(unittest.TestCase):
             indexer(14)
         with self.assertRaises(IndexError, msg="Index 20 should raise IndexError."):
             indexer(20)
-        with self.assertRaises(IndexError, msg="Negative index should raise IndexError."):
+        with self.assertRaises(
+            IndexError, msg="Negative index should raise IndexError."
+        ):
             indexer(-1)
 
     def test_empty_counts(self):
@@ -41,7 +43,9 @@ class UtilMultiLayerIndexerTest(unittest.TestCase):
         counts = []
         indexer = MultiLayerIndexer(counts)
         self.assertEqual(len(indexer), 0, "Total count should be 0.")
-        with self.assertRaises(IndexError, msg="Any index should raise IndexError for empty counts."):
+        with self.assertRaises(
+            IndexError, msg="Any index should raise IndexError for empty counts."
+        ):
             indexer(0)
 
     def test_single_layer(self):
@@ -58,20 +62,28 @@ class UtilMultiLayerIndexerTest(unittest.TestCase):
         counts = [[[2, 3], 4], 5]
         indexer = MultiLayerIndexer(counts)
         self.assertEqual(len(indexer), (2 + 3) + 4 + 5, "Total count should be 14.")
-        self.assertEqual(indexer(0), [0, 0, 0, 0], "Index 0 should map to [0, 0, 0, 0].")
-        self.assertEqual(indexer(4), [0, 0, 1, 2], "Index 4 should map to [0, 0, 1, 2].")
+        self.assertEqual(
+            indexer(0), [0, 0, 0, 0], "Index 0 should map to [0, 0, 0, 0]."
+        )
+        self.assertEqual(
+            indexer(4), [0, 0, 1, 2], "Index 4 should map to [0, 0, 1, 2]."
+        )
         self.assertEqual(indexer(7), [0, 1, 2], "Index 7 should map to [0, 1, 2].")
 
     def test_non_integer_counts(self):
         """Test with invalid counts structure."""
         counts = [2, "invalid", 3]
-        with self.assertRaises(ValueError, msg="Non-integer counts should raise ValueError."):
+        with self.assertRaises(
+            ValueError, msg="Non-integer counts should raise ValueError."
+        ):
             MultiLayerIndexer(counts)
 
     def test_negative_counts(self):
         """Test with negative counts."""
         counts = [5, -10, 15]
-        with self.assertRaises(ValueError, msg="Negative counts should raise ValueError."):
+        with self.assertRaises(
+            ValueError, msg="Negative counts should raise ValueError."
+        ):
             MultiLayerIndexer(counts)
 
     def test_zero_counts(self):
@@ -89,6 +101,14 @@ class UtilMultiLayerIndexerTest(unittest.TestCase):
         counts = [1000, 2000, 3000]
         indexer = MultiLayerIndexer(counts)
         self.assertEqual(len(indexer), 6000, "Total count should be 6000.")
-        self.assertEqual(indexer(5999), [2, 2999], "Index 5999 should map to [2, 2999].")
+        self.assertEqual(
+            indexer(5999), [2, 2999], "Index 5999 should map to [2, 2999]."
+        )
         with self.assertRaises(IndexError, msg="Index 6000 should raise IndexError."):
             indexer(6000)
+
+    def test_invalid_counts_in_multi_layer_index(self):
+        """Line 87: _multi_layer_index with invalid counts type raises ValueError."""
+        with self.assertRaises(ValueError) as ctx:
+            MultiLayerIndexer._multi_layer_index("not_int_or_list", 0)
+        self.assertIn("Invalid counts structure", str(ctx.exception))

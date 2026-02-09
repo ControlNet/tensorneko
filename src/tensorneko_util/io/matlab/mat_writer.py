@@ -7,7 +7,6 @@ from .._path_conversion import _path2str
 
 
 class MatWriter:
-
     @classmethod
     def to(cls, path: Union[str, Path], data: Dict[str, Any]) -> None:
         """
@@ -22,4 +21,4 @@ class MatWriter:
 
     def __new__(cls, path: Union[str, Path], data: Dict[str, Any]) -> None:
         """Alias to :meth:`~tensorneko_util.io.mat_writer.MatWriter.to`."""
-        cls.to(data, path)
+        cls.to(path, data)

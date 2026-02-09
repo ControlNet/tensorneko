@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TensorNeko Dataset Viewer</title>
+    <style>
+        /* ── Reset & Base ───────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f0f0f0;
+            --surface: #ffffff;
+            --surface-alt: #fafafa;
+            --border: #e2e2e2;
+            --border-focus: #3b82f6;
+            --text: #1a1a1a;
+            --text-dim: #6b7280;
+            --text-faint: #6b7280;
+            --accent: #2563eb;
+            --accent-light: #dbeafe;
+            --accent-dark: #1d4ed8;
+            --error: #dc2626;
+            --error-bg: #fef2f2;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-lg: 0 4px 16px rgba(0,0,0,0.10);
+            --radius: 6px;
+            --radius-lg: 10px;
+            --mono: "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+            --sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: var(--sans);
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text);
+            background: var(--bg);
+            overflow: hidden;
+        }
+
+        /* ── Layout ─────────────────────────────────────────────── */
+        .app {
+            display: flex;
+            height: 100vh;
+            height: 100dvh; /* progressive enhancement for mobile */
+            width: 100vw;
+        }
+
+        /* ── Left Panel ─────────────────────────────────────────── */
+        .panel-left {
+            width: 320px;
+            min-width: 320px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-md);
+            z-index: 2;
+        }
+
+        .panel-header {
+            padding: 20px 16px 12px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .panel-header h1 {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .panel-header .dataset-info {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .panel-header .dataset-info span {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* ── Sample List ────────────────────────────────────────── */
+        .sample-list {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .sample-list::-webkit-scrollbar { width: 6px; }
+        .sample-list::-webkit-scrollbar-track { background: transparent; }
+        .sample-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .sample-list::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+        .sample-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s ease;
+            position: relative;
+        }
+
+        .sample-item:hover {
+            background: var(--surface-alt);
+        }
+
+        .sample-item.active {
+            background: var(--accent-light);
+            border-left: 3px solid var(--accent);
+            padding-left: 13px;
+        }
+
+        .sample-item.active::after {
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        .sample-thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .sample-thumb-placeholder {
+            width: 48px;
+            height: 48px;
+            border-radius: 4px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--text-faint);
+        }
+
+        .sample-meta {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sample-meta .idx {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+         .sample-meta .preview {
+             font-size: 12px;
+             color: var(--text-dim);
+             white-space: nowrap;
+             overflow: hidden;
+             text-overflow: ellipsis;
+             max-width: 200px;
+         }
+
+        /* ── Pagination ─────────────────────────────────────────── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            flex-shrink: 0;
+        }
+
+        .pagination button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--sans);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 500;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* ── Right Panel ────────────────────────────────────────── */
+        .panel-right {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+            background: var(--bg);
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+
+        .panel-right::-webkit-scrollbar { width: 8px; }
+        .panel-right::-webkit-scrollbar-track { background: transparent; }
+        .panel-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .panel-right::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+
+        /* ── Empty / Loading / Error States ──────────────────────── */
+        .state-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .state-message .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .state-message .title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .state-message .subtitle {
+            font-size: 13px;
+            color: var(--text-faint);
+        }
+
+        .state-message.error .title {
+            color: var(--error);
+        }
+
+        .loading-list {
+            padding: 20px 16px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        /* ── Detail View ────────────────────────────────────────── */
+        .detail-header {
+            margin-bottom: 20px;
+        }
+
+        .detail-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+
+        .field-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.15s ease;
+        }
+
+        .field-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .field-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .field-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .field-type-badge {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--accent-light);
+            color: var(--accent-dark);
+        }
+
+        .field-card-body {
+            padding: 16px;
+        }
+
+        .field-card-header {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .field-card-header .chevron {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--text-dim);
+            transition: transform 0.15s ease;
+        }
+
+        .field-card-header[aria-expanded="false"] .chevron {
+            transform: rotate(-90deg);
+        }
+
+        .field-card-body.collapsed {
+            display: none;
+        }
+
+        .collapse-toggle-btn {
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--sans);
+            color: var(--accent);
+            background: none;
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .collapse-toggle-btn:hover {
+            background: var(--accent-light);
+        }
+
+        /* ── Field Type Renderers ─────────────────────────────────── */
+
+        /* Image */
+        .field-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--radius);
+            display: block;
+        }
+
+        /* Text */
+        .field-text p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Scalar */
+        .field-scalar .scalar-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-dark);
+            font-family: var(--mono);
+        }
+
+        /* Tensor */
+        .field-tensor .tensor-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .tensor-stat {
+            padding: 8px 12px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .tensor-stat .label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-faint);
+            margin-bottom: 2px;
+        }
+
+        .tensor-stat .value {
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--mono);
+            color: var(--text);
+        }
+
+        .tensor-data-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--sans);
+            color: var(--accent);
+            background: none;
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .tensor-data-toggle:hover {
+            background: var(--accent-light);
+        }
+
+         .tensor-raw-data {
+             margin-top: 8px;
+             padding: 12px;
+             background: #1e1e1e;
+             color: #d4d4d4;
+             font-family: var(--mono);
+             font-size: 12px;
+             line-height: 1.5;
+             border-radius: var(--radius);
+             overflow-x: auto;
+             max-height: 300px;
+             overflow-y: auto;
+             white-space: pre;
+             display: none;
+         }
+
+        .tensor-raw-data.visible {
+            display: block;
+        }
+
+         /* JSON */
+         .field-json pre {
+             padding: 12px;
+             background: #1e1e1e;
+             color: #d4d4d4;
+             font-family: var(--mono);
+             font-size: 12px;
+             line-height: 1.5;
+             border-radius: var(--radius);
+             overflow-x: auto;
+             max-height: 400px;
+             overflow-y: auto;
+             white-space: pre;
+         }
+
+        /* Unknown */
+        .field-unknown code {
+            display: block;
+            padding: 12px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* ── Image Zoom Modal ──────────────────────────────── */
+        .zoom-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .zoom-overlay .zoom-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 101;
+        }
+
+        .zoom-overlay .zoom-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .zoom-overlay .zoom-toggle {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 16px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--sans);
+            cursor: pointer;
+            z-index: 101;
+        }
+
+        .zoom-overlay .zoom-toggle:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .zoom-overlay .zoom-img-fit {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .zoom-overlay .zoom-img-full {
+            max-width: none;
+            max-height: none;
+            cursor: grab;
+        }
+
+        .zoom-overlay .zoom-scroll-container {
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        /* ── Keyboard nav focus ring ────────────────────────────── */
+        .sample-item:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        :focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        /* ── Animation ──────────────────────────────────────────── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .field-card {
+            animation: fadeIn 0.2s ease both;
+        }
+
+        .field-card:nth-child(2) { animation-delay: 0.04s; }
+        .field-card:nth-child(3) { animation-delay: 0.08s; }
+        .field-card:nth-child(4) { animation-delay: 0.12s; }
+        .field-card:nth-child(5) { animation-delay: 0.16s; }
+        .field-card:nth-child(6) { animation-delay: 0.20s; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .loading-pulse {
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* ── Jump Navigation ──────────────────────────────── */
+        .jump-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .jump-nav input {
+            width: 70px;
+            padding: 5px 8px;
+            font-size: 12px;
+            font-family: var(--sans);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .jump-nav button {
+            padding: 5px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--sans);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        /* ── Detail Navigation ─────────────────────────────── */
+        .detail-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .detail-nav h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+
+        .detail-nav-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .detail-nav-buttons button {
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--sans);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.12s ease;
+        }
+
+        .detail-nav-buttons button:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-light);
+        }
+
+        .detail-nav-buttons button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ── Responsive ────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .app {
+                flex-direction: column;
+            }
+            .panel-left {
+                width: 100%;
+                min-width: unset;
+                max-height: 40vh;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                box-shadow: none;
+            }
+            .panel-right {
+                padding: 16px;
+            }
+        }
+
+        /* ── Reduced Motion ────────────────────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ── Dark Mode ────────────────────────────────────── */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --surface: #2d2d2d;
+                --surface-alt: #353535;
+                --border: #404040;
+                --border-focus: #60a5fa;
+                --text: #e5e5e5;
+                --text-dim: #a0a0a0;
+                --text-faint: #808080;
+                --accent: #60a5fa;
+                --accent-light: #1e3a5f;
+                --accent-dark: #93c5fd;
+                --error: #f87171;
+                --error-bg: #3b1515;
+                --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+                --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+                --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Left Panel -->
+        <div class="panel-left">
+            <div class="panel-header">
+                <h1>TensorNeko Dataset Viewer</h1>
+                <div class="dataset-info" id="dataset-info">Loading&hellip;</div>
+            </div>
+            <div class="sample-list" id="sample-list" role="listbox">
+                <div class="loading-list loading-pulse">Loading samples&hellip;</div>
+            </div>
+            <div class="pagination" id="pagination" style="display:none;">
+                <button id="btn-prev" disabled>&#9664; Prev</button>
+                <span class="page-info" id="page-info">Page 1/1</span>
+                <button id="btn-next" disabled>Next &#9654;</button>
+                <div class="jump-nav">
+                    <input type="number" id="jump-input" min="0" placeholder="Go to #…">
+                    <button id="btn-jump">Go</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+         <div class="panel-right" id="detail-panel">
+             <div class="state-message" id="empty-state">
+                 <div class="icon">&#128269;</div>
+                 <div class="title">Select a sample from the list</div>
+                 <div class="subtitle">Click any item to inspect its fields</div>
+             </div>
+         </div>
+
+         <!-- Live region for screen reader announcements -->
+         <div id="live-status" role="status" aria-live="polite" class="sr-only"></div>
+     </div>
+
+    <script>
+    (function () {
+        "use strict";
+
+         /* ── State ──────────────────────────────────────────────── */
+         const state = {
+             length: 0,
+             schema: {},
+             pageSize: 20,
+             currentPage: 0,
+             totalPages: 1,
+             samples: [],
+             selectedIdx: null,
+             focusedListIndex: -1
+         };
+
+         /* ── Abort controllers for request cancellation ─────────────── */
+         let sampleAbort = null;
+         let pageAbort = null;
+
+         /* ── DOM refs ───────────────────────────────────────────── */
+         const $info = document.getElementById("dataset-info");
+         const $list = document.getElementById("sample-list");
+         const $pagination = document.getElementById("pagination");
+         const $pageInfo = document.getElementById("page-info");
+         const $btnPrev = document.getElementById("btn-prev");
+         const $btnNext = document.getElementById("btn-next");
+         const $detail = document.getElementById("detail-panel");
+         const $liveStatus = document.getElementById("live-status");
+         const $jumpInput = document.getElementById("jump-input");
+         const $btnJump = document.getElementById("btn-jump");
+
+         /* ── Helpers ────────────────────────────────────────────── */
+         function announceStatus(msg) {
+             $liveStatus.textContent = msg;
+         }
+
+          function escapeHtml(str) {
+              const div = document.createElement("div");
+              div.textContent = str;
+              return div.innerHTML;
+          }
+
+        function formatNumber(n) {
+            if (typeof n === "number") {
+                if (Number.isInteger(n)) return n.toString();
+                return n.toFixed(6).replace(/0+$/, "").replace(/\.$/, "");
+            }
+            return String(n);
+        }
+
+          /* ── API helpers ────────────────────────────────────────── */
+          function apiGet(url, signal) {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(function() { controller.abort(); }, 30000);
+              
+              if (signal) {
+                  signal.addEventListener("abort", function() { controller.abort(); });
+              }
+              
+              return fetch(url, { signal: controller.signal }).then(function (resp) {
+                  clearTimeout(timeoutId);
+                  if (!resp.ok) throw new Error("HTTP " + resp.status);
+                  return resp.json();
+              }).catch(function (err) {
+                  clearTimeout(timeoutId);
+                  throw err;
+              });
+          }
+
+         /* ── Counter for tensor data element IDs ────────────── */
+         let tensorDataCounter = 0;
+
+         /* ── DOM construction helpers ──────────────────────────── */
+         function createLoadingListDiv(text, isError) {
+             const div = document.createElement("div");
+             div.className = "loading-list" + (isError ? "" : "");
+             if (isError) {
+                 div.style.color = "var(--error)";
+             }
+             div.textContent = text;
+             return div;
+         }
+
+           function createStateMessage(iconText, titleText, subtitleText, isError) {
+               const wrap = document.createElement("div");
+               wrap.className = "state-message" + (isError ? " error" : "");
+               const icon = document.createElement("div");
+               icon.className = "icon";
+               icon.textContent = iconText;
+               icon.setAttribute("aria-hidden", "true");
+               wrap.appendChild(icon);
+               const title = document.createElement("div");
+               title.className = "title";
+               title.textContent = titleText;
+               wrap.appendChild(title);
+               if (subtitleText) {
+                   const subtitle = document.createElement("div");
+                   subtitle.className = "subtitle";
+                   subtitle.textContent = subtitleText;
+                   wrap.appendChild(subtitle);
+               }
+               return wrap;
+           }
+
+           function showEmptyState() {
+               $detail.textContent = '';
+               const msg = document.createElement('div');
+               msg.className = 'state-message';
+               const icon = document.createElement('div');
+               icon.className = 'icon';
+               icon.textContent = '\uD83D\uDD0D';
+               icon.setAttribute('aria-hidden', 'true');
+               const title = document.createElement('div');
+               title.className = 'title';
+               title.textContent = 'Select a sample from the list';
+               const subtitle = document.createElement('div');
+               subtitle.className = 'subtitle';
+               subtitle.textContent = 'Click any item to inspect its fields';
+               msg.appendChild(icon);
+               msg.appendChild(title);
+               msg.appendChild(subtitle);
+               $detail.appendChild(msg);
+           }
+
+          function createRetryButton(label, onClick) {
+              const btn = document.createElement('button');
+              btn.textContent = label;
+              btn.style.marginTop = '12px';
+              btn.style.padding = '6px 16px';
+              btn.style.fontSize = '13px';
+              btn.style.fontWeight = '600';
+              btn.style.border = '1px solid var(--border)';
+              btn.style.borderRadius = 'var(--radius)';
+              btn.style.background = 'var(--surface)';
+              btn.style.color = 'var(--text)';
+              btn.style.cursor = 'pointer';
+              btn.style.fontFamily = 'var(--sans)';
+              btn.addEventListener('click', onClick);
+              return btn;
+          }
+
+         /* ── Image Zoom Modal ──────────────────────────────── */
+         function openZoomModal(src) {
+             const overlay = document.createElement("div");
+             overlay.className = "zoom-overlay";
+             overlay.setAttribute("role", "dialog");
+             overlay.setAttribute("aria-modal", "true");
+             overlay.setAttribute("aria-label", "Image preview");
+
+             const closeBtn = document.createElement("button");
+             closeBtn.className = "zoom-close";
+             closeBtn.textContent = "\u00D7";
+             closeBtn.setAttribute("aria-label", "Close image preview");
+
+             const toggleBtn = document.createElement("button");
+             toggleBtn.className = "zoom-toggle";
+             toggleBtn.textContent = "100%";
+
+             const img = document.createElement("img");
+             img.src = src;
+             img.className = "zoom-img-fit";
+             img.alt = "Enlarged image preview";
+
+             const scrollContainer = document.createElement("div");
+             scrollContainer.className = "zoom-scroll-container";
+             scrollContainer.style.display = "none";
+
+             let isFit = true;
+
+            function closeModal() {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                document.removeEventListener("keydown", handleKey);
+            }
+
+             function handleKey(e) {
+                 if (e.key === "Escape") {
+                     e.preventDefault();
+                     closeModal();
+                 }
+                 /* Focus trap */
+                 if (e.key === "Tab") {
+                     const focusable = [closeBtn, toggleBtn];
+                     const first = focusable[0];
+                     const last = focusable[focusable.length - 1];
+                     if (e.shiftKey) {
+                         if (document.activeElement === first) {
+                             e.preventDefault();
+                             last.focus();
+                         }
+                     } else {
+                         if (document.activeElement === last) {
+                             e.preventDefault();
+                             first.focus();
+                         }
+                     }
+                 }
+             }
+
+            closeBtn.addEventListener("click", closeModal);
+
+            overlay.addEventListener("click", function(e) {
+                if (e.target === overlay) closeModal();
+            });
+
+            toggleBtn.addEventListener("click", function() {
+                if (isFit) {
+                    /* Switch to 100% */
+                    img.className = "zoom-img-full";
+                    if (img.parentNode === overlay) {
+                        overlay.removeChild(img);
+                    }
+                    scrollContainer.textContent = "";
+                    scrollContainer.appendChild(img);
+                    scrollContainer.style.display = "block";
+                    toggleBtn.textContent = "Fit";
+                } else {
+                    /* Switch to fit */
+                    if (img.parentNode === scrollContainer) {
+                        scrollContainer.removeChild(img);
+                    }
+                    scrollContainer.style.display = "none";
+                    img.className = "zoom-img-fit";
+                    overlay.insertBefore(img, toggleBtn);
+                    toggleBtn.textContent = "100%";
+                }
+                isFit = !isFit;
+            });
+
+            overlay.appendChild(closeBtn);
+            overlay.appendChild(img);
+            overlay.appendChild(scrollContainer);
+            overlay.appendChild(toggleBtn);
+            document.body.appendChild(overlay);
+
+            document.addEventListener("keydown", handleKey);
+            closeBtn.focus();
+        }
+
+        /* ── Init ───────────────────────────────────────────────── */
+         function init() {
+             apiGet("/api/info")
+                 .then(function (info) {
+                     state.length = info.length;
+                     state.schema = info.schema || {};
+                     state.pageSize = info.page_size || 20;
+                     state.totalPages = Math.max(1, Math.ceil(state.length / state.pageSize));
+
+                   if (state.length === 0) {
+                       $info.textContent = "Empty dataset";
+                       $list.textContent = "";
+                       $list.appendChild(createLoadingListDiv("No samples found", false));
+                       $detail.textContent = "";
+                       $detail.appendChild(createStateMessage("📭", "This dataset is empty", "No samples available to display", false));
+                       announceStatus("Empty dataset");
+                       return;
+                   }
+
+                 $info.textContent = "";
+                 const countSpan = document.createElement("span");
+                 countSpan.textContent = state.length;
+                 $info.appendChild(countSpan);
+                 $info.appendChild(document.createTextNode(" samples \u00b7 " +
+                     Object.keys(state.schema).length + " fields"));
+
+                     announceStatus(state.length + " samples loaded");
+                     loadPage(0);
+                 })
+                   .catch(function (err) {
+                       $info.textContent = "Error loading dataset";
+                       $list.textContent = "";
+                       const errorDiv = createLoadingListDiv("Failed to load: " + err.message, true);
+                       $list.appendChild(errorDiv);
+                       const retryBtn = createRetryButton('Retry', function() { init(); });
+                       errorDiv.appendChild(retryBtn);
+                       announceStatus("Error: " + err.message);
+                   });
+         }
+
+          /* ── Load page ──────────────────────────────────────────── */
+          function loadPage(page) {
+              /* Cancel previous page load */
+              if (pageAbort) pageAbort.abort();
+              pageAbort = new AbortController();
+
+               state.currentPage = page;
+               state.selectedIdx = null;
+               state.focusedListIndex = -1;
+               showEmptyState();
+               const offset = page * state.pageSize;
+
+              $list.textContent = "";
+              const loadingDiv = document.createElement("div");
+              loadingDiv.className = "loading-list loading-pulse";
+              loadingDiv.textContent = "Loading\u2026";
+              $list.appendChild(loadingDiv);
+
+             /* Disable pagination buttons during load */
+             $btnPrev.disabled = true;
+             $btnNext.disabled = true;
+
+              apiGet("/api/samples?offset=" + offset + "&limit=" + state.pageSize, pageAbort.signal)
+                  .then(function (samples) {
+                      /* Guard: if this request is stale, discard */
+                      if (page !== state.currentPage) return;
+
+                      state.samples = samples;
+                      state.focusedListIndex = -1;
+                      renderSampleList();
+                      renderPagination();
+                      announceStatus("Loaded " + samples.length + " samples, page " + (page + 1) + " of " + state.totalPages);
+                  })
+                    .catch(function (err) {
+                        /* Silently discard aborted requests */
+                        if (err.name === "AbortError") return;
+
+                        /* Guard: if this request is stale, discard */
+                        if (page !== state.currentPage) return;
+
+                        $list.textContent = "";
+                        const errorDiv = createLoadingListDiv("Error: " + err.message, true);
+                        $list.appendChild(errorDiv);
+                        const retryBtn = createRetryButton('Retry', function() { loadPage(state.currentPage); });
+                        errorDiv.appendChild(retryBtn);
+                        renderPagination();
+                        announceStatus("Error: " + err.message);
+                    });
+          }
+
+        /* ── Render sample list ─────────────────────────────────── */
+         function renderSampleList() {
+             if (state.samples.length === 0) {
+                 $list.textContent = "";
+                 $list.appendChild(createLoadingListDiv("No samples on this page", false));
+                 return;
+             }
+
+              const frag = document.createDocumentFragment();
+              for (let i = 0; i < state.samples.length; i++) {
+                  const s = state.samples[i];
+                  const isActive = s.idx === state.selectedIdx;
+
+                  const itemDiv = document.createElement("div");
+                  itemDiv.className = "sample-item" + (isActive ? " active" : "");
+                  itemDiv.setAttribute("data-idx", s.idx);
+                  itemDiv.setAttribute("tabindex", "0");
+                  itemDiv.setAttribute("role", "option");
+                  itemDiv.setAttribute("aria-selected", isActive ? "true" : "false");
+
+                  itemDiv.appendChild(buildThumbElement(s));
+
+                  const metaDiv = document.createElement("div");
+                  metaDiv.className = "sample-meta";
+
+                  const idxDiv = document.createElement("div");
+                  idxDiv.className = "idx";
+                  idxDiv.textContent = "Sample #" + s.idx;
+                  metaDiv.appendChild(idxDiv);
+
+                  const previewDiv = document.createElement("div");
+                  previewDiv.className = "preview";
+                  previewDiv.textContent = buildPreviewText(s);
+                  metaDiv.appendChild(previewDiv);
+
+                 itemDiv.appendChild(metaDiv);
+
+                 /* Attach click + keyboard handlers directly */
+                 (function (item, idx) {
+                     item.addEventListener("click", function () {
+                         selectSample(idx);
+                     });
+                     item.addEventListener("keydown", function (e) {
+                         if (e.key === "Enter" || e.key === " ") {
+                             e.preventDefault();
+                             selectSample(idx);
+                         }
+                     });
+                 })(itemDiv, s.idx);
+
+                 frag.appendChild(itemDiv);
+             }
+             $list.textContent = "";
+             $list.appendChild(frag);
+         }
+
+         function buildThumbElement(sample) {
+             const fields = sample.fields || {};
+             const keys = Object.keys(fields);
+             for (let i = 0; i < keys.length; i++) {
+                 if (fields[keys[i]].type === "image") {
+                     const img = document.createElement("img");
+                     img.className = "sample-thumb";
+                     img.src = "/media/" + encodeURIComponent(String(sample.idx)) + "/" + encodeURIComponent(keys[i]);
+                     img.alt = "";
+                     img.loading = "lazy";
+                     return img;
+                 }
+             }
+              const placeholder = document.createElement("div");
+              placeholder.className = "sample-thumb-placeholder";
+              placeholder.textContent = "\uD83D\uDCC4";
+              placeholder.setAttribute("aria-hidden", "true");
+              return placeholder;
+         }
+
+          function buildPreviewText(sample) {
+              const fields = sample.fields || {};
+              const keys = Object.keys(fields);
+              const parts = [];
+              for (let i = 0; i < keys.length && parts.length < 3; i++) {
+                  const f = fields[keys[i]];
+                  if (f.type === "text" && f.value) {
+                      parts.push(keys[i] + ": " + f.value.substring(0, 50));
+                  } else if (f.type === "scalar" && f.value !== undefined) {
+                      parts.push(keys[i] + "=" + formatNumber(f.value));
+                  } else if (f.type === "tensor") {
+                      parts.push(keys[i] + ": tensor");
+                  } else if (f.type === "image") {
+                      parts.push(keys[i] + ": image");
+                  }
+              }
+              return parts.join("  \u00b7  ") || "Sample #" + sample.idx;
+          }
+
+        /* ── Pagination ─────────────────────────────────────────── */
+        function renderPagination() {
+            if (state.totalPages <= 1) {
+                $pagination.style.display = "none";
+                return;
+            }
+            $pagination.style.display = "flex";
+            $pageInfo.textContent = "Page " + (state.currentPage + 1) + "/" + state.totalPages;
+            $btnPrev.disabled = state.currentPage <= 0;
+            $btnNext.disabled = state.currentPage >= state.totalPages - 1;
+        }
+
+        $btnPrev.addEventListener("click", function () {
+            if (state.currentPage > 0) loadPage(state.currentPage - 1);
+        });
+
+        $btnNext.addEventListener("click", function () {
+            if (state.currentPage < state.totalPages - 1) loadPage(state.currentPage + 1);
+        });
+
+        /* ── Navigate to sample (cross-page) ──────────────────── */
+        function navigateToSample(idx) {
+            idx = Math.max(0, Math.min(idx, state.length - 1));
+             if (state.length === 0) return;
+             const targetPage = Math.floor(idx / state.pageSize);
+             if (targetPage !== state.currentPage) {
+                 state.currentPage = targetPage;
+                 if (pageAbort) pageAbort.abort();
+                 pageAbort = new AbortController();
+                 const loadingEl = document.createElement('div');
+                 loadingEl.className = 'loading-list loading-pulse';
+                 loadingEl.textContent = 'Loading\u2026';
+                 $list.textContent = '';
+                 $list.appendChild(loadingEl);
+                $btnPrev.disabled = true;
+                $btnNext.disabled = true;
+                apiGet("/api/samples?offset=" + (targetPage * state.pageSize) + "&limit=" + state.pageSize, pageAbort.signal)
+                    .then(function (samples) {
+                        if (targetPage !== state.currentPage) return;
+                        state.samples = samples;
+                        state.focusedListIndex = -1;
+                        renderSampleList();
+                        renderPagination();
+                        selectSample(idx);
+                    })
+                     .catch(function (err) {
+                         if (err.name === 'AbortError') return;
+                         $list.textContent = '';
+                         const errorDiv = createLoadingListDiv('Error: ' + err.message, true);
+                         $list.appendChild(errorDiv);
+                         const retryBtn = createRetryButton('Retry', function() { navigateToSample(idx); });
+                         errorDiv.appendChild(retryBtn);
+                         renderPagination();
+                     });
+            } else {
+                selectSample(idx);
+            }
+        }
+
+        /* ── Jump to index ────────────────────────────────────── */
+        function handleJump() {
+            let val = parseInt($jumpInput.value, 10);
+            if (isNaN(val)) return;
+            val = Math.max(0, Math.min(val, state.length - 1));
+            $jumpInput.value = '';
+            navigateToSample(val);
+        }
+
+        $btnJump.addEventListener('click', handleJump);
+        $jumpInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleJump();
+        });
+
+          /* ── Select & render detail ─────────────────────────────── */
+          function selectSample(idx) {
+              /* Cancel previous sample load */
+              if (sampleAbort) sampleAbort.abort();
+              sampleAbort = new AbortController();
+
+              state.selectedIdx = idx;
+
+               /* Update list highlights */
+               const items = $list.querySelectorAll(".sample-item");
+               for (let i = 0; i < items.length; i++) {
+                   const itemIdx = parseInt(items[i].getAttribute("data-idx"), 10);
+                   if (itemIdx === idx) {
+                       items[i].classList.add("active");
+                       items[i].setAttribute("aria-selected", "true");
+                   } else {
+                       items[i].classList.remove("active");
+                       items[i].setAttribute("aria-selected", "false");
+                   }
+               }
+
+              announceStatus("Viewing sample " + idx);
+
+                /* Load detail */
+                $detail.textContent = "";
+                $detail.setAttribute("aria-busy", "true");
+                const loadingMsg = document.createElement("div");
+                loadingMsg.className = "state-message";
+                const loadIcon = document.createElement("div");
+                loadIcon.className = "icon loading-pulse";
+                loadIcon.textContent = "\u2699";
+                loadIcon.setAttribute("aria-hidden", "true");
+                loadingMsg.appendChild(loadIcon);
+                const loadTitle = document.createElement("div");
+                loadTitle.className = "title";
+                loadTitle.textContent = "Loading sample #" + idx + "\u2026";
+                loadingMsg.appendChild(loadTitle);
+                $detail.appendChild(loadingMsg);
+
+              apiGet("/api/sample/" + idx, sampleAbort.signal)
+                  .then(function (data) {
+                      /* Guard: if this request is stale, discard */
+                      if (idx !== state.selectedIdx) return;
+
+                      $detail.removeAttribute("aria-busy");
+                      renderDetail(data);
+                  })
+                   .catch(function (err) {
+                       /* Silently discard aborted requests */
+                       if (err.name === "AbortError") return;
+
+                       /* Guard: if this request is stale, discard */
+                       if (idx !== state.selectedIdx) return;
+
+                        $detail.removeAttribute("aria-busy");
+                        $detail.textContent = "";
+                        const errorMsg = createStateMessage("\u26A0", "Error loading sample", err.message, true);
+                        $detail.appendChild(errorMsg);
+                        const retryBtn = createRetryButton('Retry', function() { selectSample(idx); });
+                        errorMsg.appendChild(retryBtn);
+                        announceStatus("Error: " + err.message);
+                    });
+           }
+
+         function renderDetail(data) {
+             const frag = document.createDocumentFragment();
+
+             const nav = document.createElement("div");
+             nav.className = "detail-nav";
+
+             const h2 = document.createElement("h2");
+             h2.textContent = "Sample #" + data.idx;
+
+             const navBtns = document.createElement("div");
+             navBtns.className = "detail-nav-buttons";
+
+             const prevBtn = document.createElement("button");
+             prevBtn.textContent = "\u25C0 Prev";
+             prevBtn.disabled = (data.idx <= 0);
+             prevBtn.addEventListener("click", function() { navigateToSample(data.idx - 1); });
+
+              const nextBtn = document.createElement("button");
+              nextBtn.textContent = "Next \u25B6";
+              nextBtn.disabled = (data.idx >= state.length - 1);
+              nextBtn.addEventListener("click", function() { navigateToSample(data.idx + 1); });
+
+              const collapseBtn = document.createElement("button");
+              collapseBtn.className = "collapse-toggle-btn";
+              collapseBtn.textContent = "Collapse All";
+
+             navBtns.appendChild(prevBtn);
+             navBtns.appendChild(nextBtn);
+             navBtns.appendChild(collapseBtn);
+             nav.appendChild(h2);
+             nav.appendChild(navBtns);
+             frag.appendChild(nav);
+
+              /* Add click handler for collapse/expand all button */
+              (function(btn, detail) {
+                  btn.addEventListener("click", function() {
+                      const allExpanded = btn.textContent === "Collapse All";
+                      const headers = detail.querySelectorAll(".field-card-header");
+                      const bodies = detail.querySelectorAll(".field-card-body");
+                      for (let i = 0; i < headers.length; i++) {
+                          headers[i].setAttribute("aria-expanded", allExpanded ? "false" : "true");
+                          if (allExpanded) {
+                              bodies[i].classList.add("collapsed");
+                          } else {
+                              bodies[i].classList.remove("collapsed");
+                          }
+                          const chev = headers[i].querySelector(".chevron");
+                          if (chev) chev.textContent = allExpanded ? "\u25B8" : "\u25BE"; /* ▸ or ▾ */
+                      }
+                      btn.textContent = allExpanded ? "Expand All" : "Collapse All";
+                  });
+              })(collapseBtn, frag);
+
+              const fields = data.fields || {};
+             const keys = Object.keys(fields);
+
+             if (keys.length === 0) {
+                 const emptyMsg = document.createElement("div");
+                 emptyMsg.className = "state-message";
+                 const emptySubtitle = document.createElement("div");
+                 emptySubtitle.className = "subtitle";
+                 emptySubtitle.textContent = "No fields to display";
+                 emptyMsg.appendChild(emptySubtitle);
+                 frag.appendChild(emptyMsg);
+                 $detail.textContent = "";
+                 $detail.appendChild(frag);
+                 return;
+             }
+
+             for (let i = 0; i < keys.length; i++) {
+                 frag.appendChild(renderFieldCard(keys[i], fields[keys[i]], data.idx));
+             }
+
+            $detail.textContent = "";
+            $detail.appendChild(frag);
+            $detail.scrollTop = 0;
+        }
+
+         /* ── Field card rendering ─────────────────────────────────── */
+          function renderFieldCard(fieldName, field, sampleIdx) {
+              const type = field.type || "unknown";
+
+              const card = document.createElement("div");
+              card.className = "field-card";
+
+              /* Header */
+              const header = document.createElement("div");
+              header.className = "field-card-header";
+              const nameSpan = document.createElement("span");
+              nameSpan.className = "field-name";
+              nameSpan.textContent = fieldName;
+              header.appendChild(nameSpan);
+              const badge = document.createElement("span");
+              badge.className = "field-type-badge";
+              badge.textContent = type;
+              header.appendChild(badge);
+
+              /* Body */
+              const bodyDiv = document.createElement("div");
+              bodyDiv.className = "field-card-body";
+
+              /* Generate unique ID for body */
+              const bodyId = "field-body-" + sampleIdx + "-" + fieldName.replace(/[^a-zA-Z0-9]/g, "_");
+              bodyDiv.id = bodyId;
+
+              /* Add ARIA attributes to header */
+              header.setAttribute("aria-expanded", "true");
+              header.setAttribute("aria-controls", bodyId);
+              header.setAttribute("role", "button");
+              header.setAttribute("tabindex", "0");
+
+              /* Add chevron span */
+              const chevronSpan = document.createElement("span");
+              chevronSpan.className = "chevron";
+              chevronSpan.textContent = "\u25BE"; /* ▾ */
+              header.appendChild(chevronSpan);
+
+             card.appendChild(header);
+
+             switch (type) {
+                 case "image":
+                     const imgWrap = document.createElement("div");
+                     imgWrap.className = "field-image";
+                     const img = document.createElement("img");
+                     img.src = "/media/" + encodeURIComponent(String(sampleIdx)) + "/" + encodeURIComponent(fieldName);
+                     img.alt = fieldName;
+                     img.style.cursor = "zoom-in";
+                     (function(imgSrc) {
+                         img.addEventListener("click", function() {
+                             openZoomModal(imgSrc);
+                         });
+                     })(img.src);
+                     imgWrap.appendChild(img);
+                     bodyDiv.appendChild(imgWrap);
+                     break;
+
+                  case "text":
+                      const textWrap = document.createElement("div");
+                      textWrap.className = "field-text";
+                      const p = document.createElement("p");
+                      p.textContent = field.value != null ? String(field.value) : "";
+                      textWrap.appendChild(p);
+                      bodyDiv.appendChild(textWrap);
+                      break;
+
+                 case "scalar":
+                     const scalarWrap = document.createElement("div");
+                     scalarWrap.className = "field-scalar";
+                     const scalarSpan = document.createElement("span");
+                     scalarSpan.className = "scalar-value";
+                     scalarSpan.textContent = formatNumber(field.value);
+                     scalarWrap.appendChild(scalarSpan);
+                     bodyDiv.appendChild(scalarWrap);
+                     break;
+
+                  case "tensor":
+                      bodyDiv.appendChild(renderTensorBody(field, sampleIdx));
+                      break;
+
+                  case "json":
+                      const jsonStr = JSON.stringify(field.value, null, 2);
+                      const isLargeJson = jsonStr.length > 5000;
+                      const jsonWrap = document.createElement("div");
+                      jsonWrap.className = "field-json";
+                      
+                      if (isLargeJson) {
+                          const jsonToggleBtn = document.createElement("button");
+                          jsonToggleBtn.className = "collapse-toggle-btn";
+                          jsonToggleBtn.textContent = "Show JSON";
+                          jsonToggleBtn.setAttribute("aria-expanded", "false");
+                          
+                          const jsonUid = "json-data-" + sampleIdx + "-" + fieldName.replace(/[^a-zA-Z0-9]/g, "_");
+                          const jsonPreDiv = document.createElement("div");
+                          jsonPreDiv.id = jsonUid;
+                          jsonPreDiv.setAttribute("aria-controls", jsonUid);
+                          
+                          jsonToggleBtn.addEventListener("click", function() {
+                              let showing = jsonPreDiv.classList.contains("visible");
+                              if (!showing && jsonPreDiv.textContent === "") {
+                                  const pre = document.createElement("pre");
+                                  pre.textContent = jsonStr;
+                                  jsonPreDiv.appendChild(pre);
+                              }
+                              jsonPreDiv.classList.toggle("visible");
+                              showing = jsonPreDiv.classList.contains("visible");
+                              jsonToggleBtn.textContent = showing ? "Hide JSON" : "Show JSON";
+                              jsonToggleBtn.setAttribute("aria-expanded", showing ? "true" : "false");
+                          });
+                          
+                          jsonWrap.appendChild(jsonToggleBtn);
+                          jsonWrap.appendChild(jsonPreDiv);
+                      } else {
+                          const pre = document.createElement("pre");
+                          pre.textContent = jsonStr;
+                          jsonWrap.appendChild(pre);
+                      }
+                      bodyDiv.appendChild(jsonWrap);
+                      break;
+
+                  default: /* unknown */
+                      const unknownWrap = document.createElement("div");
+                      unknownWrap.className = "field-unknown";
+                      const code = document.createElement("code");
+                      code.textContent = field.value != null ? String(field.value) : "";
+                      unknownWrap.appendChild(code);
+                      bodyDiv.appendChild(unknownWrap);
+                      break;
+              }
+
+             card.appendChild(bodyDiv);
+
+              /* Add click and keyboard handlers to header for collapse/expand */
+              (function(h, b, chev) {
+                  h.addEventListener("click", function() {
+                      const expanded = h.getAttribute("aria-expanded") === "true";
+                      h.setAttribute("aria-expanded", expanded ? "false" : "true");
+                      b.classList.toggle("collapsed");
+                      chev.textContent = expanded ? "\u25B8" : "\u25BE"; /* ▸ or ▾ */
+                  });
+                  h.addEventListener("keydown", function(e) {
+                      if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          h.click();
+                      }
+                  });
+              })(header, bodyDiv, chevronSpan);
+
+             return card;
+         }
+
+          function renderTensorBody(field, sampleIdx) {
+              const stats = [
+                  { label: "Shape", value: field.shape ? "[" + field.shape.join(", ") + "]" : "?" },
+                  { label: "Dtype", value: field.dtype || "?" },
+                  { label: "Min", value: field.min !== undefined ? formatNumber(field.min) : "?" },
+                  { label: "Max", value: field.max !== undefined ? formatNumber(field.max) : "?" },
+                  { label: "Mean", value: field.mean !== undefined ? formatNumber(field.mean) : "?" }
+              ];
+
+              const tensorDiv = document.createElement("div");
+              tensorDiv.className = "field-tensor";
+
+              const statsGrid = document.createElement("div");
+              statsGrid.className = "tensor-stats";
+              for (let i = 0; i < stats.length; i++) {
+                  const statDiv = document.createElement("div");
+                  statDiv.className = "tensor-stat";
+                  const labelDiv = document.createElement("div");
+                  labelDiv.className = "label";
+                  labelDiv.textContent = stats[i].label;
+                  statDiv.appendChild(labelDiv);
+                  const valueDiv = document.createElement("div");
+                  valueDiv.className = "value";
+                  valueDiv.textContent = stats[i].value;
+                  statDiv.appendChild(valueDiv);
+                  statsGrid.appendChild(statDiv);
+              }
+              tensorDiv.appendChild(statsGrid);
+
+               if (field.data !== null && field.data !== undefined) {
+                   const uid = "tensor-data-" + sampleIdx + "-" + tensorDataCounter;
+                   tensorDataCounter += 1;
+
+                   const toggleBtn = document.createElement("button");
+                   toggleBtn.className = "tensor-data-toggle";
+                   toggleBtn.textContent = "Show raw data";
+                   toggleBtn.setAttribute("aria-expanded", "false");
+                   toggleBtn.setAttribute("aria-controls", uid);
+
+                   const rawDiv = document.createElement("div");
+                   rawDiv.className = "tensor-raw-data";
+                   rawDiv.id = uid;
+                   // Lazy render: start empty, stringify on first toggle click
+
+                   const fieldData = field.data; // capture in closure
+                   toggleBtn.addEventListener("click", function () {
+                       // Lazy render on first click
+                       if (rawDiv.dataset.rendered !== 'true') {
+                           const jsonStr = JSON.stringify(fieldData, null, 2);
+                           if (jsonStr.length > 100000) {
+                               rawDiv.textContent = 'Data too large to display (' + jsonStr.length + ' chars)';
+                           } else {
+                               rawDiv.textContent = jsonStr;
+                           }
+                           rawDiv.dataset.rendered = 'true';
+                       }
+                       // Toggle visibility
+                       let showing = rawDiv.classList.toggle("visible");
+                       toggleBtn.textContent = showing ? "Hide raw data" : "Show raw data";
+                       toggleBtn.setAttribute("aria-expanded", showing ? "true" : "false");
+                   });
+
+                  tensorDiv.appendChild(toggleBtn);
+                  tensorDiv.appendChild(rawDiv);
+              }
+
+             return tensorDiv;
+         }
+
+          /* ── Keyboard navigation ────────────────────────────────── */
+          $list.addEventListener("keydown", function (e) {
+              const items = $list.querySelectorAll(".sample-item");
+              if (items.length === 0) return;
+
+             if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                 e.preventDefault();
+                 if (e.key === "ArrowDown") {
+                     state.focusedListIndex = Math.min(state.focusedListIndex + 1, items.length - 1);
+                 } else {
+                     state.focusedListIndex = Math.max(state.focusedListIndex - 1, 0);
+                 }
+                 items[state.focusedListIndex].focus();
+             }
+         });
+
+         /* ── j/k keyboard shortcuts ────────────────────────────── */
+         document.addEventListener('keydown', function(e) {
+             const tag = document.activeElement ? document.activeElement.tagName : '';
+             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+            if (e.key === 'j' && state.selectedIdx !== null) {
+                e.preventDefault();
+                navigateToSample(state.selectedIdx + 1);
+            } else if (e.key === 'k' && state.selectedIdx !== null) {
+                e.preventDefault();
+                navigateToSample(state.selectedIdx - 1);
+            }
+        });
+
+        /* ── Boot ───────────────────────────────────────────────── */
+        init();
+    })();
+    </script>
+</body>
+</html>

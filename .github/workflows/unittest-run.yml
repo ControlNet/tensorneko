@@ -1,0 +1,59 @@
+name: Unittest Run
+
+on:
+  workflow_call:
+    inputs:
+      matrix_json:
+        required: true
+        type: string
+
+jobs:
+  unittest:
+    name: Unittest
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(inputs.matrix_json) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          sed -i -E "s/^torch[[:space:]].*/torch == ${{ matrix.torch-version }}/" requirements_test.txt
+          sed -i -E "s/^lightning[[:space:]].*/lightning == ${{ matrix.lightning-version }}/" requirements_test.txt
+          uv pip install --system -r requirements_test.txt
+          python init.py
+
+      - name: Fix python 3.8 packages
+        if: ${{ matrix.python-version }} == "3.8"
+        run: |
+          uv pip install --system "fsspec<2025.3.1"
+
+      - name: Fix pillow for torch 1.11/1.12/1.13
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' }}
+        run: |
+          uv pip install --system "pillow<10"
+
+      - name: Fix av for old torchvision (torch < 2.8)
+        if: ${{ matrix.torch-version == '1.11.*' || matrix.torch-version == '1.12.*' || matrix.torch-version == '1.13.*' || matrix.torch-version == '2.0.*' || matrix.torch-version == '2.1.*' || matrix.torch-version == '2.2.*' || matrix.torch-version == '2.3.*' || matrix.torch-version == '2.4.*' || matrix.torch-version == '2.5.*' || matrix.torch-version == '2.6.*' || matrix.torch-version == '2.7.*' }}
+        run: |
+          uv pip install --system "av>=8.0.3,<13.1"
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$(pwd)/src" >> $GITHUB_ENV
+
+      - name: Run Test
+        run: python -m unittest discover test

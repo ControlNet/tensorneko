@@ -23,7 +23,6 @@ class MyObject:
 
 
 class SingletonTest(unittest.TestCase):
-
     def test_singleton_access_object(self):
         self.assertTrue(type(MyObject) is not type)
 
@@ -48,3 +47,24 @@ class SingletonTest(unittest.TestCase):
 
     def test_singleton_access_static_method(self):
         self.assertEqual(MyObject.static_method(), "static_method")
+
+
+@Singleton.args(10, 20)
+class MyObjectWithArgs:
+    def __init__(self, a, b):
+        self.total = a + b
+
+    def get_total(self):
+        return self.total
+
+
+class SingletonArgsTest(unittest.TestCase):
+    def test_singleton_args_creates_instance(self):
+        self.assertEqual(MyObjectWithArgs.total, 30)
+
+    def test_singleton_args_method(self):
+        self.assertEqual(MyObjectWithArgs.get_total(), 30)
+
+    def test_singleton_args_registered(self):
+        # Verify that all_instances contains our singleton
+        self.assertGreater(len(Singleton.all_instances), 0)
