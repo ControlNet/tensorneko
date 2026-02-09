@@ -8,19 +8,26 @@ from ...util.type import T
 
 
 class JsonReader:
-
     @staticmethod
-    def _read_json(path: str, encoding: str = "UTF-8", fast: bool = False) -> Union[dict, list]:
+    def _read_json(
+        path: str, encoding: str = "UTF-8", fast: bool = False
+    ) -> Union[dict, list]:
         if not fast:
             with open(path, "r", encoding=encoding) as file:
                 return json.load(file)
         else:
             import orjson
+
             with open(path, "rb") as file:
                 return orjson.loads(file.read())
 
     @classmethod
-    def of(cls, path: Union[str, Path], clazz: Optional[T] = None, encoding: str = "UTF-8", fast: bool = True
+    def of(
+        cls,
+        path: Union[str, Path],
+        clazz: Optional[T] = None,
+        encoding: str = "UTF-8",
+        fast: bool = True,
     ) -> Union[T, dict, list]:
         """
         Read json files to ``list`` or ``dict``.
@@ -43,7 +50,8 @@ class JsonReader:
             except ImportError:
                 fast = False
                 warnings.warn("orjson is not installed, will use json lib instead.")
-            assert encoding == "UTF-8", "orjson only supports UTF-8 encoding."
+            if encoding != "UTF-8":
+                raise ValueError("orjson only supports UTF-8 encoding.")
 
         if clazz is not None:
             if "typing.List[" in str(clazz):
@@ -74,9 +82,13 @@ class JsonReader:
 
         return obj
 
-
     @classmethod
-    def of_jsonl(cls, path: Union[str, Path], clazz: Optional[T] = None, encoding: str = "UTF-8", fast: bool = True
+    def of_jsonl(
+        cls,
+        path: Union[str, Path],
+        clazz: Optional[T] = None,
+        encoding: str = "UTF-8",
+        fast: bool = True,
     ) -> List[Union[T, dict, list]]:
         """
         Read jsonl files to ``list`` or ``dict``.
@@ -99,7 +111,8 @@ class JsonReader:
             except ImportError:
                 fast = False
                 warnings.warn("orjson is not installed, will use json lib instead.")
-            assert encoding == "UTF-8", "orjson only supports UTF-8 encoding."
+            if encoding != "UTF-8":
+                raise ValueError("orjson only supports UTF-8 encoding.")
 
         if clazz is not None:
             if "typing.List[" in str(clazz):
@@ -143,7 +156,13 @@ class JsonReader:
 
         return obj
 
-    def __new__(cls, path: Union[str, Path], clazz: T = None, encoding: str = "UTF-8", fast: bool = True) -> Union[T, dict, list]:
+    def __new__(
+        cls,
+        path: Union[str, Path],
+        clazz: T = None,
+        encoding: str = "UTF-8",
+        fast: bool = True,
+    ) -> Union[T, dict, list]:
         """
         Read json or jsonl file smartly.
 

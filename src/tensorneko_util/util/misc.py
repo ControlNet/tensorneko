@@ -4,7 +4,18 @@ import time
 from functools import reduce
 from os.path import dirname, abspath
 from types import ModuleType
-from typing import Callable, List, Dict, Iterable, Sequence, Any, Optional, Type, Union, Tuple
+from typing import (
+    Callable,
+    List,
+    Dict,
+    Iterable,
+    Sequence,
+    Any,
+    Optional,
+    Type,
+    Union,
+    Tuple,
+)
 
 import numpy as np
 
@@ -16,7 +27,8 @@ def identity(*args, **kwargs):
     """
     Pickle-friendly identity function.
     """
-    assert kwargs == {}, "identity function doesn't accept keyword arguments"
+    if kwargs:
+        raise TypeError("identity function doesn't accept keyword arguments")
     if len(args) == 1:
         return args[0]
     else:
@@ -78,7 +90,9 @@ def compose(fs: Sequence[Callable]) -> F:
     return reduce(_ >> _, fs, F())
 
 
-def listdir(path: str, filter_func: Callable[[str], bool] = lambda arg: True) -> List[str]:
+def listdir(
+    path: str, filter_func: Callable[[str], bool] = lambda arg: True
+) -> List[str]:
     """
     The full path version of :func:`os.listdir`.
 
@@ -129,7 +143,10 @@ def with_printed(x: T, func: Callable[[T], Any] = identity) -> T:
     return x
 
 
-def ifelse(predicate: Callable[[T], bool], func_true: Callable[[T], R], func_false: Callable[[T], R] = identity
+def ifelse(
+    predicate: Callable[[T], bool],
+    func_true: Callable[[T], R],
+    func_false: Callable[[T], R] = identity,
 ) -> Callable[[T], R]:
     """
     A function composition util for if-else control flow.
@@ -220,7 +237,7 @@ def circular_pad(x: List[T], target: int) -> List[T]:
     elif len(x) > target:
         return x[:target]
     elif 2 * len(x) > target:
-        return x + x[:target - len(x)]
+        return x + x[: target - len(x)]
     else:
         return circular_pad(x + x, target)
 
@@ -241,9 +258,14 @@ def load_py(path: str) -> ModuleType:
     return module
 
 
-def try_until_success(func: Callable[..., T], *args, max_trials: Optional[int] = None, sleep_time: int = 0,
+def try_until_success(
+    func: Callable[..., T],
+    *args,
+    max_trials: Optional[int] = None,
+    sleep_time: int = 0,
     exception_callback: Optional[Callable[[Exception], None]] = None,
-    exception_type: Union[Type[T_E], Tuple[T_E, ...]] = Exception, **kwargs
+    exception_type: Union[Type[T_E], Tuple[T_E, ...]] = Exception,
+    **kwargs,
 ) -> T:
     """
     Try to run the function until success.

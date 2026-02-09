@@ -12,6 +12,7 @@ from .video import VideoWriter
 
 try:
     from .matlab import MatWriter
+
     scipy_available = True
 except ImportError:
     scipy_available = False
@@ -19,6 +20,7 @@ except ImportError:
 
 try:
     from .yaml import YamlWriter
+
     yaml_available = True
 except ImportError:
     YamlWriter = object
@@ -26,6 +28,7 @@ except ImportError:
 
 try:
     from .hdf5 import Hdf5Writer
+
     h5py_available = True
 except ImportError:
     Hdf5Writer = object
@@ -33,6 +36,7 @@ except ImportError:
 
 try:
     from .toml import TomlWriter
+
     toml_available = True
 except ImportError:
     TomlWriter = object
@@ -40,7 +44,6 @@ except ImportError:
 
 
 class Writer:
-
     def __init__(self):
         self.image = ImageWriter
         self.text = TextWriter
@@ -91,10 +94,15 @@ class Writer:
             raise ImportError("To use the toml writer, please install toml.")
 
     def __call__(self, path: Union[str, Path], obj, *args, **kwargs):
-        """Automatically infer the file type and return the corresponding result. """
+        """Automatically infer the file type and return the corresponding result."""
         path = _path2str(path)
 
-        if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".bmp"):
+        if (
+            path.endswith(".jpg")
+            or path.endswith(".jpeg")
+            or path.endswith(".png")
+            or path.endswith(".bmp")
+        ):
             self.image(path, obj, *args, **kwargs)
         elif path.endswith(".txt"):
             return self.text(path, obj, *args, **kwargs)
@@ -102,23 +110,32 @@ class Writer:
             return self.json(path, obj, *args, **kwargs)
         elif path.endswith(".npy") or path.endswith(".npz"):
             return self.npy(path, obj, *args, **kwargs)
-        elif path.endswith(".mp4") or path.endswith(".avi") or path.endswith(".mov") or path.endswith(".mkv"):
+        elif (
+            path.endswith(".mp4")
+            or path.endswith(".avi")
+            or path.endswith(".mov")
+            or path.endswith(".mkv")
+        ):
             return self.video(path, obj, *args, **kwargs)
         elif path.endswith(".wav") or path.endswith(".mp3") or path.endswith(".flac"):
             return self.audio(path, obj, *args, **kwargs)
         elif path.endswith(".pkl") or path.endswith(".pickle"):
-            assert len(args) == 0 and len(kwargs) == 0, "Pickle reader does not support extra arguments."
+            if len(args) != 0 or len(kwargs) != 0:
+                raise TypeError("Pickle writer does not support extra arguments.")
             return self.pickle(path, obj)
         elif path.endswith(".mat"):
-            assert len(args) == 0 and len(kwargs) == 0, "Mat reader does not support extra arguments."
+            if len(args) != 0 or len(kwargs) != 0:
+                raise TypeError("Mat writer does not support extra arguments.")
             return self.mat(path, obj)
         elif path.endswith(".yaml") or path.endswith(".yml"):
-            assert len(args) == 0 and len(kwargs) == 0, "Yaml reader does not support extra arguments."
+            if len(args) != 0 or len(kwargs) != 0:
+                raise TypeError("Yaml writer does not support extra arguments.")
             return self.yaml(path, obj)
         elif path.endswith(".h5") or path.endswith(".hdf5"):
             raise NotImplementedError("Hdf5 writer is not implemented yet.")
         elif path.endswith(".toml"):
-            assert len(args) == 0 and len(kwargs) == 0, "Toml reader does not support extra arguments."
+            if len(args) != 0 or len(kwargs) != 0:
+                raise TypeError("Toml writer does not support extra arguments.")
             return self.toml(path, obj)
         else:
             raise ValueError("Unknown file type: {}".format(path))

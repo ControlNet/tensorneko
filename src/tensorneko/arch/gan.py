@@ -39,11 +39,25 @@ class GAN(NekoModel, ABC):
 
     """
 
-    def __init__(self, latent_dim: int, g_learning_rate: float, d_learning_rate: float,
-        g_steps: int = 1, d_steps: int = 1, num_samples: int = 8, grid_cols: Optional[int] = None,
-        name: str = "gan", *args, **kwargs
+    def __init__(
+        self,
+        latent_dim: int,
+        g_learning_rate: float,
+        d_learning_rate: float,
+        g_steps: int = 1,
+        d_steps: int = 1,
+        num_samples: int = 8,
+        grid_cols: Optional[int] = None,
+        name: str = "gan",
+        *args,
+        **kwargs,
     ):
         super().__init__(name, *args, **kwargs)
+
+        if g_steps < 1:
+            raise ValueError(f"g_steps must be >= 1, got {g_steps}")
+        if d_steps < 1:
+            raise ValueError(f"d_steps must be >= 1, got {d_steps}")
 
         self.latent_dim = latent_dim
         self.g_learning_rate = g_learning_rate
@@ -77,8 +91,12 @@ class GAN(NekoModel, ABC):
     def d_loss_fn(pred, target) -> Tensor:
         return binary_cross_entropy_with_logits(pred, target)
 
-    def training_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
-        hiddens: Optional[Tensor] = None) -> Dict[str, Tensor]:
+    def training_step(
+        self,
+        batch: Optional[Union[Tensor, Sequence[Tensor]]] = None,
+        batch_idx: Optional[int] = None,
+        hiddens: Optional[Tensor] = None,
+    ) -> Dict[str, Tensor]:
         if isinstance(batch, Tensor):
             x = batch
         else:
@@ -146,16 +164,20 @@ class GAN(NekoModel, ABC):
         # forward generator
         # generate fake images and labels
         fake_image = self.generator(z)
-        target_label = torch.ones(x.size(0), 1, device=self.device)  # target label is real.
+        target_label = torch.ones(
+            x.size(0), 1, device=self.device
+        )  # target label is real.
 
         # calculate generator loss
         g_loss = self.g_loss_fn(self.discriminator(fake_image), target_label)
         return {"loss": g_loss, "loss/g_loss": g_loss}
 
-    def validation_step(self, batch: Optional[Union[Tensor, Sequence[Tensor]]] = None, batch_idx: Optional[int] = None,
-        dataloader_idx: Optional[int] = None
+    def validation_step(
+        self,
+        batch: Optional[Union[Tensor, Sequence[Tensor]]] = None,
+        batch_idx: Optional[int] = None,
+        dataloader_idx: Optional[int] = None,
     ) -> Dict[str, Tensor]:
-
         if isinstance(batch, Tensor):
             x = batch
         else:
@@ -181,7 +203,9 @@ class GAN(NekoModel, ABC):
     def on_validation_epoch_end(self) -> None:
         super().on_validation_epoch_end()
         if self.sample_z is None:
-            self.sample_z = torch.randn(self.num_samples, self.latent_dim, device=self.device)
+            self.sample_z = torch.randn(
+                self.num_samples, self.latent_dim, device=self.device
+            )
         sample_generated = self.generator(self.sample_z)
         grid = torchvision.utils.make_grid(sample_generated, nrow=self.grid_cols)
         self.log_image("sample_images", grid)

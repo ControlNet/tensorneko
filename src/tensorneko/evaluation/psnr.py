@@ -30,7 +30,9 @@ def psnr_image(pred: str, real: str) -> Tensor:
 
 
 @dispatch
-def psnr_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN) -> Tensor:
+def psnr_image(
+    pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN
+) -> Tensor:
     """
     Calculate PSNR of an image.
 
@@ -48,13 +50,14 @@ def psnr_image(pred: Tensor, real: Tensor, reduction: Reduction = Reduction.MEAN
     if real.dim() == 3:
         real = real.unsqueeze(0)
 
-    assert pred.shape[0] == real.shape[0], "The number of images in pred and real must be equal."
+    if pred.shape[0] != real.shape[0]:
+        raise ValueError("The number of images in pred and real must be equal.")
 
     if pred.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
-        pred = pred.float() / 255.
+        pred = pred.float() / 255.0
 
     if real.dtype in (torch.uint8, torch.int8, torch.int16, torch.int32, torch.int64):
-        real = real.float() / 255.
+        real = real.float() / 255.0
 
     reduction_method = reduction.value
 
@@ -84,8 +87,21 @@ def psnr_video(pred: str, real: str, use_ffmpeg: bool = False) -> Tensor:
         if not VisualLib.ffmpeg_available():
             raise RuntimeError("ffmpeg is not found.")
 
-        p = subprocess.run(["ffmpeg", "-i", pred, "-i", real, "-filter_complex", "psnr", "-f", "null", "/dev/null"],
-                           capture_output=True)
+        p = subprocess.run(
+            [
+                "ffmpeg",
+                "-i",
+                pred,
+                "-i",
+                real,
+                "-filter_complex",
+                "psnr",
+                "-f",
+                "null",
+                "/dev/null",
+            ],
+            capture_output=True,
+        )
         psnr_out = p.stderr.decode().split("\n")[-2]
         return tensor(float(re.search(r" average:([\d.]+) ", psnr_out)[1]))
     else:

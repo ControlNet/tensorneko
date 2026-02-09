@@ -33,7 +33,9 @@ class VectorQuantizer(NekoModule):
         self.beta = beta
 
         self.embedding = Embedding(self.n_embedding, self.embedding_dim)
-        self.embedding.weight.data.uniform_(-1.0 / self.n_embedding, 1 / self.n_embedding)
+        torch.nn.init.uniform_(
+            self.embedding.weight, -1.0 / self.n_embedding, 1.0 / self.n_embedding
+        )
 
     def forward(self, z: Tensor) -> Tuple[Tensor, Tensor]:
         z_index = self.predict_indexes(z)
@@ -41,7 +43,9 @@ class VectorQuantizer(NekoModule):
         z_q = self.indexing(z_index)
         z_q = z + (z_q - z).detach()
 
-        embedding_loss = torch.mean((z_q.detach() - z) ** 2) + self.beta * torch.mean((z_q - z.detach()) ** 2)
+        embedding_loss = torch.mean((z_q.detach() - z) ** 2) + self.beta * torch.mean(
+            (z_q - z.detach()) ** 2
+        )
         return z_q, embedding_loss
 
     def predict_indexes(self, z: Tensor) -> Tensor:
@@ -49,9 +53,14 @@ class VectorQuantizer(NekoModule):
         z_flattened = z.view(-1, self.embedding_dim)
 
         # calculate distance from each z to each entry
-        d = torch.sum(z_flattened ** 2, dim=1, keepdim=True) + \
-            torch.sum(self.embedding.weight ** 2, dim=1) - 2 * \
-            torch.einsum("bd,dn->bn", z_flattened, rearrange(self.embedding.weight, "n d -> d n"))
+        d = (
+            torch.sum(z_flattened**2, dim=1, keepdim=True)
+            + torch.sum(self.embedding.weight**2, dim=1)
+            - 2
+            * torch.einsum(
+                "bd,dn->bn", z_flattened, rearrange(self.embedding.weight, "n d -> d n")
+            )
+        )
 
         min_encoding_indices = torch.argmin(d, dim=1)
         return min_encoding_indices.view(z.shape[:3])

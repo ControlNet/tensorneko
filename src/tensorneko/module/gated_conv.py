@@ -23,7 +23,8 @@ class GatedConv(NekoModule):
         **kwargs,
     ):
         super().__init__()
-        assert mask_type in ["A", "B"]
+        if mask_type not in ("A", "B"):
+            raise ValueError("mask_type must be 'A' or 'B'")
         out_channels = in_channels * 2
         self.residual = residual
         self.Conv = {

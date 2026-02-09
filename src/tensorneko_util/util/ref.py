@@ -29,7 +29,8 @@ class Ref(ABC, Generic[P]):
 
     def apply(self, f: Callable[[P], P]) -> Ref[P]:
         new_value = f(self.value)
-        assert type(new_value) is type(self.value), "The transform should be the same type."
+        if type(new_value) is not type(self.value):
+            raise TypeError("The transform should be the same type.")
         self.value = new_value
         return self
 
@@ -38,25 +39,21 @@ class Ref(ABC, Generic[P]):
 
 
 class StringRef(Ref[str]):
-
     def __str__(self):
         return self.value
 
 
 class IntRef(Ref[int]):
-
     def __int__(self):
         return self.value
 
 
 class FloatRef(Ref[float]):
-
     def __float__(self):
         return self.value
 
 
 class BoolRef(Ref[bool]):
-
     def __bool__(self):
         return self.value
 

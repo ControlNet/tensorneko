@@ -29,7 +29,7 @@ class TestEarlyStoppingLR(unittest.TestCase):
         cb = EarlyStoppingLR(lr_threshold=1e-6, mode="all")
         trainer = MagicMock()
         trainer.should_stop = False
-        trainer._logger_connector.callback_metrics = {
+        trainer.callback_metrics = {
             "learning_rate/opt0_lr0": 1e-7,
             "learning_rate/opt1_lr0": 1e-8,
         }
@@ -42,7 +42,7 @@ class TestEarlyStoppingLR(unittest.TestCase):
         cb = EarlyStoppingLR(lr_threshold=1e-6, mode="all")
         trainer = MagicMock()
         trainer.should_stop = False
-        trainer._logger_connector.callback_metrics = {
+        trainer.callback_metrics = {
             "learning_rate/opt0_lr0": 1e-3,
         }
         cb.on_train_epoch_start(trainer, MagicMock())
@@ -54,7 +54,7 @@ class TestEarlyStoppingLR(unittest.TestCase):
         cb = EarlyStoppingLR(lr_threshold=1e-6, mode="any")
         trainer = MagicMock()
         trainer.should_stop = False
-        trainer._logger_connector.callback_metrics = {
+        trainer.callback_metrics = {
             "learning_rate/opt0_lr0": 1e-3,
             "learning_rate/opt1_lr0": 1e-8,  # below threshold
         }
@@ -67,7 +67,7 @@ class TestEarlyStoppingLR(unittest.TestCase):
         cb = EarlyStoppingLR(lr_threshold=1e-6, mode="all")
         trainer = MagicMock()
         trainer.should_stop = False
-        trainer._logger_connector.callback_metrics = {}
+        trainer.callback_metrics = {}
         cb.on_train_epoch_start(trainer, MagicMock())
         self.assertFalse(trainer.should_stop)
 
@@ -77,7 +77,7 @@ class TestEarlyStoppingLR(unittest.TestCase):
         cb = EarlyStoppingLR(lr_threshold=1e-6, mode="all")
         trainer = MagicMock()
         trainer.should_stop = False
-        trainer._logger_connector.callback_metrics = {"loss": 0.5}
+        trainer.callback_metrics = {"loss": 0.5}
         cb.on_train_epoch_start(trainer, MagicMock())
         self.assertFalse(trainer.should_stop)
 
@@ -99,7 +99,7 @@ class TestSystemStatsLogger(unittest.TestCase):
         self.assertIsNotNone(cb.psutil)
 
     def test_init_both_false_raises(self):
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             self.SystemStatsLogger(on_epoch=False, on_step=False)
 
     def test_on_train_epoch_end(self):
@@ -201,10 +201,9 @@ class TestDisplayMetricsCallback(unittest.TestCase):
 
         cb = DisplayMetricsCallback()
         trainer = MagicMock()
-        trainer._logger_connector.callback_metrics = {"loss": 0.5, "acc": 0.9}
+        trainer.callback_metrics = {"loss": 0.5, "acc": 0.9}
         pl_module = MagicMock()
 
-        # Patch print to verify it was called
         with patch("builtins.print") as mock_print:
             cb.on_validation_epoch_end(trainer, pl_module)
             mock_print.assert_called_once_with({"loss": 0.5, "acc": 0.9})
@@ -215,10 +214,9 @@ class TestDisplayMetricsCallback(unittest.TestCase):
 
         cb = DisplayMetricsCallback()
         trainer = MagicMock()
-        trainer._logger_connector.callback_metrics = {}
+        trainer.callback_metrics = {}
         pl_module = MagicMock()
 
-        # Patch print to verify it was called with empty dict
         with patch("builtins.print") as mock_print:
             cb.on_validation_epoch_end(trainer, pl_module)
             mock_print.assert_called_once_with({})
@@ -262,7 +260,7 @@ class TestSystemStatsLoggerMocked(unittest.TestCase):
             self.assertIsNotNone(cb.psutil)
 
     def test_init_both_false_raises(self):
-        """Test that both False raises AssertionError."""
+        """Test that both False raises ValueError."""
         import sys
         from unittest.mock import MagicMock
 
@@ -272,7 +270,7 @@ class TestSystemStatsLoggerMocked(unittest.TestCase):
                 del sys.modules["tensorneko.callback.system_stats_logger"]
             from tensorneko.callback.system_stats_logger import SystemStatsLogger
 
-            with self.assertRaises(AssertionError):
+            with self.assertRaises(ValueError):
                 SystemStatsLogger(on_epoch=False, on_step=False)
 
     def test_on_train_epoch_end_logs_stats(self):
@@ -405,7 +403,7 @@ class TestGpuStatsLoggerMocked(unittest.TestCase):
             self.assertIsNone(cb.monitor_step)
 
     def test_init_both_false_raises(self):
-        """Test that both False raises AssertionError."""
+        """Test that both False raises ValueError."""
         import sys
         from unittest.mock import MagicMock
 
@@ -421,7 +419,7 @@ class TestGpuStatsLoggerMocked(unittest.TestCase):
                 del sys.modules["tensorneko.callback.gpu_stats_logger"]
             from tensorneko.callback.gpu_stats_logger import GpuStatsLogger
 
-            with self.assertRaises(AssertionError):
+            with self.assertRaises(ValueError):
                 GpuStatsLogger(on_epoch=False, on_step=False)
 
     def test_on_train_epoch_start_resets_monitor(self):

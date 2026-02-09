@@ -7,19 +7,26 @@ from .._path_conversion import _path2str
 
 
 class JsonWriter:
-
     @staticmethod
-    def _write_json(path: str, obj: Union[dict, list], encoding: str = "UTF-8", indent: int = 2,
-        ensure_ascii: bool = False, fast: bool = True
+    def _write_json(
+        path: str,
+        obj: Union[dict, list],
+        encoding: str = "UTF-8",
+        indent: int = 2,
+        ensure_ascii: bool = False,
+        fast: bool = True,
     ) -> None:
         if not fast:
             with open(path, "w", encoding=encoding) as file:
                 json.dump(obj, file, indent=indent, ensure_ascii=ensure_ascii)
         else:
             import orjson
+
             with open(path, "wb") as file:
                 if indent == 4:
-                    warnings.warn("orjson does not support indent 4, will use indent 2 instead.")
+                    warnings.warn(
+                        "orjson does not support indent 4, will use indent 2 instead."
+                    )
                     option = orjson.OPT_INDENT_2
                 elif indent == 2:
                     option = orjson.OPT_INDENT_2
@@ -28,8 +35,14 @@ class JsonWriter:
                 file.write(orjson.dumps(obj, option=option))
 
     @classmethod
-    def to(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 2,
-        ensure_ascii: bool = False, fast: bool = True
+    def to(
+        cls,
+        path: Union[str, Path],
+        obj: Union[dict, list, object],
+        encoding: str = "UTF-8",
+        indent: int = 2,
+        ensure_ascii: bool = False,
+        fast: bool = True,
     ) -> None:
         """
         Save as Json file from a dictionary, list or json_dict.
@@ -51,9 +64,12 @@ class JsonWriter:
             except ImportError:
                 fast = False
                 warnings.warn("orjson is not installed, will use json lib instead.")
-            assert encoding == "UTF-8", "orjson only supports UTF-8 encoding."
-            assert indent in (0, 2, 4, None), "Only support indent 2, 4 or 0/None."
-            assert ensure_ascii is False, "orjson does not support ensure_ascii."
+            if encoding != "UTF-8":
+                raise ValueError("orjson only supports UTF-8 encoding.")
+            if indent not in (0, 2, 4, None):
+                raise ValueError("Only support indent 2, 4 or 0/None.")
+            if ensure_ascii is not False:
+                raise ValueError("orjson does not support ensure_ascii.")
 
         if type(obj) is dict:
             cls._write_json(path, obj, encoding, indent, ensure_ascii, fast)
@@ -68,8 +84,14 @@ class JsonWriter:
         else:
             raise TypeError("Not implemented type. Only support dict, list, json_data.")
 
-    def __new__(cls, path: Union[str, Path], obj: Union[dict, list, object], encoding: str = "UTF-8", indent: int = 2,
-        ensure_ascii: bool = False, fast: bool = True
+    def __new__(
+        cls,
+        path: Union[str, Path],
+        obj: Union[dict, list, object],
+        encoding: str = "UTF-8",
+        indent: int = 2,
+        ensure_ascii: bool = False,
+        fast: bool = True,
     ) -> None:
         """Alias of :meth:`~tensorneko.io.json.json_writer.JsonWriter.to`."""
         path = _path2str(path)

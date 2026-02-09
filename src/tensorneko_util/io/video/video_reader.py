@@ -142,7 +142,10 @@ class VideoReader:
                     # early stop
                     break
                 i += 1
-            assert len(frames) == len(indexes)
+            if len(frames) != len(indexes):
+                raise RuntimeError(
+                    "Failed to read all requested frame indexes from video"
+                )
             cap.release()
             video = np.stack(frames, axis=0)
             if channel_first:

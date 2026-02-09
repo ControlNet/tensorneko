@@ -128,15 +128,13 @@ class TestCropWithPadding(unittest.TestCase):
         )
         torch.testing.assert_close(result[0], expected)
 
-    def test_assertion_error_invalid_crop_bounds(self):
-        """Test assertion error when y2 <= y1 or x2 <= x1."""
+    def test_invalid_crop_bounds_raises_value_error(self):
         image = torch.ones(1, 2, 2)
 
-        # Should raise AssertionError
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             crop_with_padding(image, x1=2, x2=2, y1=0, y2=1)
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             crop_with_padding(image, x1=0, x2=1, y1=1, y2=1)
 
     def test_value_error_invalid_shape(self):
@@ -204,10 +202,10 @@ class TestCropWithPaddingNumpy(unittest.TestCase):
         expected = np.array([[1.0, 2.0], [4.0, 5.0]], dtype=np.float32)
         np.testing.assert_allclose(result, expected)
 
-    def test_numpy_invalid_bounds_raise_assertion(self):
+    def test_numpy_invalid_bounds_raise_value_error(self):
         image = np.ones((3, 3), dtype=np.float32)
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             crop_with_padding_numpy(image, x1=1, x2=1, y1=0, y2=2)
 
 

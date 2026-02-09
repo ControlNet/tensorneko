@@ -8,37 +8,69 @@ from random import randint
 import numpy as np
 import torch
 
-from tensorneko.util import reduce_dict_by, summarize_dict_by, generate_inf_seq, compose, listdir, with_printed, \
-    with_printed_shape, ifelse, is_bad_num, dict_add, tensorneko_path, as_list, identity, _, F, sparse2binary, \
-    binary2sparse, circular_pad
+from tensorneko.util import (
+    reduce_dict_by,
+    summarize_dict_by,
+    generate_inf_seq,
+    compose,
+    listdir,
+    with_printed,
+    with_printed_shape,
+    ifelse,
+    is_bad_num,
+    dict_add,
+    tensorneko_path,
+    as_list,
+    identity,
+    _,
+    F,
+    sparse2binary,
+    binary2sparse,
+    circular_pad,
+)
 from itertools import islice
 
 
 class UtilFuncTest(unittest.TestCase):
-
     def test_reduce_dict_by(self):
         x = [
             {"a": 1, "b": 2, "c": torch.Tensor([3])},
             {"a": 3, "b": 4, "c": torch.Tensor([5])},
-            {"a": 2.3, "b": -1, "c": torch.Tensor([0])}
+            {"a": 2.3, "b": -1, "c": torch.Tensor([0])},
         ]
-        self.assertEqual(reduce_dict_by("a", _ + _)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
-        self.assertEqual(reduce_dict_by("b", _ - _)(x), x[0]["b"] - x[1]["b"] - x[2]["b"])
-        self.assertEqual(reduce_dict_by("c", 10 * _ + _)(x), (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"])
+        self.assertEqual(
+            reduce_dict_by("a", _ + _)(x), x[0]["a"] + x[1]["a"] + x[2]["a"]
+        )
+        self.assertEqual(
+            reduce_dict_by("b", _ - _)(x), x[0]["b"] - x[1]["b"] - x[2]["b"]
+        )
+        self.assertEqual(
+            reduce_dict_by("c", 10 * _ + _)(x),
+            (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"],
+        )
 
     def test_summarize_dict_by(self):
         x = [
             {"a": 1, "b": torch.Tensor([2]), "c": 3, "d": np.array([1.5])},
             {"a": 3, "b": torch.Tensor([4]), "c": 5, "d": np.array([2.5])},
-            {"a": 2.3, "b": torch.Tensor([-1]), "c": 0, "d": np.array([-1.0])}
+            {"a": 2.3, "b": torch.Tensor([-1]), "c": 0, "d": np.array([-1.0])},
         ]
 
-        self.assertEqual(summarize_dict_by("a", sum)(x), x[0]["a"] + x[1]["a"] + x[2]["a"])
-        self.assertEqual(summarize_dict_by("b", torch.mean)(x), (x[0]["b"] + x[1]["b"] + x[2]["b"]) / 3)
-        self.assertEqual(summarize_dict_by("c", F(map, str) >> "".join >> float)(x),
-                         (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"]
-                         )
-        self.assertEqual(summarize_dict_by("d", F(np.sum, axis=0))(x), x[0]["d"] + x[1]["d"] + x[2]["d"])
+        self.assertEqual(
+            summarize_dict_by("a", sum)(x), x[0]["a"] + x[1]["a"] + x[2]["a"]
+        )
+        self.assertEqual(
+            summarize_dict_by("b", torch.mean)(x),
+            (x[0]["b"] + x[1]["b"] + x[2]["b"]) / 3,
+        )
+        self.assertEqual(
+            summarize_dict_by("c", F(map, str) >> "".join >> float)(x),
+            (x[0]["c"] * 10 + x[1]["c"]) * 10 + x[2]["c"],
+        )
+        self.assertEqual(
+            summarize_dict_by("d", F(np.sum, axis=0))(x),
+            x[0]["d"] + x[1]["d"] + x[2]["d"],
+        )
 
     def test_generate_inf_seq(self):
         length = 20
@@ -65,7 +97,10 @@ class UtilFuncTest(unittest.TestCase):
 
     def test_compose(self):
         x = 1
-        for fs in [[_ + 2, _ * 2, _ ** 2, _ - 2], [str, _ + "abc", lambda s: s.replace("abc", "123")]]:
+        for fs in [
+            [_ + 2, _ * 2, _**2, _ - 2],
+            [str, _ + "abc", lambda s: s.replace("abc", "123")],
+        ]:
             expect = x
             for f in fs:
                 expect = f(expect)
@@ -106,11 +141,11 @@ class UtilFuncTest(unittest.TestCase):
         # build functions for test
         is_even = _ % 2 == 0
         add_3 = _ + 3
-        power_2 = _ ** 2
+        power_2 = _**2
 
         # build composed functions for tensorneko and python3
         neko_f = ifelse(is_even, add_3, power_2)
-        python_f = lambda x: x + 3 if x % 2 == 0 else x ** 2
+        python_f = lambda x: x + 3 if x % 2 == 0 else x**2
 
         # compare
         for i in range(30):
@@ -170,7 +205,7 @@ class UtilFuncTest(unittest.TestCase):
         # test identity
         self.assertEqual(identity(1), 1)
         self.assertEqual(identity(1, 2, 3), (1, 2, 3))
-        self.assertRaises(AssertionError, identity, 1, 2, 3, 4, k=1)
+        self.assertRaises(TypeError, identity, 1, 2, 3, 4, k=1)
 
     def test_sparse2binary_numpy(self):
         sparse = np.array([2, 4])

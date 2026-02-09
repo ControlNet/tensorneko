@@ -15,7 +15,8 @@ class SystemStatsLogger(Callback):
         self.psutil = psutil
         self.on_epoch = on_epoch
         self.on_step = on_step
-        assert self.on_epoch or self.on_step, "on_epoch and on_step cannot be both False"
+        if not self.on_epoch and not self.on_step:
+            raise ValueError("on_epoch and on_step cannot be both False")
 
     def on_train_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         if not self.on_epoch:
@@ -24,13 +25,18 @@ class SystemStatsLogger(Callback):
         memory_usage = self.psutil.virtual_memory().percent
         logged_info = {
             "system/cpu_usage_epoch": cpu_usage,
-            "system/memory_usage_epoch": memory_usage
+            "system/memory_usage_epoch": memory_usage,
         }
         pl_module.logger.log_metrics(logged_info, step=trainer.global_step)
         pl_module.log_dict(logged_info, logger=False, sync_dist=pl_module.distributed)
 
     def on_train_batch_end(
-        self, trainer: Trainer, pl_module: LightningModule, outputs: STEP_OUTPUT, batch: Any, batch_idx: int
+        self,
+        trainer: Trainer,
+        pl_module: LightningModule,
+        outputs: STEP_OUTPUT,
+        batch: Any,
+        batch_idx: int,
     ) -> None:
         if not self.on_step:
             return
@@ -38,7 +44,7 @@ class SystemStatsLogger(Callback):
         memory_usage = self.psutil.virtual_memory().percent
         logged_info = {
             "system/cpu_usage_step": cpu_usage,
-            "system/memory_usage_step": memory_usage
+            "system/memory_usage_step": memory_usage,
         }
         pl_module.logger.log_metrics(logged_info, step=trainer.global_step)
         pl_module.log_dict(logged_info, logger=False, sync_dist=pl_module.distributed)

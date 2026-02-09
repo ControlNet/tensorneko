@@ -177,7 +177,8 @@ class DatasetVisualizer:
         print(f"Dataset viewer started at http://{host}:{port}/")
 
     def _run_server(self) -> None:
-        assert self._server is not None
+        if self._server is None:
+            raise RuntimeError("Server has not been initialized. Call start() first.")
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:

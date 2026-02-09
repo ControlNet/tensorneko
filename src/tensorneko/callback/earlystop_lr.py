@@ -4,7 +4,6 @@ import re
 
 
 class EarlyStoppingLR(Callback):
-
     def __init__(self, lr_threshold: float, mode="all"):
         self.lr_threshold = lr_threshold
 
@@ -13,11 +12,13 @@ class EarlyStoppingLR(Callback):
         else:
             raise ValueError(f"mode must be one of ('any', 'all')")
 
-    def on_train_epoch_start(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def on_train_epoch_start(
+        self, trainer: Trainer, pl_module: LightningModule
+    ) -> None:
         self._run_early_stop_checking(trainer)
 
     def _run_early_stop_checking(self, trainer: Trainer) -> None:
-        metrics = trainer._logger_connector.callback_metrics
+        metrics = trainer.callback_metrics
         if len(metrics) == 0:
             return
         all_lr = []

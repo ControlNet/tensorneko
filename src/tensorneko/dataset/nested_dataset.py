@@ -62,6 +62,9 @@ class NestedDataset(Dataset[T_co], ABC):
         inner_index = index if outer_index == 0 else index - self._acc[outer_index - 1]
         return outer_index, inner_index
 
+    def __len__(self) -> int:
+        return int(self._acc[-1])
+
     def __getitem__(self, index: int) -> T_co:
         """
         Retrieves an item from the nested dataset at a specific index.

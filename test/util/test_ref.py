@@ -41,7 +41,7 @@ class UtilRefTest(unittest.TestCase):
 
     def test_ref_apply_raises_on_type_mismatch(self):
         value_ref = Ref(1)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             value_ref.apply(lambda _: "bad")
 
     def test_ref_string_repr_and_none(self):

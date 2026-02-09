@@ -57,7 +57,7 @@ class MiscExtraTest(unittest.TestCase):
         self.assertEqual(as_list(1, 2, x=3, y=4), [1, 2, 3, 4])
         self.assertEqual(identity(10), 10)
         self.assertEqual(identity(1, 2), (1, 2))
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             identity(1, kw=2)
 
         records = ["aa", "bb"]
