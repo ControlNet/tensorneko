@@ -39,12 +39,32 @@ class WGAN(GAN, ABC):
 
     """
 
-    def __init__(self, latent_dim: int, g_learning_rate: float, d_learning_rate: float, gp_weight: float = 10.0,
-        g_steps: int = 1, d_steps: int = 1, num_samples: int = 8, grid_cols: Optional[int] = None,
-        name: str = "wgan", *args, **kwargs
+    def __init__(
+        self,
+        latent_dim: int,
+        g_learning_rate: float,
+        d_learning_rate: float,
+        gp_weight: float = 10.0,
+        g_steps: int = 1,
+        d_steps: int = 1,
+        num_samples: int = 8,
+        grid_cols: Optional[int] = None,
+        name: str = "wgan",
+        *args,
+        **kwargs,
     ):
-        super(WGAN, self).__init__(latent_dim, g_learning_rate, d_learning_rate, g_steps, d_steps, num_samples,
-            grid_cols, name, *args, **kwargs)
+        super(WGAN, self).__init__(
+            latent_dim,
+            g_learning_rate,
+            d_learning_rate,
+            g_steps,
+            d_steps,
+            num_samples,
+            grid_cols,
+            name,
+            *args,
+            **kwargs,
+        )
         self.gp_weight = gp_weight
 
     @staticmethod
@@ -57,18 +77,24 @@ class WGAN(GAN, ABC):
     def g_loss_fn(pred: Tensor, target: Tensor) -> Tensor:
         return -pred.mean()
 
-    def gradient_penalty_fn(self, batch_size: int, real_images: Tensor, fake_images: Tensor) -> Tensor:
+    def gradient_penalty_fn(
+        self, batch_size: int, real_images: Tensor, fake_images: Tensor
+    ) -> Tensor:
         alpha = torch.randn(size=(batch_size, 1, 1, 1), device=self.device)
         diff = fake_images - real_images
 
-        # 1. Get the discriminator output for this interpolated image.
-        interpolates = torch.autograd.Variable(real_images + alpha * diff, requires_grad=True)
+        interpolates = (real_images + alpha * diff).detach().requires_grad_(True)
         disc_interpolates = self.discriminator(interpolates)
 
         # 2. Calculate the gradients w.r.t to this interpolated image.
-        gradients = torch.autograd.grad(outputs=disc_interpolates, inputs=interpolates,
+        gradients = torch.autograd.grad(
+            outputs=disc_interpolates,
+            inputs=interpolates,
             grad_outputs=torch.ones(disc_interpolates.size(), device=self.device),
-            create_graph=True, retain_graph=True, only_inputs=True)[0]
+            create_graph=True,
+            retain_graph=True,
+            only_inputs=True,
+        )[0]
 
         # 3. Calculate the norm of the gradients.
         gradients = gradients.view(gradients.size(0), -1)
@@ -97,7 +123,7 @@ class WGAN(GAN, ABC):
             gp = self.gradient_penalty_fn(x.size(0), x, fake_image)
             loss = d_loss + self.gp_weight * gp
         else:
-            gp = torch.tensor(0., device=self.device)
+            gp = torch.tensor(0.0, device=self.device)
             loss = d_loss
 
         return {"loss": loss, "loss/d_loss": d_loss, "loss/gp": gp}

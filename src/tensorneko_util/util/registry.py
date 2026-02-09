@@ -1,4 +1,4 @@
-from typing import Callable, Generic, Type
+from typing import Callable, Dict, Generic, Type
 
 from ..util.type import T
 
@@ -28,7 +28,7 @@ class Registry(Generic[T]):
     """
 
     def __init__(self):
-        self._registry: dict[str, Type[T]] = {}
+        self._registry: Dict[str, Type[T]] = {}
 
     def register(self, name: str) -> Callable[[Type[T]], Type[T]]:
         def wrapper(cls):
