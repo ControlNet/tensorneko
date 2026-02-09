@@ -1,0 +1,35 @@
+name: Dependency Audit
+on:
+  push:
+    branches:
+      - "dev"
+      - "master"
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"  # every Monday 06:00 UTC
+
+jobs:
+  pip-audit:
+    name: pip-audit
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        requirements:
+          - requirements.txt
+          - requirements_util.txt
+          - requirements_tool.txt
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run pip-audit
+        uses: pypa/gh-action-pip-audit@v1.1.0
+        with:
+          inputs: ${{ matrix.requirements }}
