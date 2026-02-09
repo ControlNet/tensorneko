@@ -100,9 +100,17 @@ class BiMapTest(unittest.TestCase):
         self.assertEqual(list(bimap.backward), ["a", "b"])
 
     def test_bimap_copy_items_keys_values(self):
+        import copy
+
         bimap = BiMap({1: "a", 2: "b"})
-        copied = bimap.__copy__()
-        self.assertIsNone(copied)
+        copied = copy.copy(bimap)
+        self.assertIsNotNone(copied)
+        self.assertIsInstance(copied, BiMap)
+        self.assertEqual(copied.forward, {1: "a", 2: "b"})
+        self.assertEqual(copied.backward, {"a": 1, "b": 2})
+        # Mutating the copy should not affect the original
+        copied[3] = "c"
+        self.assertNotIn(3, bimap)
         self.assertEqual(list(bimap.items()), [(1, "a"), (2, "b")])
         self.assertEqual(list(bimap.keys()), [1, 2])
         self.assertEqual(list(bimap.values()), ["a", "b"])

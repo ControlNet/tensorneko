@@ -209,6 +209,31 @@ class TestDownloadFilesThread(unittest.TestCase):
         self.assertEqual(calls[2].args[3], 2)
 
 
+class TestDownloadNoProgressBar(unittest.TestCase):
+    """Test download_file with progress_bar=False (previously broken path)."""
+
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        import shutil
+
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    @patch("tensorneko_util.util.downloader.urlretrieve")
+    def test_download_no_progress_bar(self, mock_urlretrieve):
+        """progress_bar=False should skip tqdm and call urlretrieve directly."""
+        mock_urlretrieve.return_value = (None, None)
+        url = "http://example.com/data/file.bin"
+        result = download_file(url, dir_path=self.tmpdir, progress_bar=False)
+        expected = os.path.join(self.tmpdir, "file.bin")
+        self.assertEqual(result, expected)
+        mock_urlretrieve.assert_called_once()
+        # Should NOT have reporthook (no progress bar)
+        call_kwargs = mock_urlretrieve.call_args
+        self.assertNotIn("reporthook", call_kwargs.kwargs)
+
+
 class TestDownloadProgressBarUpdateTo(unittest.TestCase):
     """Test DownloadProgressBar.update_to (lines 20-22)."""
 

@@ -7,7 +7,6 @@ from .._path_conversion import _path2str
 
 
 class NpyWriter:
-
     @classmethod
     def to(cls, path: Union[str, Path], arr: np.ndarray) -> None:
         """
@@ -31,6 +30,7 @@ class NpyWriter:
         """
         path = _path2str(path)
         import scipy.sparse
+
         scipy.sparse.save_npz(path, scipy.sparse.csc_matrix(arr))
 
     @classmethod
@@ -51,7 +51,13 @@ class NpyWriter:
             np.savez(path, **kwargs)
 
     @classmethod
-    def to_txt(cls, path: Union[str, Path], arr: np.ndarray, delimiter: str = ' ', newline: str = '\n') -> None:
+    def to_txt(
+        cls,
+        path: Union[str, Path],
+        arr: np.ndarray,
+        delimiter: str = " ",
+        newline: str = "\n",
+    ) -> None:
         """
         Save numpy array to file as text format.
 
@@ -68,12 +74,11 @@ class NpyWriter:
 
     def __new__(cls, path: Union[str, Path], *args, **kwargs) -> None:
         path = _path2str(path)
-        ext = path.split(".")[-1]
-        if ext == "npy":
-            return cls.to(path, *args, **kwargs)
-        elif ext == "npz":
-            return cls.to_npz(path, *args, **kwargs)
-        elif ext in ("txt", "txt.gz"):
+        if path.endswith(".txt.gz") or path.endswith(".txt"):
             return cls.to_txt(path, *args, **kwargs)
+        elif path.endswith(".npy"):
+            return cls.to(path, *args, **kwargs)
+        elif path.endswith(".npz"):
+            return cls.to_npz(path, *args, **kwargs)
         else:
-            raise ValueError(f"Unknown file extension: {ext}")
+            raise ValueError(f"Unknown file extension: {path}")

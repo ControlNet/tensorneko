@@ -51,6 +51,7 @@ class BiMap(Generic[K, V]):
         bimap = BiMap()
         bimap.forward = self.forward.copy()
         bimap.backward = self.backward.copy()
+        return bimap
 
     def items(self):
         return self.forward.items()

@@ -91,6 +91,14 @@ class NpyReaderWriterTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 NpyWriter(path, np.array([1]))
 
+    def test_txt_gz_via_constructor(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "data.txt.gz")
+            arr = np.array([[1.0, 2.0], [3.0, 4.0]])
+            NpyWriter(path, arr)
+            loaded = NpyReader(path)
+            np.testing.assert_array_almost_equal(loaded, arr)
+
     def test_reader_fallback_extension(self):
         """NpyReader.__new__ falls back to np.load for unknown extensions."""
         with tempfile.TemporaryDirectory() as tmpdir:

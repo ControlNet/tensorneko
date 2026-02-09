@@ -8,7 +8,6 @@ from .._path_conversion import _path2str
 
 
 class NpyReader:
-
     @classmethod
     def of(cls, path: Union[str, Path]) -> Union[np.ndarray, NpzFile]:
         """
@@ -37,10 +36,13 @@ class NpyReader:
         """
         path = _path2str(path)
         import scipy.sparse
+
         return scipy.sparse.load_npz(path).toarray()
 
     @classmethod
-    def of_txt(cls, path: Union[str, Path], delimiter: str = ' ', dtype: type = float) -> np.ndarray:
+    def of_txt(
+        cls, path: Union[str, Path], delimiter: str = " ", dtype: type = float
+    ) -> np.ndarray:
         """
         Read numpy array from file as text format.
 
@@ -57,12 +59,13 @@ class NpyReader:
         path = _path2str(path)
         return np.loadtxt(path, delimiter=delimiter, dtype=dtype)
 
-    def __new__(cls, path: Union[str, Path], *args, **kwargs) -> Union[np.ndarray, NpzFile]:
+    def __new__(
+        cls, path: Union[str, Path], *args, **kwargs
+    ) -> Union[np.ndarray, NpzFile]:
         path = _path2str(path)
-        ext = path.split(".")[-1]
-        if ext in ("npz", "npy"):
-            return cls.of(path)
-        elif ext in ("txt", "txt.gz"):
+        if path.endswith(".txt.gz") or path.endswith(".txt"):
             return cls.of_txt(path, *args, **kwargs)
+        elif path.endswith(".npz") or path.endswith(".npy"):
+            return cls.of(path)
         else:
             return cls.of(path)
