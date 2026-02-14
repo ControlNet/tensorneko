@@ -7,7 +7,6 @@ from .._path_conversion import _path2str
 
 
 class Hdf5Reader:
-
     @classmethod
     def of(cls, path: Union[str, Path]) -> h5py.File:
         """
@@ -18,6 +17,8 @@ class Hdf5Reader:
 
         Returns:
             :class:`h5py.File`: The opened hdf5 file.
+            The caller is responsible for closing the file handle.
+            Prefer ``with Hdf5Reader.of(path) as f: ...``.
 
         """
         path = _path2str(path)
