@@ -8,6 +8,7 @@ with automatic type inference and media rendering.
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import threading
 from typing import Any, Dict, Optional
@@ -20,6 +21,7 @@ from .type_inference import infer_schema, normalize_sample
 from .renderers import render_media, render_metadata, get_media_content_type
 
 _WEB_DIR = os.path.join(os.path.dirname(__file__), "web")
+_logger = logging.getLogger(__name__)
 
 
 class DatasetVisualizer:
@@ -58,7 +60,11 @@ class DatasetVisualizer:
         elif len(dataset) > 0:
             try:
                 self._schema = infer_schema(dataset[0])
-            except Exception:
+            except Exception as e:
+                _logger.warning(
+                    "Failed to infer dataset schema from sample 0: %s",
+                    e,
+                )
                 self._schema: Dict[str, str] = {}
         else:
             self._schema: Dict[str, str] = {}
@@ -99,8 +105,9 @@ class DatasetVisualizer:
             for i in range(offset, end):
                 try:
                     raw = self._dataset[i]
-                except Exception:
-                    continue  # skip errored samples
+                except Exception as e:
+                    _logger.warning("Failed to load dataset sample %d: %s", i, e)
+                    continue
                 fields_dict = normalize_sample(raw)
                 field_meta = {}
                 for name, value in fields_dict.items():
