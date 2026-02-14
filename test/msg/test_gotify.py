@@ -20,10 +20,11 @@ class TestGotifyPush(unittest.TestCase):
         gotify.push("hello", url="https://gotify.local/", token="token-1")
 
         req = mock_urlopen.call_args[0][0]
-        self.assertEqual(req.full_url, "https://gotify.local/message?token=token-1")
+        self.assertEqual(req.full_url, "https://gotify.local/message")
         self.assertEqual(req.get_method(), "POST")
         self.assertEqual(req.headers["Content-type"], "application/json")
         self.assertEqual(req.headers["User-agent"], "TensorNeko")
+        self.assertEqual(req.headers["X-gotify-key"], "token-1")
         self.assertEqual(
             json.loads(req.data.decode("utf-8")),
             {"title": "host-1", "message": "hello", "priority": 0},
@@ -63,7 +64,8 @@ class TestGotifyPush(unittest.TestCase):
             gotify.push("from-env")
 
         req = mock_urlopen.call_args[0][0]
-        self.assertEqual(req.full_url, "https://env-gotify/message?token=env-token")
+        self.assertEqual(req.full_url, "https://env-gotify/message")
+        self.assertEqual(req.headers["X-gotify-key"], "env-token")
         self.assertEqual(
             json.loads(req.data.decode("utf-8")),
             {"title": "env-title", "message": "from-env", "priority": 0},
@@ -81,7 +83,7 @@ class TestGotifyPush(unittest.TestCase):
     @patch("tensorneko_util.msg.gotify.urllib.request.urlopen")
     def test_push_prints_http_error_body(self, mock_urlopen, mock_print):
         error = HTTPError(
-            url="https://gotify.local/message?token=token",
+            url="https://gotify.local/message",
             code=500,
             msg="server-error",
             hdrs=Message(),
