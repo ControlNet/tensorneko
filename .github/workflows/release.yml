@@ -228,6 +228,8 @@ jobs:
     name: Release
     needs: [release-tensorneko, release-tensorneko-util, release-tensorneko-lib, release-tensorneko-tool]
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -277,12 +279,12 @@ jobs:
           cp -r dist_tensorneko_tool/* dist/
 
       - name: Release to GitHub Release
-        uses: marvinpinto/action-automatic-releases@latest
+        uses: softprops/action-gh-release@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ env.VERSION }}"
-          title: "[${{ env.VERSION }}] TensorNeko Release"
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag_name: "${{ env.VERSION }}"
+          target_commitish: "${{ github.sha }}"
+          name: "[${{ env.VERSION }}] TensorNeko Release"
           prerelease: false
           files: "dist/*"
           draft: true
-
