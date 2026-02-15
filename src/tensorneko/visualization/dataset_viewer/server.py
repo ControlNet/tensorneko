@@ -8,20 +8,28 @@ with automatic type inference and media rendering.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Mapping as MappingABC
+from collections.abc import Sequence as SequenceABC
 import logging
 import os
 import threading
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Hashable, Mapping, Optional, Sequence, Union
 
 import fastapi
 import uvicorn
 from fastapi.responses import FileResponse, JSONResponse, Response
 
-from .type_inference import infer_schema, normalize_sample
+from .type_inference import (
+    infer_schema,
+    normalize_sample,
+    normalize_sample_with_raw_keys,
+)
 from .renderers import render_media, render_metadata, get_media_content_type
 
 _WEB_DIR = os.path.join(os.path.dirname(__file__), "web")
 _logger = logging.getLogger(__name__)
+
+_FieldLabelMapping = Union[Sequence[str], Mapping[Any, str]]
 
 
 class DatasetVisualizer:
@@ -34,6 +42,10 @@ class DatasetVisualizer:
     schema : dict, optional
         User-provided ``{field_name: type_string}`` override.  If *None*,
         the schema is auto-inferred from the first sample.
+    label_mappings : dict, optional
+        Optional mapping from raw field key to label names. Keys can be tuple
+        indices (e.g. ``1``) or dict field keys (e.g. ``"label"``).
+        Values can be either ``list[str]`` or ``dict[index, name]``.
     page_size : int
         Default page size for the ``/api/samples`` endpoint.
     """
@@ -42,6 +54,7 @@ class DatasetVisualizer:
         self,
         dataset: Any,
         schema: Optional[Dict[str, str]] = None,
+        label_mappings: Optional[Mapping[Hashable, _FieldLabelMapping]] = None,
         page_size: int = 20,
     ) -> None:
         # Validate map-style dataset
@@ -53,6 +66,9 @@ class DatasetVisualizer:
 
         self._dataset = dataset
         self._page_size = page_size
+        self._label_mappings: Dict[Hashable, _FieldLabelMapping] = (
+            dict(label_mappings) if label_mappings is not None else {}
+        )
 
         # Infer or accept schema
         if schema is not None:
@@ -76,6 +92,121 @@ class DatasetVisualizer:
         # Lifecycle state
         self._server: Optional[uvicorn.Server] = None
         self._thread: Optional[threading.Thread] = None
+
+    def _find_field_mapping(
+        self,
+        field_name: str,
+        raw_key: Hashable,
+    ) -> Optional[_FieldLabelMapping]:
+        candidates = [raw_key, field_name]
+
+        raw_key_str = str(raw_key)
+        if raw_key_str not in candidates:
+            candidates.append(raw_key_str)
+
+        for key in candidates:
+            if key in self._label_mappings:
+                return self._label_mappings[key]
+
+        return None
+
+    @staticmethod
+    def _coerce_label_index(value: Any) -> Optional[int]:
+        try:
+            import numpy as np
+
+            if isinstance(value, np.generic):
+                value = value.item()
+        except ImportError:
+            pass
+
+        if isinstance(value, bool):
+            return int(value)
+
+        if isinstance(value, int):
+            return value
+
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+
+        return None
+
+    @staticmethod
+    def _tensor_label_index(value: Any) -> Optional[int]:
+        try:
+            import torch
+
+            if isinstance(value, torch.Tensor):
+                tensor = value.detach().cpu()
+                if tensor.ndim != 1 or tensor.numel() == 0:
+                    return None
+                return int(torch.argmax(tensor.float()).item())
+        except ImportError:
+            pass
+
+        try:
+            import numpy as np
+
+            if isinstance(value, np.ndarray):
+                if value.ndim != 1 or value.size == 0:
+                    return None
+                return int(np.argmax(value))
+        except ImportError:
+            pass
+        except ValueError:
+            return None
+        except TypeError:
+            return None
+
+        return None
+
+    @staticmethod
+    def _resolve_label_name(mapping: _FieldLabelMapping, index: int) -> Optional[str]:
+        if isinstance(mapping, MappingABC):
+            if index in mapping:
+                return str(mapping[index])
+
+            str_index = str(index)
+            if str_index in mapping:
+                return str(mapping[str_index])
+
+            return None
+
+        if isinstance(mapping, SequenceABC) and not isinstance(mapping, (str, bytes)):
+            if 0 <= index < len(mapping):
+                return str(mapping[index])
+
+        return None
+
+    def _append_label_metadata(
+        self,
+        field_name: str,
+        raw_key: Hashable,
+        value: Any,
+        field_type: str,
+        metadata: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        mapping = self._find_field_mapping(field_name, raw_key)
+        if mapping is None:
+            return metadata
+
+        index: Optional[int] = None
+        if field_type == "scalar":
+            index = self._coerce_label_index(metadata.get("value"))
+        elif field_type == "tensor":
+            index = self._tensor_label_index(value)
+
+        if index is None:
+            return metadata
+
+        label_name = self._resolve_label_name(mapping, index)
+        if label_name is None:
+            return metadata
+
+        metadata = dict(metadata)
+        metadata["label"] = label_name
+        metadata["label_index"] = index
+        return metadata
 
     # ------------------------------------------------------------------
     # Route registration
@@ -108,11 +239,19 @@ class DatasetVisualizer:
                 except Exception as e:
                     _logger.warning("Failed to load dataset sample %d: %s", i, e)
                     continue
-                fields_dict = normalize_sample(raw)
+                fields_dict, raw_key_map = normalize_sample_with_raw_keys(raw)
                 field_meta = {}
                 for name, value in fields_dict.items():
                     ftype = self._schema.get(name, "tensor")
-                    field_meta[name] = render_metadata(value, ftype)
+                    metadata = render_metadata(value, ftype)
+                    raw_key = raw_key_map.get(name, name)
+                    field_meta[name] = self._append_label_metadata(
+                        name,
+                        raw_key,
+                        value,
+                        ftype,
+                        metadata,
+                    )
                 results.append({"idx": i, "fields": field_meta})
             return results
 
@@ -131,11 +270,19 @@ class DatasetVisualizer:
                     {"error": str(e)},
                     status_code=500,
                 )
-            fields_dict = normalize_sample(raw)
+            fields_dict, raw_key_map = normalize_sample_with_raw_keys(raw)
             field_meta = {}
             for name, value in fields_dict.items():
                 ftype = self._schema.get(name, "tensor")
-                field_meta[name] = render_metadata(value, ftype)
+                metadata = render_metadata(value, ftype)
+                raw_key = raw_key_map.get(name, name)
+                field_meta[name] = self._append_label_metadata(
+                    name,
+                    raw_key,
+                    value,
+                    ftype,
+                    metadata,
+                )
             return {"idx": idx, "fields": field_meta}
 
         @app.get("/media/{idx}/{field}")

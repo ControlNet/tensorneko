@@ -102,6 +102,39 @@ class _SimpleIterableDataset(IterableDataset):
         yield torch.tensor(1)
 
 
+class _DictLabelDataset(torch.utils.data.Dataset):
+    def __init__(self):
+        self._images = torch.rand(3, 3, 32, 32)
+        self._labels = [0, 1, 0]
+
+    def __len__(self):
+        return len(self._labels)
+
+    def __getitem__(self, idx):
+        return {"image": self._images[idx], "label": self._labels[idx]}
+
+
+class _IntKeyDictLabelDataset(torch.utils.data.Dataset):
+    def __init__(self):
+        self._images = torch.rand(3, 3, 32, 32)
+
+    def __len__(self):
+        return 3
+
+    def __getitem__(self, idx):
+        return {0: self._images[idx], 1: idx}
+
+
+class _TensorLabelDataset(torch.utils.data.Dataset):
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, idx):
+        if idx == 0:
+            return {"logits": torch.tensor([0.1, 1.2, -0.3], dtype=torch.float32)}
+        return {"logits": torch.tensor([0.0, 1.0, 0.0], dtype=torch.float32)}
+
+
 # ===========================================================================
 # Test cases
 # ===========================================================================
@@ -422,6 +455,163 @@ class TestEdgeCases(unittest.TestCase):
             _wait_for_server(port, retries=40)
             status, _ = _get(f"http://127.0.0.1:{port}/media/999/0")
             self.assertEqual(status, 404)
+        finally:
+            viz.stop()
+
+
+@unittest.skipUnless(fastapi_available, "fastapi/uvicorn not installed")
+class TestLabelMappings(unittest.TestCase):
+    def test_tuple_label_mapping_by_index_key(self):
+        from tensorneko.visualization.dataset_viewer.server import DatasetVisualizer
+
+        port = _PORT_BASE + 40
+        ds = _make_image_label_dataset(3)
+        viz = DatasetVisualizer(
+            ds,
+            page_size=10,
+            label_mappings={1: ["cat", "dog", "bird"]},
+        )
+        viz.start(port=port)
+        try:
+            _wait_for_server(port, retries=40)
+            status, data = _get_json(f"http://127.0.0.1:{port}/api/sample/2")
+            self.assertEqual(status, 200)
+            self.assertEqual(data["fields"]["1"]["type"], "scalar")
+            self.assertEqual(data["fields"]["1"]["value"], 2)
+            self.assertEqual(data["fields"]["1"]["label"], "bird")
+            self.assertEqual(data["fields"]["1"]["label_index"], 2)
+        finally:
+            viz.stop()
+
+    def test_dict_label_mapping_by_field_name(self):
+        from tensorneko.visualization.dataset_viewer.server import DatasetVisualizer
+
+        port = _PORT_BASE + 41
+        ds = _DictLabelDataset()
+        viz = DatasetVisualizer(
+            ds,
+            page_size=10,
+            label_mappings={"label": ["neg", "pos"]},
+        )
+        viz.start(port=port)
+        try:
+            _wait_for_server(port, retries=40)
+            status, data = _get_json(f"http://127.0.0.1:{port}/api/sample/1")
+            self.assertEqual(status, 200)
+            self.assertEqual(data["fields"]["label"]["type"], "scalar")
+            self.assertEqual(data["fields"]["label"]["value"], 1)
+            self.assertEqual(data["fields"]["label"]["label"], "pos")
+            self.assertEqual(data["fields"]["label"]["label_index"], 1)
+        finally:
+            viz.stop()
+
+    def test_dict_int_key_mapping_uses_raw_key(self):
+        from tensorneko.visualization.dataset_viewer.server import DatasetVisualizer
+
+        port = _PORT_BASE + 42
+        ds = _IntKeyDictLabelDataset()
+        viz = DatasetVisualizer(
+            ds,
+            page_size=10,
+            label_mappings={1: ["zero", "one", "two"]},
+        )
+        viz.start(port=port)
+        try:
+            _wait_for_server(port, retries=40)
+            status, data = _get_json(f"http://127.0.0.1:{port}/api/sample/2")
+            self.assertEqual(status, 200)
+            self.assertEqual(data["fields"]["1"]["type"], "scalar")
+            self.assertEqual(data["fields"]["1"]["value"], 2)
+            self.assertEqual(data["fields"]["1"]["label"], "two")
+            self.assertEqual(data["fields"]["1"]["label_index"], 2)
+        finally:
+            viz.stop()
+
+    def test_tuple_label_mapping_by_string_key(self):
+        from tensorneko.visualization.dataset_viewer.server import DatasetVisualizer
+
+        port = _PORT_BASE + 45
+        ds = _make_image_label_dataset(3)
+        viz = DatasetVisualizer(
+            ds,
+            page_size=10,
+            label_mappings={"1": ["cat", "dog", "bird"]},
+        )
+        viz.start(port=port)
+        try:
+            _wait_for_server(port, retries=40)
+            status, data = _get_json(f"http://127.0.0.1:{port}/api/sample/2")
+            self.assertEqual(status, 200)
+            self.assertEqual(data["fields"]["1"]["label"], "bird")
+            self.assertEqual(data["fields"]["1"]["label_index"], 2)
+        finally:
+            viz.stop()
+
+    def test_tensor_1d_label_mapping_uses_argmax(self):
+        from tensorneko.visualization.dataset_viewer.server import DatasetVisualizer
+
+        port = _PORT_BASE + 43
+        ds = _TensorLabelDataset()
+        viz = DatasetVisualizer(
+            ds,
+            page_size=10,
+            label_mappings={"logits": ["cat", "dog", "bird"]},
+        )
+        viz.start(port=port)
+        try:
+            _wait_for_server(port, retries=40)
+            status, data = _get_json(f"http://127.0.0.1:{port}/api/sample/0")
+            self.assertEqual(status, 200)
+            self.assertEqual(data["fields"]["logits"]["type"], "tensor")
+            self.assertEqual(data["fields"]["logits"]["label"], "dog")
+            self.assertEqual(data["fields"]["logits"]["label_index"], 1)
+        finally:
+            viz.stop()
+
+    def test_missing_label_mapping_entry_keeps_original_metadata(self):
+        from tensorneko.visualization.dataset_viewer.server import DatasetVisualizer
+
+        port = _PORT_BASE + 44
+        ds = _DictLabelDataset()
+        viz = DatasetVisualizer(
+            ds,
+            page_size=10,
+            label_mappings={"label": ["neg"]},
+        )
+        viz.start(port=port)
+        try:
+            _wait_for_server(port, retries=40)
+            status, data = _get_json(f"http://127.0.0.1:{port}/api/sample/1")
+            self.assertEqual(status, 200)
+            self.assertEqual(data["fields"]["label"]["type"], "scalar")
+            self.assertEqual(data["fields"]["label"]["value"], 1)
+            self.assertNotIn("label", data["fields"]["label"])
+            self.assertNotIn("label_index", data["fields"]["label"])
+        finally:
+            viz.stop()
+
+    def test_api_samples_contains_mapped_labels(self):
+        from tensorneko.visualization.dataset_viewer.server import DatasetVisualizer
+
+        port = _PORT_BASE + 46
+        ds = _DictLabelDataset()
+        viz = DatasetVisualizer(
+            ds,
+            page_size=10,
+            label_mappings={"label": ["neg", "pos"]},
+        )
+        viz.start(port=port)
+        try:
+            _wait_for_server(port, retries=40)
+            status, data = _get_json(
+                f"http://127.0.0.1:{port}/api/samples?offset=0&limit=3"
+            )
+            self.assertEqual(status, 200)
+            self.assertEqual(len(data), 3)
+            self.assertEqual(data[0]["fields"]["label"]["label"], "neg")
+            self.assertEqual(data[0]["fields"]["label"]["label_index"], 0)
+            self.assertEqual(data[1]["fields"]["label"]["label"], "pos")
+            self.assertEqual(data[1]["fields"]["label"]["label_index"], 1)
         finally:
             viz.stop()
 
