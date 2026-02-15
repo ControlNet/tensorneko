@@ -38,7 +38,7 @@ jobs:
           python init.py
 
       - name: Fix python 3.8 packages
-        if: ${{ matrix.python-version }} == "3.8"
+        if: ${{ matrix.python-version == '3.8' }}
         run: |
           uv pip install --system "fsspec<2025.3.1"
 
