@@ -1,5 +1,7 @@
 # pyright: reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownVariableType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnusedCallResult=false, reportUnusedFunction=false, reportUnnecessaryComparison=false
 
+from __future__ import annotations
+
 import argparse
 from contextlib import ExitStack
 import json
@@ -7,11 +9,24 @@ import socket
 import sys
 import time
 import urllib.request
-from collections.abc import Callable, Iterable
-from typing import Protocol, TypedDict, cast
+from typing import (
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Union,
+    cast,
+)
 from urllib.error import HTTPError, URLError
 from rich.live import Live
 from rich.table import Table
+
+try:
+    from typing import Protocol, TypedDict
+except ImportError:
+    from typing_extensions import Protocol, TypedDict
+
 
 from . import utils
 
@@ -125,7 +140,7 @@ _AUTH_FAILURE_ERROR_CODES = {
     "invalid_api_key",
 }
 
-_JsonPayload = dict[str, object] | list[object] | str | int | float | bool | None
+_JsonPayload = Optional[Union[Dict[str, object], List[object], str, int, float, bool]]
 
 
 class _NormalizedError(TypedDict):
@@ -2105,7 +2120,7 @@ def _extract_chat_usage(payload: _JsonPayload) -> dict[str, object] | None:
     if not isinstance(raw_usage, dict):
         return None
 
-    return cast(dict[str, object], dict(raw_usage))
+    return cast(Dict[str, object], dict(raw_usage))
 
 
 def _emit_chat_json(
