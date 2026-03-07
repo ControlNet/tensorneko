@@ -1,5 +1,7 @@
 # pyright: reportUnknownMemberType=false, reportMissingImports=false, reportUnknownArgumentType=false, reportUnknownVariableType=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownLambdaType=false
 
+from __future__ import annotations
+
 import argparse
 import copy
 import io
@@ -8,11 +10,16 @@ import os
 import socket
 import unittest
 from email.message import Message
-from typing import Protocol, cast, override
+from typing import Dict, List, Optional, Tuple, cast
 from urllib.error import HTTPError, URLError
 from unittest.mock import MagicMock, call, patch
 
 import tensorneko_tool.openai as openai_module
+
+try:
+    from typing import Protocol
+except ImportError:
+    from typing_extensions import Protocol
 
 
 class _OpenAIRootArgs(Protocol):
@@ -68,7 +75,7 @@ def _as_list_args(value: argparse.Namespace) -> _OpenAIListArgs:
 def _table_column_cells(table: openai_module.Table, column_index: int) -> list[str]:
     if column_index >= len(table.columns):
         return []
-    return cast(list[str], getattr(table.columns[column_index], "_cells", []))
+    return cast(List[str], getattr(table.columns[column_index], "_cells", []))
 
 
 class TestOpenAIParserTree(unittest.TestCase):
@@ -980,7 +987,6 @@ class _FakeStdin(io.StringIO):
         super().__init__(content)
         self._is_tty = is_tty
 
-    @override
     def isatty(self) -> bool:
         return self._is_tty
 
@@ -989,7 +995,7 @@ def _step_status(
     frame: dict[str, openai_module._TestStepRender],
     step: str,
 ) -> str | None:
-    return cast(str | None, frame.get(step, {}).get("status"))
+    return cast(Optional[str], frame.get(step, {}).get("status"))
 
 
 class TestOpenAIExitCodes(unittest.TestCase):
@@ -1103,7 +1109,7 @@ class TestOpenAIExitCodes(unittest.TestCase):
             http_status=401,
             error_type="invalid_api_key",
         )
-        cast(dict[str, object], auth_error)["error_code"] = "invalid_api_key"
+        cast(Dict[str, object], auth_error)["error_code"] = "invalid_api_key"
 
         mock_request.return_value = _request_fail(error=auth_error)
         test_code = openai_module.run_test(
@@ -1431,7 +1437,7 @@ class TestOpenAITestPipeline(unittest.TestCase):
                     "--no-live should render exactly one final dashboard table.",
                 )
                 request_sequence = cast(
-                    list[tuple[str, str]], expected["request_sequence"]
+                    List[Tuple[str, str]], expected["request_sequence"]
                 )
                 for index, (url, method) in enumerate(request_sequence):
                     self.assertEqual(
@@ -1593,7 +1599,7 @@ class TestOpenAIProbeFallback(unittest.TestCase):
                 error_type="invalid_api_key",
             )
         )
-        cast(dict[str, object], mock_request.return_value["error"])["error_code"] = (
+        cast(Dict[str, object], mock_request.return_value["error"])["error_code"] = (
             "invalid_api_key"
         )
 
@@ -1852,7 +1858,7 @@ class TestOpenAIEndpointCandidateFallback(unittest.TestCase):
                 error_type="invalid_api_key",
             )
         )
-        cast(dict[str, object], mock_request.return_value["error"])["error_code"] = (
+        cast(Dict[str, object], mock_request.return_value["error"])["error_code"] = (
             "invalid_api_key"
         )
 
@@ -2370,7 +2376,7 @@ class TestOpenAIListDataParsing(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(mock_console.print.call_count, 1)
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
 
@@ -2486,7 +2492,7 @@ class TestOpenAIJsonTestSchema(unittest.TestCase):
         self.assertEqual(mock_console.print.call_count, 1)
 
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
         self.assertEqual(set(payload.keys()), self._TOP_LEVEL_KEYS)
@@ -2509,7 +2515,7 @@ class TestOpenAIJsonTestSchema(unittest.TestCase):
         if not isinstance(steps, list):
             self.fail("expected steps list")
         self.assertEqual(
-            [cast(str, cast(dict[str, object], step)["name"]) for step in steps],
+            [cast(str, cast(Dict[str, object], step)["name"]) for step in steps],
             list(openai_module._TEST_STEP_ORDER),
         )
         for step in steps:
@@ -2546,7 +2552,7 @@ class TestOpenAIJsonTestSchema(unittest.TestCase):
         self.assertEqual(mock_console.print.call_count, 1)
 
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
         self.assertEqual(set(payload.keys()), self._TOP_LEVEL_KEYS)
@@ -2567,9 +2573,9 @@ class TestOpenAIJsonTestSchema(unittest.TestCase):
             self.assertEqual(set(step.keys()), self._STEP_KEYS)
 
         network_step = next(
-            cast(dict[str, object], step)
+            cast(Dict[str, object], step)
             for step in steps
-            if cast(dict[str, object], step)["name"] == "network"
+            if cast(Dict[str, object], step)["name"] == "network"
         )
         self.assertEqual(network_step["status"], "fail")
         self.assertEqual(network_step["error_code"], "url_error")
@@ -2617,7 +2623,7 @@ class TestOpenAIJsonChatSchema(unittest.TestCase):
         self.assertIsNone(mock_chat_stream.call_args_list[0].kwargs.get("on_delta"))
 
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
         self.assertEqual(set(payload.keys()), self._TOP_LEVEL_KEYS)
@@ -2665,7 +2671,7 @@ class TestOpenAIJsonChatSchema(unittest.TestCase):
         self.assertEqual(mock_console.print.call_count, 1)
 
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
         self.assertEqual(set(payload.keys()), self._TOP_LEVEL_KEYS)
@@ -2716,7 +2722,7 @@ class TestOpenAIJsonChatSchema(unittest.TestCase):
         self.assertEqual(mock_console.print.call_count, 1)
 
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
         self.assertEqual(set(payload.keys()), self._TOP_LEVEL_KEYS)
@@ -2773,7 +2779,7 @@ class TestOpenAIJsonListSchema(unittest.TestCase):
         self.assertEqual(mock_console.print.call_count, 1)
 
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
         self.assertEqual(set(payload.keys()), self._TOP_LEVEL_KEYS)
@@ -2831,7 +2837,7 @@ class TestOpenAIJsonListSchema(unittest.TestCase):
         self.assertEqual(mock_console.print.call_count, 1)
 
         payload = cast(
-            dict[str, object],
+            Dict[str, object],
             json.loads(cast(str, mock_console.print.call_args_list[0].args[0])),
         )
         self.assertEqual(set(payload.keys()), self._TOP_LEVEL_KEYS)
