@@ -1,6 +1,9 @@
+# pyright: reportUnknownMemberType=false, reportMissingImports=false, reportUnknownArgumentType=false, reportUnknownVariableType=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnusedCallResult=false
 import unittest
 from unittest.mock import patch, MagicMock
 import sys
+import io
+from contextlib import redirect_stdout
 
 from tensorneko_tool.__main__ import main
 from tensorneko_tool import utils
@@ -79,7 +82,7 @@ class TestMainVersionBanner(unittest.TestCase):
 
     @patch("tensorneko_tool.utils.make_panel")
     @patch("tensorneko_tool.utils.print_banner")
-    def test_main_version_banner_fancy_output(self, mock_banner, mock_make_panel):
+    def test_main_version_banner_fancy_output(self, _mock_banner, mock_make_panel):
         """Test main() with --version --banner uses fancy panel output"""
         mock_make_panel.return_value = MagicMock()
         with patch.object(sys, "argv", ["tensorneko", "--version", "--banner"]):
@@ -110,7 +113,9 @@ class TestMainVersionBannerQuiet(unittest.TestCase):
     @patch("tensorneko_tool.__main__.set_quiet")
     def test_main_version_banner_quiet_no_output(self, mock_set_quiet, mock_banner):
         """Test main() with --version --banner --quiet exits 0 without printing"""
-        with patch.object(sys, "argv", ["tensorneko", "--version", "--banner", "--quiet"]):
+        with patch.object(
+            sys, "argv", ["tensorneko", "--version", "--banner", "--quiet"]
+        ):
             with self.assertRaises(SystemExit) as cm:
                 main()
             self.assertEqual(cm.exception.code, 0)
@@ -192,6 +197,53 @@ class TestMainWithSubcommand(unittest.TestCase):
                         main()
                     self.assertEqual(cm.exception.code, 0)
                     mock_func.assert_called_once()
+
+
+class TestMainOpenAIWiring(unittest.TestCase):
+    """Regression tests for root CLI OpenAI wiring"""
+
+    @patch("argparse.ArgumentParser.print_help")
+    def test_main_registers_openai_subparser(self, mock_help):
+        """Test main() calls register_openai during parser wiring"""
+        with patch("tensorneko_tool.__main__.register_gotify"):
+            with patch("tensorneko_tool.__main__.register_dep_check"):
+                with patch(
+                    "tensorneko_tool.__main__.register_openai"
+                ) as mock_register_openai:
+                    with patch.object(sys, "argv", ["tensorneko"]):
+                        with self.assertRaises(SystemExit) as cm:
+                            main()
+
+        self.assertEqual(cm.exception.code, 0)
+        mock_help.assert_called_once()
+        mock_register_openai.assert_called_once()
+
+    def test_main_openai_help_succeeds_and_lists_nested_subcommands(self):
+        """Test `tensorneko openai --help` exposes test/chat/list"""
+        buffer = io.StringIO()
+
+        with patch.object(sys, "argv", ["tensorneko", "openai", "--help"]):
+            with redirect_stdout(buffer):
+                with self.assertRaises(SystemExit) as cm:
+                    main()
+
+        help_text = buffer.getvalue()
+        self.assertEqual(cm.exception.code, 0)
+        self.assertIn("{test,chat,list}", help_text)
+
+    def test_main_openai_test_help_succeeds_and_mentions_no_live(self):
+        """Test `tensorneko openai test --help` includes --no-live option"""
+        buffer = io.StringIO()
+
+        with patch.object(sys, "argv", ["tensorneko", "openai", "test", "--help"]):
+            with redirect_stdout(buffer):
+                with self.assertRaises(SystemExit) as cm:
+                    main()
+
+        help_text = buffer.getvalue()
+        self.assertEqual(cm.exception.code, 0)
+        self.assertIn("--no-live", help_text)
+        self.assertIn("Disable live dashboard rendering", help_text)
 
 
 if __name__ == "__main__":
