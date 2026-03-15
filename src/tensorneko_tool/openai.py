@@ -19,6 +19,7 @@ from typing import (
     cast,
 )
 from urllib.error import HTTPError, URLError
+from rich.console import Console
 from rich.live import Live
 from rich.table import Table
 
@@ -116,6 +117,7 @@ _TEST_CHEAP_MODEL_ALLOWLIST = (
 _DEFAULT_CHAT_MODEL = "gpt-4.1-mini"
 
 _DEFAULT_OPENAI_ENDPOINT = "https://api.openai.com/v1"
+_OPENAI_ERROR_CONSOLE = Console(stderr=True)
 
 _OPENAI_EXIT_CODES: dict[str, int] = {
     "success": 0,
@@ -746,6 +748,71 @@ def _render_chat_plain_text(text: str, *, append: bool = False) -> None:
     utils.console.print(text)
 
 
+def _build_human_error_summary(
+    *,
+    command: str,
+    error: _NormalizedError | None,
+    endpoint: str | None = None,
+    stage: str | None = None,
+) -> str:
+    normalized_command = _normalize_optional_text(command) or "openai"
+    normalized_stage = _normalize_optional_text(stage)
+    normalized_endpoint = _normalize_optional_text(endpoint)
+
+    title = f"OpenAI {normalized_command} failed"
+    if normalized_stage is not None and normalized_command == "test":
+        title = f"{title} during {normalized_stage}"
+
+    if error is None:
+        if normalized_endpoint is not None:
+            return f"{title} (endpoint={normalized_endpoint})."
+        return f"{title}."
+
+    details: list[str] = []
+    if normalized_endpoint is not None:
+        details.append(f"endpoint={normalized_endpoint}")
+
+    http_status = error.get("http_status")
+    if isinstance(http_status, int):
+        details.append(f"http={http_status}")
+
+    error_type = _normalize_optional_text(error.get("error_type"))
+    if error_type is not None:
+        details.append(f"type={error_type}")
+
+    error_code = _normalize_optional_text(error.get("error_code"))
+    if error_code is not None and error_code != error_type:
+        details.append(f"code={error_code}")
+
+    detail_prefix = f" ({', '.join(details)})" if len(details) > 0 else ""
+    message = _normalize_optional_text(error.get("message")) or "Request failed."
+    return f"{title}{detail_prefix}: {message}"
+
+
+def _render_human_error_to_stderr(message: str) -> None:
+    _OPENAI_ERROR_CONSOLE.print(f"[bold red]{message}[/bold red]")
+
+
+def _emit_human_error(
+    *,
+    output_precedence: _OutputPrecedence,
+    command: str,
+    error: _NormalizedError | None,
+    endpoint: str | None = None,
+    stage: str | None = None,
+) -> None:
+    if not output_precedence["human"] or error is None:
+        return
+    _render_human_error_to_stderr(
+        _build_human_error_summary(
+            command=command,
+            error=error,
+            endpoint=endpoint,
+            stage=stage,
+        )
+    )
+
+
 def _build_list_table(models: list[_ListModel]) -> Table:
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Model ID")
@@ -1372,6 +1439,13 @@ def run_test(_args: argparse.Namespace) -> int:
             started_at=started_at,
             finished_at=finished_at,
             error=error,
+        )
+        _emit_human_error(
+            output_precedence=output_precedence,
+            command="test",
+            error=error,
+            endpoint=endpoint_base,
+            stage=stage,
         )
         return exit_code
 
@@ -2248,6 +2322,12 @@ def run_chat(_args: argparse.Namespace) -> int:
             finished_at=finished_at,
             error=error,
         )
+        _emit_human_error(
+            output_precedence=output_precedence,
+            command="chat",
+            error=error,
+            endpoint=endpoint_base,
+        )
         return exit_code
 
     try:
@@ -2469,6 +2549,12 @@ def run_list(_args: argparse.Namespace) -> int:
             started_at=started_at,
             finished_at=finished_at,
             error=error,
+        )
+        _emit_human_error(
+            output_precedence=output_precedence,
+            command="list",
+            error=error,
+            endpoint=endpoint_base,
         )
         if ok and output_precedence["human"]:
             _render_list_table_and_summary(resolved_models, endpoint=endpoint_base)

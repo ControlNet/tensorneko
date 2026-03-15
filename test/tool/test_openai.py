@@ -779,6 +779,28 @@ class TestOpenAIRenderContracts(unittest.TestCase):
         openai_module._render_chat_plain_text("hello", append=True)
         mock_console.print.assert_called_once_with("hello", end="")
 
+    def test_build_human_error_summary_includes_context(self):
+        error = _normalized_error(
+            kind="http_error",
+            http_status=401,
+            error_type="invalid_api_key",
+        )
+        error["error_code"] = "invalid_api_key"
+        error["message"] = "Incorrect API key provided"
+
+        summary = openai_module._build_human_error_summary(
+            command="test",
+            error=error,
+            endpoint="https://api.example.com/v1",
+            stage="auth",
+        )
+
+        self.assertIn("OpenAI test failed during auth", summary)
+        self.assertIn("endpoint=https://api.example.com/v1", summary)
+        self.assertIn("http=401", summary)
+        self.assertIn("type=invalid_api_key", summary)
+        self.assertIn("Incorrect API key provided", summary)
+
     @patch("tensorneko_tool.openai._build_list_summary_text")
     @patch("tensorneko_tool.openai._build_list_table")
     @patch("tensorneko_tool.openai.utils.console")
@@ -2353,6 +2375,32 @@ class TestOpenAIListHumanOutput(unittest.TestCase):
         self.assertIn("Total models: 2", summary_text)
         self.assertIn("Endpoint: https://api.example.com/v1", summary_text)
 
+    @patch("tensorneko_tool.openai._render_human_error_to_stderr")
+    @patch("tensorneko_tool.openai._request_json_with_retry")
+    def test_list_failure_prints_human_error_summary(
+        self,
+        mock_request,
+        mock_print_error,
+    ):
+        models_error = _normalized_error(
+            kind="http_error",
+            http_status=500,
+            error_type="server_error",
+        )
+        models_error["message"] = "server overloaded"
+        mock_request.return_value = _request_fail(error=models_error)
+
+        code = openai_module.run_list(_make_list_args())
+
+        self.assertEqual(code, 30)
+        mock_print_error.assert_called_once()
+        error_summary = cast(str, mock_print_error.call_args.args[0])
+        self.assertIn("OpenAI list failed", error_summary)
+        self.assertIn("endpoint=https://api.example.com/v1", error_summary)
+        self.assertIn("http=500", error_summary)
+        self.assertIn("type=server_error", error_summary)
+        self.assertIn("server overloaded", error_summary)
+
 
 class TestOpenAIListDataParsing(unittest.TestCase):
     @patch("tensorneko_tool.openai.utils.console")
@@ -2643,6 +2691,38 @@ class TestOpenAIJsonChatSchema(unittest.TestCase):
         _assert_timestamp_pair(self, payload)
         self.assertIsNone(payload["error"])
 
+    @patch("tensorneko_tool.openai._render_human_error_to_stderr")
+    @patch("tensorneko_tool.openai._render_chat_plain_text")
+    @patch("tensorneko_tool.openai._request_json_with_retry")
+    def test_chat_human_error_prints_summary(
+        self,
+        mock_request,
+        mock_render,
+        mock_print_error,
+    ):
+        auth_error = _normalized_error(
+            kind="http_error",
+            http_status=401,
+            error_type="invalid_api_key",
+        )
+        auth_error["error_code"] = "invalid_api_key"
+        auth_error["message"] = "Incorrect API key provided"
+        mock_request.return_value = _request_fail(error=auth_error)
+
+        args = _make_chat_args(message="hello", no_stream=True, json=False, quiet=False)
+        with patch("sys.stdin", _FakeStdin("", is_tty=True)):
+            code = openai_module.run_chat(args)
+
+        self.assertEqual(code, 20)
+        mock_render.assert_not_called()
+        mock_print_error.assert_called_once()
+        error_summary = cast(str, mock_print_error.call_args.args[0])
+        self.assertIn("OpenAI chat failed", error_summary)
+        self.assertIn("endpoint=https://api.example.com/v1", error_summary)
+        self.assertIn("http=401", error_summary)
+        self.assertIn("type=invalid_api_key", error_summary)
+        self.assertIn("Incorrect API key provided", error_summary)
+
     @patch("tensorneko_tool.openai._render_chat_plain_text")
     @patch("tensorneko_tool.openai.utils.console")
     @patch("tensorneko_tool.openai._request_json_with_retry")
@@ -2848,6 +2928,81 @@ class TestOpenAIJsonListSchema(unittest.TestCase):
         self.assertEqual(payload["models"], [])
         _assert_timestamp_pair(self, payload)
         _assert_json_error_schema(self, payload["error"])
+
+
+class TestOpenAITestHumanErrorOutput(unittest.TestCase):
+    @patch("tensorneko_tool.openai._render_human_error_to_stderr")
+    @patch("tensorneko_tool.openai._render_test_dashboard_if_human")
+    @patch("tensorneko_tool.openai._request_json_with_retry")
+    def test_test_failure_prints_human_error_summary(
+        self,
+        mock_request,
+        mock_render_dashboard,
+        mock_print_error,
+    ):
+        network_error = _normalized_error(
+            kind="transport_error",
+            error_type="timeout_error",
+        )
+        network_error["message"] = "timed out while connecting"
+        mock_request.return_value = _request_fail(error=network_error)
+
+        code = openai_module.run_test(
+            _make_test_args(mode="network", no_live=True, json=False, quiet=False)
+        )
+
+        self.assertEqual(code, 10)
+        mock_render_dashboard.assert_called_once()
+        mock_print_error.assert_called_once()
+        error_summary = cast(str, mock_print_error.call_args.args[0])
+        self.assertIn("OpenAI test failed during network", error_summary)
+        self.assertIn("endpoint=https://api.example.com/v1", error_summary)
+        self.assertIn("type=timeout_error", error_summary)
+        self.assertIn("timed out while connecting", error_summary)
+
+    @patch("tensorneko_tool.openai._render_human_error_to_stderr")
+    @patch("tensorneko_tool.openai.utils.console")
+    @patch("tensorneko_tool.openai._request_json_with_retry")
+    def test_list_json_error_does_not_emit_human_stderr_summary(
+        self,
+        mock_request,
+        mock_console,
+        mock_print_stderr_error,
+    ):
+        mock_console.print = MagicMock()
+        models_error = _normalized_error(
+            kind="http_error",
+            http_status=500,
+            error_type="server_error",
+        )
+        models_error["message"] = "server overloaded"
+        mock_request.return_value = _request_fail(error=models_error)
+
+        code = openai_module.run_list(_make_list_args(json=True, quiet=False))
+
+        self.assertEqual(code, 30)
+        mock_print_stderr_error.assert_not_called()
+        self.assertEqual(mock_console.print.call_count, 1)
+
+    @patch("tensorneko_tool.openai._render_human_error_to_stderr")
+    @patch("tensorneko_tool.openai._request_json_with_retry")
+    def test_list_quiet_error_does_not_emit_human_stderr_summary(
+        self,
+        mock_request,
+        mock_print_stderr_error,
+    ):
+        models_error = _normalized_error(
+            kind="http_error",
+            http_status=500,
+            error_type="server_error",
+        )
+        models_error["message"] = "server overloaded"
+        mock_request.return_value = _request_fail(error=models_error)
+
+        code = openai_module.run_list(_make_list_args(json=False, quiet=True))
+
+        self.assertEqual(code, 30)
+        mock_print_stderr_error.assert_not_called()
 
 
 if __name__ == "__main__":
