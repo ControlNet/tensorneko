@@ -12,6 +12,7 @@ from .video import VideoReader
 
 try:
     from .matlab import MatReader
+
     scipy_available = True
 except ImportError:
     scipy_available = False
@@ -19,6 +20,7 @@ except ImportError:
 
 try:
     from .yaml import YamlReader
+
     yaml_available = True
 except ImportError:
     YamlReader = object
@@ -26,6 +28,7 @@ except ImportError:
 
 try:
     from .hdf5 import Hdf5Reader
+
     h5py_available = True
 except ImportError:
     Hdf5Reader = object
@@ -33,6 +36,7 @@ except ImportError:
 
 try:
     from .toml import TomlReader
+
     toml_available = True
 except ImportError:
     TomlReader = object
@@ -40,7 +44,6 @@ except ImportError:
 
 
 class Reader:
-
     def __init__(self):
         self.image = ImageReader
         self.text = TextReader
@@ -91,10 +94,15 @@ class Reader:
             raise ImportError("To use the toml reader, please install toml.")
 
     def __call__(self, path: Union[str, Path], *args, **kwargs) -> Any:
-        """Automatically infer the file type and return the corresponding result. """
+        """Automatically infer the file type and return the corresponding result."""
         path = _path2str(path)
 
-        if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png") or path.endswith(".bmp"):
+        if (
+            path.endswith(".jpg")
+            or path.endswith(".jpeg")
+            or path.endswith(".png")
+            or path.endswith(".bmp")
+        ):
             return self.image(path, *args, **kwargs)
         elif path.endswith(".txt"):
             return self.text(path, *args, **kwargs)
@@ -102,22 +110,30 @@ class Reader:
             return self.json(path, *args, **kwargs)
         elif path.endswith(".npy") or path.endswith(".npz"):
             return self.npy(path, *args, **kwargs)
-        elif path.endswith(".mp4") or path.endswith(".avi") or path.endswith(".mov") or path.endswith(".mkv"):
+        elif (
+            path.endswith(".mp4")
+            or path.endswith(".avi")
+            or path.endswith(".mov")
+            or path.endswith(".mkv")
+        ):
             return self.video(path, *args, **kwargs)
         elif path.endswith(".wav") or path.endswith(".mp3") or path.endswith(".flac"):
             return self.audio(path, *args, **kwargs)
         elif path.endswith(".pkl") or path.endswith(".pickle"):
-            assert len(args) == 0 and len(kwargs) == 0, "Pickle reader does not support extra arguments."
+            if len(args) != 0 or len(kwargs) != 0:
+                raise TypeError("Pickle reader does not support extra arguments.")
             return self.pickle(path)
         elif path.endswith(".mat"):
             return self.mat(path, *args, **kwargs)
         elif path.endswith(".yaml") or path.endswith(".yml"):
             return self.yaml(path, *args, **kwargs)
         elif path.endswith(".h5") or path.endswith(".hdf5"):
-            assert len(args) == 0 and len(kwargs) == 0, "Hdf5 reader does not support extra arguments."
+            if len(args) != 0 or len(kwargs) != 0:
+                raise TypeError("Hdf5 reader does not support extra arguments.")
             return self.h5(path)
         elif path.endswith(".toml"):
-            assert len(args) == 0 and len(kwargs) == 0, "Toml reader does not support extra arguments."
+            if len(args) != 0 or len(kwargs) != 0:
+                raise TypeError("Toml reader does not support extra arguments.")
             return self.toml(path)
         else:
             raise ValueError("Unknown file type: {}".format(path))

@@ -366,12 +366,11 @@ class TestReaderDispatch(unittest.TestCase):
         p.write_text('{"b": 2}')
         self.assertEqual(self.reader(p), {"b": 2})
 
-    # --- pickle extra args assertion ---
     def test_pickle_rejects_extra_args(self):
         p = os.path.join(self.tmpdir, "data.pkl")
         with open(p, "wb") as f:
             pickle.dump({}, f)
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             self.reader(p, "extra_arg")
 
 
@@ -644,10 +643,9 @@ class TestWriterDispatch(unittest.TestCase):
         self.writer(p, {"b": 2})
         self.assertEqual(json.loads(p.read_text()), {"b": 2})
 
-    # --- pickle extra args assertion ---
     def test_pickle_rejects_extra_args(self):
         p = os.path.join(self.tmpdir, "data.pkl")
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(TypeError):
             self.writer(p, {}, "extra_arg")
 
     # --- npz dispatch (NpyWriter.to_npz expects keyword args, not positional array) ---

@@ -33,11 +33,13 @@ class PositionalEmbedding(NekoModule):
 
     """
 
-    def __init__(self, input_shape: Shape, dropout_rate: float = 0.5, trainable: bool = True):
+    def __init__(
+        self, input_shape: Shape, dropout_rate: float = 0.5, trainable: bool = True
+    ):
         super().__init__()
         self.input_shape = input_shape
         self.emb = Parameter(zeros(1, *input_shape), requires_grad=trainable)
-        self.use_dropout = dropout_rate is not None and dropout_rate != 0.
+        self.use_dropout = dropout_rate is not None and dropout_rate != 0.0
         if self.use_dropout:
             self.dropout = Dropout(dropout_rate)
 
@@ -78,7 +80,8 @@ class AbstractNonTrainablePositionalEmbedding(PositionalEmbedding, ABC):
 
     def __init__(self, input_shape: Shape, dropout_rate: float = 0.5):
         super().__init__(input_shape, dropout_rate, trainable=False)
-        self.emb.data = self.make_embedding().unsqueeze(0)
+        with torch.no_grad():
+            self.emb.copy_(self.make_embedding().unsqueeze(0))
 
     @abstractmethod
     def make_embedding(self) -> Tensor:
@@ -108,9 +111,12 @@ class SinCosPositionalEmbedding(AbstractNonTrainablePositionalEmbedding):
 
         def get_position_angle_vec(position):
             return position / torch.tensor(10000).pow(
-                2 * torch.div(torch.arange(d_hid), 2, rounding_mode='trunc') / d_hid)
+                2 * torch.div(torch.arange(d_hid), 2, rounding_mode="trunc") / d_hid
+            )
 
-        sinusoid_table = torch.stack([get_position_angle_vec(pos_i) for pos_i in range(n_position)], 0)
+        sinusoid_table = torch.stack(
+            [get_position_angle_vec(pos_i) for pos_i in range(n_position)], 0
+        )
         sinusoid_table[:, 0::2] = torch.sin(sinusoid_table[:, 0::2])  # dim 2i
         sinusoid_table[:, 1::2] = torch.cos(sinusoid_table[:, 1::2])  # dim 2i+1
 

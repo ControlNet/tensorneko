@@ -5,10 +5,9 @@ Auto-detects the type of each field in a PyTorch Dataset sample:
   "image", "text", "scalar", "tensor", "json"
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Hashable, Optional, Tuple
 
 import numpy as np
-from torch import Tensor
 
 # Type constants
 IMAGE = "image"
@@ -70,14 +69,19 @@ def infer_field_type(value: Any) -> str:
         pass
 
     # torch.Tensor
-    if isinstance(value, Tensor):
-        # Move to CPU for inspection if needed
-        t = value.detach().cpu()
-        if t.ndim == 0:
-            return SCALAR
-        if _is_image_shape(t.shape):
-            return IMAGE
-        return TENSOR
+    try:
+        import torch
+
+        if isinstance(value, torch.Tensor):
+            # Move to CPU for inspection if needed
+            t = value.detach().cpu()
+            if t.ndim == 0:
+                return SCALAR
+            if _is_image_shape(t.shape):
+                return IMAGE
+            return TENSOR
+    except ImportError:
+        pass
 
     # numpy.ndarray
     if isinstance(value, np.ndarray):
@@ -101,6 +105,30 @@ def infer_field_type(value: Any) -> str:
     return TENSOR
 
 
+def normalize_sample_with_raw_keys(
+    sample: Any,
+) -> Tuple[Dict[str, Any], Dict[str, Hashable]]:
+    if sample is None:
+        return {}, {}
+
+    if isinstance(sample, dict):
+        normalized: Dict[str, Any] = {}
+        raw_key_map: Dict[str, Hashable] = {}
+        for key, value in sample.items():
+            display_key = str(key)
+            normalized[display_key] = value
+            raw_key_map[display_key] = key
+        return normalized, raw_key_map
+
+    if isinstance(sample, (tuple, list)):
+        normalized = {str(i): value for i, value in enumerate(sample)}
+        raw_key_map = {str(i): i for i in range(len(sample))}
+        return normalized, raw_key_map
+
+    # Single value (Tensor, scalar, string, etc.)
+    return {"0": sample}, {"0": 0}
+
+
 def normalize_sample(sample: Any) -> Dict[str, Any]:
     """Convert any sample format to a uniform ``{str_key: value}`` dict.
 
@@ -116,17 +144,8 @@ def normalize_sample(sample: Any) -> Dict[str, Any]:
     Returns:
         A dict with string keys mapping to the original field values.
     """
-    if sample is None:
-        return {}
-
-    if isinstance(sample, dict):
-        return {str(k): v for k, v in sample.items()}
-
-    if isinstance(sample, (tuple, list)):
-        return {str(i): v for i, v in enumerate(sample)}
-
-    # Single value (Tensor, scalar, string, etc.)
-    return {"0": sample}
+    normalized, _ = normalize_sample_with_raw_keys(sample)
+    return normalized
 
 
 def infer_schema(

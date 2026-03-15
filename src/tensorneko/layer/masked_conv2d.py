@@ -50,17 +50,38 @@ class _MaskedConv2d(Conv2d):
 
     """
 
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: Union[int, Tuple[int, ...]],
-        stride: Union[int, Tuple[int, ...]] = 1, padding: Union[int, Tuple[int, ...], str] = 0,
-        dilation: Union[int, Tuple[int, ...]] = 1, groups: int = 1, bias: bool = True, padding_mode: str = 'zeros',
-        device=None, dtype=None
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        kernel_size: Union[int, Tuple[int, ...]],
+        stride: Union[int, Tuple[int, ...]] = 1,
+        padding: Union[int, Tuple[int, ...], str] = 0,
+        dilation: Union[int, Tuple[int, ...]] = 1,
+        groups: int = 1,
+        bias: bool = True,
+        padding_mode: str = "zeros",
+        device=None,
+        dtype=None,
     ):
-        super().__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias, padding_mode,
-                         device, dtype)
+        super().__init__(
+            in_channels,
+            out_channels,
+            kernel_size,
+            stride,
+            padding,
+            dilation,
+            groups,
+            bias,
+            padding_mode,
+            device,
+            dtype,
+        )
         self.register_buffer("mask", self.make_mask())
 
     def forward(self, x: Tensor) -> Tensor:
-        self.weight.data *= self.mask
+        with torch.no_grad():
+            self.weight.mul_(self.mask)
         return super().forward(x)
 
     @abstractmethod
@@ -69,27 +90,24 @@ class _MaskedConv2d(Conv2d):
 
 
 class _MaskedConv2dA(_MaskedConv2d):
-
     def make_mask(self) -> Tensor:
-        mask = torch.ones(self.weight.data.shape)
+        mask = torch.ones(self.weight.shape)
         _, _, kernel_h, kernel_w = self.weight.size()
-        mask[:, :, kernel_h // 2, kernel_w // 2:] = 0
-        mask[:, :, kernel_h // 2 + 1:] = 0
+        mask[:, :, kernel_h // 2, kernel_w // 2 :] = 0
+        mask[:, :, kernel_h // 2 + 1 :] = 0
         return mask
 
 
 class _MaskedConv2dB(_MaskedConv2d):
-
     def make_mask(self) -> Tensor:
-        mask = torch.ones(self.weight.data.shape)
+        mask = torch.ones(self.weight.shape)
         _, _, kernel_h, kernel_w = self.weight.size()
-        mask[:, :, kernel_h // 2, kernel_w // 2 + 1:] = 0
-        mask[:, :, kernel_h // 2 + 1:] = 0
+        mask[:, :, kernel_h // 2, kernel_w // 2 + 1 :] = 0
+        mask[:, :, kernel_h // 2 + 1 :] = 0
         return mask
 
 
 class MaskedConv2dA(_Conv[_MaskedConv2dA]):
-
     @property
     def _class_name(self) -> str:
         return "tensorneko.layer.MaskedConv2dA"
@@ -100,7 +118,6 @@ class MaskedConv2dA(_Conv[_MaskedConv2dA]):
 
 
 class MaskedConv2dB(_Conv[_MaskedConv2dB]):
-
     @property
     def _class_name(self) -> str:
         return "tensorneko.layer.MaskedConv2dB"
@@ -110,44 +127,36 @@ class MaskedConv2dB(_Conv[_MaskedConv2dB]):
         return _MaskedConv2dB
 
 
-MaskedConv2d = {
-    "A": MaskedConv2dA,
-    "B": MaskedConv2dB
-}
+MaskedConv2d = {"A": MaskedConv2dA, "B": MaskedConv2dB}
 
 
 class _VerticalStackConv2dA(_MaskedConv2d):
-
     def make_mask(self) -> Tensor:
-        mask = torch.ones(self.weight.data.shape)
+        mask = torch.ones(self.weight.shape)
         _, _, kernel_h, kernel_w = self.weight.size()
-        print(self.weight.size())
-        mask[:, :, kernel_h // 2:] = 0
+        mask[:, :, kernel_h // 2 :] = 0
         return mask
 
 
 class _VerticalStackConv2dB(_MaskedConv2d):
-
     def make_mask(self) -> Tensor:
-        mask = torch.ones(self.weight.data.shape)
+        mask = torch.ones(self.weight.shape)
         _, _, kernel_h, kernel_w = self.weight.size()
-        mask[:, :, kernel_h // 2 + 1:] = 0
+        mask[:, :, kernel_h // 2 + 1 :] = 0
         return mask
 
 
 class _HorizontalStackConv2dA(_MaskedConv2d):
-
     def make_mask(self) -> Tensor:
-        mask = torch.ones(self.weight.data.shape)
+        mask = torch.ones(self.weight.shape)
         _, _, kernel_h, kernel_w = self.weight.size()
-        mask[:, :, :, kernel_w // 2:] = 0
+        mask[:, :, :, kernel_w // 2 :] = 0
         return mask
 
 
 class _HorizontalStackConv2dB(_MaskedConv2d):
-
     def make_mask(self) -> Tensor:
-        mask = torch.ones(self.weight.data.shape)
+        mask = torch.ones(self.weight.shape)
         _, _, kernel_h, kernel_w = self.weight.size()
-        mask[:, :, :, kernel_w // 2 + 1:] = 0
+        mask[:, :, :, kernel_w // 2 + 1 :] = 0
         return mask

@@ -6,8 +6,12 @@ from typing import Optional
 from urllib.error import HTTPError
 
 
-def push(message: str, url: Optional[str] = None, token: Optional[str] = None, title: Optional[str] = None,
-    priority: int = 0
+def push(
+    message: str,
+    url: Optional[str] = None,
+    token: Optional[str] = None,
+    title: Optional[str] = None,
+    priority: int = 0,
 ):
     """
     Push a message to a Gotify server.
@@ -29,18 +33,28 @@ def push(message: str, url: Optional[str] = None, token: Optional[str] = None, t
     title = title or os.environ.get("GOTIFY_TITLE") or socket.gethostname()
     url = url or os.environ.get("GOTIFY_URL")
     if url is None:
-        raise ValueError("URL is not provided. Input url argument or set the environment variable GOTIFY_URL.")
+        raise ValueError(
+            "URL is not provided. Input url argument or set the environment variable GOTIFY_URL."
+        )
     token = token or os.environ.get("GOTIFY_TOKEN")
     if token is None:
-        raise ValueError("Token is not provided. Input token argument or set the environment variable GOTIFY_TOKEN.")
-    url = f"{url.rstrip('/')}/message?token={token}"
+        raise ValueError(
+            "Token is not provided. Input token argument or set the environment variable GOTIFY_TOKEN."
+        )
+    url = f"{url.rstrip('/')}/message"
     data = json.dumps(
         {"title": title, "message": message, "priority": priority}
     ).encode("utf-8")
-    req = urllib.request.Request(url, data=data, method="POST", headers={
-        "Content-Type": "application/json",
-        "User-Agent": "TensorNeko"
-    })
+    req = urllib.request.Request(
+        url,
+        data=data,
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "TensorNeko",
+            "X-Gotify-Key": token,
+        },
+    )
     try:
         with urllib.request.urlopen(req) as res:
             pass

@@ -38,7 +38,9 @@ class FaceXZooFaceDetector(AbstractFaceDetector):
         try:
             import cv2
         except ImportError:
-            raise ImportError("OpenCV and opencv-contrib-python is not installed. Please install it first.")
+            raise ImportError(
+                "OpenCV and opencv-contrib-python is not installed. Please install it first."
+            )
 
         self.cv2 = cv2
 
@@ -49,16 +51,22 @@ class FaceXZooFaceDetector(AbstractFaceDetector):
                 face_sdk_path = "FaceX-Zoo"
                 sys.path.append(face_sdk_path)
         try:
-            from core.model_handler.face_detection.FaceDetModelHandler import FaceDetModelHandler
-            from core.model_loader.face_detection.FaceDetModelLoader import FaceDetModelLoader
+            from core.model_handler.face_detection.FaceDetModelHandler import (
+                FaceDetModelHandler,
+            )
+            from core.model_loader.face_detection.FaceDetModelLoader import (
+                FaceDetModelLoader,
+            )
         except ImportError:
-            raise ImportError("FaceX-Zoo cannot be imported, please specify the path to the face_sdk path of FaceXZoo"
-                              " or put it in the working directory.")
+            raise ImportError(
+                "FaceX-Zoo cannot be imported, please specify the path to the face_sdk path of FaceXZoo"
+                " or put it in the working directory."
+            )
 
         model_conf = read.yaml(os.path.join(face_sdk_path, "config", "model_conf.yaml"))
-        model_path = os.path.join(face_sdk_path, 'models')
-        scene = 'non-mask'
-        model_category = 'face_detection'
+        model_path = os.path.join(face_sdk_path, "models")
+        scene = "non-mask"
+        model_category = "face_detection"
         model_name = model_conf[scene][model_category]
 
         faceDetModelLoader = FaceDetModelLoader(model_path, model_category, model_name)
@@ -81,18 +89,32 @@ class FaceXZooFaceDetector(AbstractFaceDetector):
         if os.path.exists(path):
             return path
 
-        os.system(f"git clone --depth=1 https://github.com/ControlNet/FaceX-Zoo {path or ''}")
+        os.system(
+            f"git clone --depth=1 https://github.com/ControlNet/FaceX-Zoo {path or ''}"
+        )
         return path
 
     def detect_face(self, image: ndarray, *args, **kwargs):
-        assert image.ndim == 3 and image.shape[2] == 3, "frame should be 3-dim"
+        if image.ndim != 3 or image.shape[2] != 3:
+            raise ValueError("frame should be 3-dim")
         dets = self.faceDetModelHandler.inference_on_image(image)
         return dets
 
-    def crop_image(self, image_path: str, out_path: str, max_faces=1, margin=0, *args, **kwargs) -> None:
+    def crop_image(
+        self, image_path: str, out_path: str, max_faces=1, margin=0, *args, **kwargs
+    ) -> None:
         detector_model_crop_image(self, image_path, out_path, max_faces, margin)
 
-    def crop_video(self, video_path: str, out_path: str, frame_size: Optional[Union[int, Tuple[int, int]]] = None,
-        margin=0, fourcc="mp4v", *args, **kwargs
+    def crop_video(
+        self,
+        video_path: str,
+        out_path: str,
+        frame_size: Optional[Union[int, Tuple[int, int]]] = None,
+        margin=0,
+        fourcc="mp4v",
+        *args,
+        **kwargs,
     ) -> None:
-        detector_model_crop_video(self, video_path, out_path, frame_size, margin, fourcc)
+        detector_model_crop_video(
+            self, video_path, out_path, frame_size, margin, fourcc
+        )

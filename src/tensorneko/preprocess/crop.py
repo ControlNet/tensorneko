@@ -9,8 +9,14 @@ from tensorneko_util.preprocess.crop import crop_with_padding as _crop_with_padd
 
 
 @dispatch.base(_crop_with_padding)
-def crop_with_padding(image: Tensor, x1: int, x2: int, y1: int, y2: int, pad_value: Union[int, float] = 0.,
-    batch: bool = False
+def crop_with_padding(
+    image: Tensor,
+    x1: int,
+    x2: int,
+    y1: int,
+    y2: int,
+    pad_value: Union[int, float] = 0.0,
+    batch: bool = False,
 ) -> Tensor:
     """
     Crop image with padding.
@@ -30,7 +36,8 @@ def crop_with_padding(image: Tensor, x1: int, x2: int, y1: int, y2: int, pad_val
         :class:`~numpy.ndarray`: Cropped image.
 
     """
-    assert y2 > y1 and x2 > x1, "Should follow y2 > y1 and x2 > x1"
+    if y2 <= y1 or x2 <= x1:
+        raise ValueError("Should follow y2 > y1 and x2 > x1")
 
     # normalize the dimension to [B, C, H, W]
     if not batch:
@@ -43,7 +50,9 @@ def crop_with_padding(image: Tensor, x1: int, x2: int, y1: int, y2: int, pad_val
     if len(image.shape) == 3:
         image = rearrange(image, "b h w -> b 1 h w")
     elif len(image.shape) != 4:
-        raise ValueError("Invalid shape, the image should be one of following shapes: ([B,] H, W) or ([B,] C, H, W)")
+        raise ValueError(
+            "Invalid shape, the image should be one of following shapes: ([B,] H, W) or ([B,] C, H, W)"
+        )
 
     b, c, h, w = image.shape
     cropped = torch.full((b, c, *crop_shape), pad_value, dtype=image.dtype)
@@ -53,16 +62,23 @@ def crop_with_padding(image: Tensor, x1: int, x2: int, y1: int, y2: int, pad_val
     end = torch.tensor([y2, x2])
 
     # compute cropped index of image
-    image_y_start, image_x_start = torch.clamp(begin, min=torch.tensor(0), max=image_shape)
+    image_y_start, image_x_start = torch.clamp(
+        begin, min=torch.tensor(0), max=image_shape
+    )
     image_y_end, image_x_end = torch.clamp(end, min=torch.tensor(0), max=image_shape)
 
     # compute target index of output
-    crop_y_start, crop_x_start = torch.clamp(-begin, min=torch.tensor(0), max=crop_shape)
-    crop_y_end, crop_x_end = crop_shape - torch.clamp(end - image_shape, min=torch.tensor(0), max=crop_shape)
+    crop_y_start, crop_x_start = torch.clamp(
+        -begin, min=torch.tensor(0), max=crop_shape
+    )
+    crop_y_end, crop_x_end = crop_shape - torch.clamp(
+        end - image_shape, min=torch.tensor(0), max=crop_shape
+    )
 
     # assign values
-    cropped[:, :, crop_y_start:crop_y_end, crop_x_start:crop_x_end] = \
-        image[:, :, image_y_start:image_y_end, image_x_start:image_x_end]
+    cropped[:, :, crop_y_start:crop_y_end, crop_x_start:crop_x_end] = image[
+        :, :, image_y_start:image_y_end, image_x_start:image_x_end
+    ]
 
     # remove channel or batch dimension if the input don't have
     if not has_channel:

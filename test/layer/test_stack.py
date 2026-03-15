@@ -82,8 +82,7 @@ class TestStack(unittest.TestCase):
             Stack(mode="invalid_mode")
         self.assertIn("Not a valid `mode` argument", str(context.exception))
 
-    def test_mode_and_dim_conflict_raises_assertion_error(self):
-        """Test that specifying mode and dim together raises AssertionError"""
-        with self.assertRaises(AssertionError) as context:
+    def test_mode_and_dim_conflict_raises_value_error(self):
+        with self.assertRaises(ValueError) as context:
             Stack(mode="v", dim=1)
         self.assertIn("Other modes cannot specify the dim", str(context.exception))

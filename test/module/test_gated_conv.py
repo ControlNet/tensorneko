@@ -16,7 +16,7 @@ class TestGatedConv(unittest.TestCase):
         self.assertFalse(model.residual is None)
 
     def test_init_invalid_mask_type(self):
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             GatedConv("C", in_channels=4, kernel_size=3, padding=1)
 
     def test_activation(self):

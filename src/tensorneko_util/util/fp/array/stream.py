@@ -11,7 +11,6 @@ from ....backend.parallel import ParallelType, ExecutorPool
 
 
 class Stream(AbstractSeq[T]):
-
     def __init__(self, iterable: Iterable[T] = iter(())):
         self._iter = iter(iterable)
         self._cache: List[T] = []
@@ -24,10 +23,10 @@ class Stream(AbstractSeq[T]):
         return Stream(items)
 
     @staticmethod
-    def from_stream(stream: Stream[T]) -> Stream[T]:
-        stream = Stream(stream._iter)
-        stream._cache = stream._cache
-        return stream
+    def from_stream(source: Stream[T]) -> Stream[T]:
+        new_stream = Stream(source._iter)
+        new_stream._cache = source._cache
+        return new_stream
 
     def __getitem__(self, item: Union[int, slice]) -> Union[T, AbstractSeq[T]]:
         if isinstance(item, int):
@@ -40,7 +39,9 @@ class Stream(AbstractSeq[T]):
             low, high, step = item.indices(maxsize)
             if step == 0:
                 raise ValueError("Step must not be 0")
-            return self.__class__() << map(self.__getitem__, range(low, high, step or 1))
+            return self.__class__() << map(
+                self.__getitem__, range(low, high, step or 1)
+            )
         else:
             raise TypeError("Invalid argument type")
 
@@ -59,7 +60,9 @@ class Stream(AbstractSeq[T]):
     def _iter_all(self) -> Generator[T, None, None]:
         return self._iter_cond(lambda i: True)
 
-    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+    def _iter_cond(
+        self, cond: Callable[[int], bool], start: int = 0
+    ) -> Generator[T, None, None]:
         i = start
         while cond(i):
             if self._cache_size > i:
@@ -84,8 +87,12 @@ class Stream(AbstractSeq[T]):
     def map(self, f: Callable[[T], R]) -> Stream[R]:
         return MapStream(self, f)
 
-    def for_each(self, f: Callable[[T], None], progress_bar: bool = False, parallel_type: Optional[ParallelType] = None,
-        **tqdm_args
+    def for_each(
+        self,
+        f: Callable[[T], None],
+        progress_bar: bool = False,
+        parallel_type: Optional[ParallelType] = None,
+        **tqdm_args,
     ) -> None:
         if parallel_type is None:
             items = self if not progress_bar else self._tqdm(self, **tqdm_args)
@@ -98,14 +105,20 @@ class Stream(AbstractSeq[T]):
                 raise NotImplementedError("lambda function is not supported yet")
 
             for item in self:
-                futures.append(ExecutorPool.submit(f, item, parallel_type=parallel_type))
+                futures.append(
+                    ExecutorPool.submit(f, item, parallel_type=parallel_type)
+                )
 
             futures = self._tqdm(futures, **tqdm_args) if progress_bar else futures
             for future in futures:
                 future.result()
 
-    def with_for_each(self, f: Callable[[T], None], progress_bar: bool = False,
-        parallel_type: Optional[ParallelType] = None, **tqdm_args
+    def with_for_each(
+        self,
+        f: Callable[[T], None],
+        progress_bar: bool = False,
+        parallel_type: Optional[ParallelType] = None,
+        **tqdm_args,
     ) -> Stream[T]:
         self.for_each(f, progress_bar, parallel_type, **tqdm_args)
         return self
@@ -147,13 +160,14 @@ class Stream(AbstractSeq[T]):
 
 
 class MapStream(Stream[T]):
-
     def __init__(self, iterable: Iterable[T], f: Callable[[T], R]):
         super().__init__(iterable)
         self._f = f
         self._cache = []
 
-    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+    def _iter_cond(
+        self, cond: Callable[[int], bool], start: int = 0
+    ) -> Generator[T, None, None]:
         i = start
         while cond(i):
             if self._cache_size > i:
@@ -172,13 +186,14 @@ class MapStream(Stream[T]):
 
 
 class FilterStream(Stream[T]):
-
     def __init__(self, iterable: Iterable[T], f: Callable[[T], bool]):
         super().__init__(iterable)
         self._f = f
         self._cache = []
 
-    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+    def _iter_cond(
+        self, cond: Callable[[int], bool], start: int = 0
+    ) -> Generator[T, None, None]:
         i = start
         while cond(i):
             if self._cache_size > i:
@@ -200,12 +215,13 @@ class FilterStream(Stream[T]):
 
 
 class FlattenStream(Stream[T]):
-
     def __init__(self, iterable: Iterable[T]):
         super().__init__(iterable)
         self._cache = []
 
-    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+    def _iter_cond(
+        self, cond: Callable[[int], bool], start: int = 0
+    ) -> Generator[T, None, None]:
         i = start
         while cond(i):
             if self._cache_size > i:
@@ -232,13 +248,14 @@ class FlattenStream(Stream[T]):
 
 
 class TakeStream(Stream[T]):
-
     def __init__(self, iterable: Iterable[T], n: int):
         super().__init__(iterable)
         self._n = n
         self._cache = []
 
-    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+    def _iter_cond(
+        self, cond: Callable[[int], bool], start: int = 0
+    ) -> Generator[T, None, None]:
         def _cond(i: int) -> bool:
             return cond(i) and i < self._n
 
@@ -246,7 +263,6 @@ class TakeStream(Stream[T]):
 
 
 class SkipStream(Stream[T]):
-
     def __init__(self, iterable: Iterable[T], n: int):
         super().__init__(iterable)
         self._n = n
@@ -258,21 +274,24 @@ class SkipStream(Stream[T]):
             next(self._iter)
         self._skip_applied = True
 
-    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+    def _iter_cond(
+        self, cond: Callable[[int], bool], start: int = 0
+    ) -> Generator[T, None, None]:
         if not self._skip_applied:
             self._apply_skip()
         return super()._iter_cond(cond, start=start)
 
 
 class RepeatStream(Stream[T]):
-
     def __init__(self, iterable: Iterable[T], n: int):
         super().__init__(iterable)
         self._cache = []
         self._n = n
         self._iter_once = False
 
-    def _iter_cond(self, cond: Callable[[int], bool], start: int = 0) -> Generator[T, None, None]:
+    def _iter_cond(
+        self, cond: Callable[[int], bool], start: int = 0
+    ) -> Generator[T, None, None]:
         i = start
         while cond(i):
             if not self._iter_once:

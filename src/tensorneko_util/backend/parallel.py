@@ -3,7 +3,7 @@ from enum import Enum
 from os import cpu_count
 from typing import Optional, Dict, Union, Tuple
 
-_num_workers = cpu_count() // 2
+_num_workers = (cpu_count() or 2) // 2
 
 
 def set_num_workers(num_workers):
@@ -21,22 +21,29 @@ class ExecutorPool:
     process_pools: Dict[str, ProcessPoolExecutor] = {}
 
     @classmethod
-    def get_thread_executor(cls, name: Optional[str] = None, num_workers: int = _num_workers) -> ThreadPoolExecutor:
+    def get_thread_executor(
+        cls, name: Optional[str] = None, num_workers: int = _num_workers
+    ) -> ThreadPoolExecutor:
         name = name or "default"
         if name not in cls.thread_pools:
             cls.thread_pools[name] = ThreadPoolExecutor(num_workers)
         return cls.thread_pools[name]
 
     @classmethod
-    def get_process_executor(cls, name: Optional[str] = None, num_workers: int = _num_workers) -> ProcessPoolExecutor:
+    def get_process_executor(
+        cls, name: Optional[str] = None, num_workers: int = _num_workers
+    ) -> ProcessPoolExecutor:
         name = name or "default"
         if name not in cls.process_pools:
             cls.process_pools[name] = ProcessPoolExecutor(num_workers)
         return cls.process_pools[name]
 
     @classmethod
-    def get(cls, name: Optional[str] = None, num_workers=_num_workers,
-        parallel_type: ParallelType = ParallelType.PROCESS
+    def get(
+        cls,
+        name: Optional[str] = None,
+        num_workers=_num_workers,
+        parallel_type: ParallelType = ParallelType.PROCESS,
     ) -> Executor:
         if parallel_type == ParallelType.THREAD:
             return cls.get_thread_executor(name, num_workers)
@@ -49,7 +56,11 @@ class ExecutorPool:
     def __class_getitem__(cls, item: Union[str, Tuple[str, ParallelType]]) -> Executor:
         if isinstance(item, str):
             if item in cls.thread_pools and item in cls.process_pools:
-                raise ValueError("Ambiguous indexing. Both thread and process pool {} found".format(item))
+                raise ValueError(
+                    "Ambiguous indexing. Both thread and process pool {} found".format(
+                        item
+                    )
+                )
             elif item in cls.thread_pools:
                 return cls.thread_pools[item]
             elif item in cls.process_pools:
@@ -58,7 +69,9 @@ class ExecutorPool:
                 raise ValueError("Executor {} not found".format(item))
         elif isinstance(item, tuple):
             if len(item) != 2:
-                raise ValueError("Invalid indexing. The format should be (name, parallel_type)")
+                raise ValueError(
+                    "Invalid indexing. The format should be (name, parallel_type)"
+                )
 
             name, parallel_type = item
             if parallel_type == ParallelType.THREAD:
@@ -68,10 +81,16 @@ class ExecutorPool:
             else:
                 raise ValueError("Invalid parallel type: {}".format(parallel_type))
         else:
-            raise ValueError("Invalid indexing. The format should be (name, parallel_type)")
+            raise ValueError(
+                "Invalid indexing. The format should be (name, parallel_type)"
+            )
 
     @classmethod
-    def shutdown(cls, name: Optional[str] = None, parallel_type: Optional[ParallelType] = ParallelType.PROCESS) -> None:
+    def shutdown(
+        cls,
+        name: Optional[str] = None,
+        parallel_type: Optional[ParallelType] = ParallelType.PROCESS,
+    ) -> None:
         name = name or "default"
         if parallel_type == ParallelType.THREAD:
             if name in cls.thread_pools:
@@ -98,8 +117,13 @@ class ExecutorPool:
         cls.process_pools = {}
 
     @classmethod
-    def submit(cls, func, *args, name: Optional[str] = None,
-        parallel_type: Optional[ParallelType] = ParallelType.PROCESS, **kwargs
+    def submit(
+        cls,
+        func,
+        *args,
+        name: Optional[str] = None,
+        parallel_type: Optional[ParallelType] = ParallelType.PROCESS,
+        **kwargs,
     ) -> Future:
         name = name or "default"
 

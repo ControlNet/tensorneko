@@ -688,10 +688,46 @@ Functions list (in `tensorneko`):
 
 ## TensorNeko Tools
 
-Some CLI tools are provided in the `tensorneko_tool` package.
+Some CLI tools are provided in the `tensorneko_tool` package. After installing `tensorneko_tool`, you can use the `tensorneko` command in the terminal.
 
-The `gotify` can send a message to the Gotify server, with the environment variables `GOTIFY_URL` and `GOTIFY_TOKEN` set.
+Global flags:
+
+- `tensorneko --version`: print the installed CLI version
+- `tensorneko --banner`: show the TensorNeko banner
+- `tensorneko --quiet ...`: suppress normal terminal output
+
+Available command families:
+
+- `gotify`: send a Gotify notification or watch a process and notify when it exits
+- `dep_check`: compare installed packages with a `requirements.txt` file
+- `openai`: test, list, and chat with an OpenAI-compatible endpoint
+
+### Gotify
+
+Set `GOTIFY_URL` and `GOTIFY_TOKEN` in the environment, or pass them with `--url` and `--token`.
 
 ```shell
 tensorneko gotify "Script finished!"
+tensorneko gotify --watch python "Training finished!"
 ```
+
+### Dependency checker
+
+Compare the current environment with a requirements file.
+
+```shell
+tensorneko dep_check -r requirements.txt
+tensorneko dep_check -r requirements.txt --overwrite
+```
+
+### OpenAI-compatible CLI
+
+Use `openai test` to validate an endpoint, `openai list` to inspect available models, and `openai chat` to send a quick request.
+
+```shell
+tensorneko openai test --endpoint https://api.openai.com/v1 --key "$OPENAI_API_KEY"
+tensorneko openai list --endpoint https://api.openai.com/v1 --key "$OPENAI_API_KEY"
+tensorneko openai chat "Say hello in one sentence." --endpoint https://api.openai.com/v1 --key "$OPENAI_API_KEY"
+```
+
+The `openai test` command also supports `--mode network|auth|models|probe|all`, and `openai chat` / `openai list` support `--json` for scripting.

@@ -13,6 +13,7 @@ except ImportError:
     _is_progress_bar_available = False
     DownloadProgressBar = object
 else:
+
     class DownloadProgressBar(tqdm):
         total: int
 
@@ -22,8 +23,11 @@ else:
             self.update(b * bsize - self.n)
 
 
-def download_file(url: str, dir_path: str = ".", file_path: Optional[str] = None,
-    progress_bar: Union[bool, int] = True
+def download_file(
+    url: str,
+    dir_path: str = ".",
+    file_path: Optional[str] = None,
+    progress_bar: Union[bool, int] = True,
 ) -> str:
     """
     Download file with given URL to given directory path with progress bar.
@@ -49,13 +53,17 @@ def download_file(url: str, dir_path: str = ".", file_path: Optional[str] = None
         path = Path(dir_path) / url.split("/")[-1]
     path.parent.mkdir(exist_ok=True, parents=True)
 
-    if type(progress_bar) is not False:
+    if progress_bar is not False:
         if not _is_progress_bar_available:
             raise ImportError("Please install tqdm to use progress bar.")
 
-        position = None if type(progress_bar) is bool and progress_bar is True else progress_bar
-        with DownloadProgressBar(unit="B", unit_scale=True, miniters=1,
-            desc=f"Downloading {path.name}", position=position
+        position = None if progress_bar is True else progress_bar
+        with DownloadProgressBar(
+            unit="B",
+            unit_scale=True,
+            miniters=1,
+            desc=f"Downloading {path.name}",
+            position=position,
         ) as pb:
             urlretrieve(url, filename=path, reporthook=pb.update_to)
     else:
@@ -64,8 +72,11 @@ def download_file(url: str, dir_path: str = ".", file_path: Optional[str] = None
     return str(path)
 
 
-def download_file_thread(url: str, dir_path: str = ".", file_path: Optional[str] = None,
-    progress_bar: Union[bool, int] = True
+def download_file_thread(
+    url: str,
+    dir_path: str = ".",
+    file_path: Optional[str] = None,
+    progress_bar: Union[bool, int] = True,
 ) -> Thread:
     """
     Download file with given URL to given directory path with progress bar.
@@ -88,8 +99,11 @@ def download_file_thread(url: str, dir_path: str = ".", file_path: Optional[str]
     return Thread(target=download_file, args=(url, dir_path, file_path, progress_bar))
 
 
-def download_files_thread(urls: List[str], dir_path: str = ".", file_paths: Optional[List[str]] = None,
-    progress_bar: Union[bool, int] = True
+def download_files_thread(
+    urls: List[str],
+    dir_path: str = ".",
+    file_paths: Optional[List[str]] = None,
+    progress_bar: Union[bool, int] = True,
 ) -> List[Thread]:
     """
     Download files with given URLs to given directory path with progress bar.

@@ -152,9 +152,18 @@ class UtilStreamTest(unittest.TestCase):
         self.assertEqual(source[0], 1)
 
         cloned = Stream.from_stream(source)
-        self.assertEqual(cloned.to_list(), [2, 3])
+        self.assertEqual(cloned.to_list(), [1, 2, 3])
         self.assertEqual(Stream.of(7, 8, 9).head, 7)
         self.assertEqual(Stream.of(7, 8, 9).tail.to_list(), [8, 9])
+
+    def test_stream_from_stream_shares_cache(self):
+        source = Stream.of(10, 20, 30, 40, 50)
+        _ = source[2]
+        self.assertEqual(source._cache, [10, 20, 30])
+
+        cloned = Stream.from_stream(source)
+        self.assertEqual(cloned._cache, [10, 20, 30])
+        self.assertIs(cloned._cache, source._cache)
 
     def test_stream_index_errors(self):
         s = Stream.of(1, 2, 3)

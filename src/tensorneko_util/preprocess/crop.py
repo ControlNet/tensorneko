@@ -7,8 +7,14 @@ from tensorneko_util.util import dispatch
 
 
 @dispatch
-def crop_with_padding(image: ndarray, x1: int, x2: int, y1: int, y2: int, pad_value: Union[int, float] = 0.,
-    batch: bool = False
+def crop_with_padding(
+    image: ndarray,
+    x1: int,
+    x2: int,
+    y1: int,
+    y2: int,
+    pad_value: Union[int, float] = 0.0,
+    batch: bool = False,
 ) -> ndarray:
     """
     Crop image with padding.
@@ -28,7 +34,8 @@ def crop_with_padding(image: ndarray, x1: int, x2: int, y1: int, y2: int, pad_va
         :class:`~numpy.ndarray`: Cropped image.
 
     """
-    assert y2 > y1 and x2 > x1, "Should follow y2 > y1 and x2 > x1"
+    if y2 <= y1 or x2 <= x1:
+        raise ValueError("Should follow y2 > y1 and x2 > x1")
 
     if not batch:
         image = image[np.newaxis, ...]
@@ -42,7 +49,9 @@ def crop_with_padding(image: ndarray, x1: int, x2: int, y1: int, y2: int, pad_va
         b, h, w, c = image.shape
         cropped = np.full((b, *crop_shape, c), pad_value, dtype=image.dtype)
     else:
-        raise ValueError("Invalid shape, the image should be one of following shapes: ([B,] H, W) or ([B,] H, W, C)")
+        raise ValueError(
+            "Invalid shape, the image should be one of following shapes: ([B,] H, W) or ([B,] H, W, C)"
+        )
 
     # compute cropped index of image
     image_y_start, image_x_start = np.clip([y1, x1], 0, [h, w])
@@ -53,14 +62,23 @@ def crop_with_padding(image: ndarray, x1: int, x2: int, y1: int, y2: int, pad_va
     crop_y_end, crop_x_end = crop_shape - np.clip([y2 - h, x2 - w], 0, crop_shape)
 
     # assign values
-    cropped[:, crop_y_start:crop_y_end, crop_x_start:crop_x_end] = \
-        image[:, image_y_start:image_y_end, image_x_start:image_x_end]
+    cropped[:, crop_y_start:crop_y_end, crop_x_start:crop_x_end] = image[
+        :, image_y_start:image_y_end, image_x_start:image_x_end
+    ]
 
     return cropped if batch else cropped[0]
 
 
 @dispatch
-def crop_with_padding(image: ndarray, x1: ndarray, x2: ndarray, y1: ndarray, y2: ndarray,
-    pad_value: Union[int, float] = 0., batch: bool = False
+def crop_with_padding(
+    image: ndarray,
+    x1: ndarray,
+    x2: ndarray,
+    y1: ndarray,
+    y2: ndarray,
+    pad_value: Union[int, float] = 0.0,
+    batch: bool = False,
 ) -> ndarray:
-    return crop_with_padding(image, int(x1), int(x2), int(y1), int(y2), pad_value, batch)
+    return crop_with_padding(
+        image, int(x1), int(x2), int(y1), int(y2), pad_value, batch
+    )

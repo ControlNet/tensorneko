@@ -397,6 +397,13 @@
             font-family: var(--mono);
         }
 
+        .field-mapped-label {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
         /* Tensor */
         .field-tensor .tensor-stats {
             display: grid;
@@ -1198,14 +1205,34 @@
                   if (f.type === "text" && f.value) {
                       parts.push(keys[i] + ": " + f.value.substring(0, 50));
                   } else if (f.type === "scalar" && f.value !== undefined) {
-                      parts.push(keys[i] + "=" + formatNumber(f.value));
+                      const mappedLabel = formatMappedLabel(f);
+                      if (mappedLabel !== "") {
+                          parts.push(keys[i] + "=" + mappedLabel);
+                      } else {
+                          parts.push(keys[i] + "=" + formatNumber(f.value));
+                      }
                   } else if (f.type === "tensor") {
-                      parts.push(keys[i] + ": tensor");
+                      const mappedLabel = formatMappedLabel(f);
+                      if (mappedLabel !== "") {
+                          parts.push(keys[i] + "=" + mappedLabel);
+                      } else {
+                          parts.push(keys[i] + ": tensor");
+                      }
                   } else if (f.type === "image") {
                       parts.push(keys[i] + ": image");
                   }
               }
               return parts.join("  \u00b7  ") || "Sample #" + sample.idx;
+          }
+
+          function formatMappedLabel(field) {
+              if (field.label === undefined || field.label === null) {
+                  return "";
+              }
+              if (field.label_index === undefined || field.label_index === null) {
+                  return String(field.label);
+              }
+              return String(field.label) + " (" + field.label_index + ")";
           }
 
         /* ── Pagination ─────────────────────────────────────────── */
@@ -1497,6 +1524,15 @@
                      scalarSpan.className = "scalar-value";
                      scalarSpan.textContent = formatNumber(field.value);
                      scalarWrap.appendChild(scalarSpan);
+
+                     const scalarLabel = formatMappedLabel(field);
+                     if (scalarLabel !== "") {
+                         const scalarLabelDiv = document.createElement("div");
+                         scalarLabelDiv.className = "field-mapped-label";
+                         scalarLabelDiv.textContent = "Label: " + scalarLabel;
+                         scalarWrap.appendChild(scalarLabelDiv);
+                     }
+
                      bodyDiv.appendChild(scalarWrap);
                      break;
 
@@ -1586,6 +1622,14 @@
 
               const tensorDiv = document.createElement("div");
               tensorDiv.className = "field-tensor";
+
+              const tensorLabel = formatMappedLabel(field);
+              if (tensorLabel !== "") {
+                  const tensorLabelDiv = document.createElement("div");
+                  tensorLabelDiv.className = "field-mapped-label";
+                  tensorLabelDiv.textContent = "Label: " + tensorLabel;
+                  tensorDiv.appendChild(tensorLabelDiv);
+              }
 
               const statsGrid = document.createElement("div");
               statsGrid.className = "tensor-stats";

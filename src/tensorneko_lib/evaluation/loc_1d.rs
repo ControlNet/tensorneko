@@ -120,7 +120,8 @@ fn calculate_ap(curve: &Array2<f32>) -> f32 {
             .collect::<Vec<_>>(),
     );
 
-    let x_diff: Array1<f32> = x.into_iter().map_windows(|[x, y]| (y - x).abs()).collect();
+    let x_vec: Vec<f32> = x.to_vec();
+    let x_diff: Array1<f32> = x_vec.windows(2).map(|w| (w[1] - w[0]).abs()).collect();
 
     (x_diff * y_max.slice(s![..-1])).sum()
 }

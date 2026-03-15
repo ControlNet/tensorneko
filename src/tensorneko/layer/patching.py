@@ -38,7 +38,8 @@ class Patching(NekoModule):
     def forward(self, x: Tensor) -> Tensor:
         x_dim = x.dim()
 
-        assert x_dim > 2, "The input must be at least 3-dimensional."
+        if x_dim <= 2:
+            raise ValueError("The input must be at least 3-dimensional.")
         if type(self.patch_size) is int:
             patch_dims = range(2, x_dim)
             self.patch_size = (self.patch_size,) * len(patch_dims)
@@ -89,9 +90,13 @@ class PatchEmbedding2d(NekoModule):
 
     """
 
-    def __init__(self, input_size: Shape, patch_size: Union[int, Shape], embedding: int,
+    def __init__(
+        self,
+        input_size: Shape,
+        patch_size: Union[int, Shape],
+        embedding: int,
         strides: Optional[Union[int, Shape]] = None,
-        build_normalization: Optional[ModuleFactory] = None
+        build_normalization: Optional[ModuleFactory] = None,
     ):
         super().__init__()
         # channel, height, width
@@ -147,15 +152,23 @@ class PatchEmbedding3d(NekoModule):
 
     """
 
-    def __init__(self, input_size: Shape, patch_size: Union[int, Shape], embedding: int,
+    def __init__(
+        self,
+        input_size: Shape,
+        patch_size: Union[int, Shape],
+        embedding: int,
         strides: Optional[Union[int, Shape]] = None,
-        build_normalization: Optional[ModuleFactory] = None
+        build_normalization: Optional[ModuleFactory] = None,
     ):
         super().__init__()
         # channel, time, height, width
         c, t, h, w = input_size
         # patch_time, patch_height, patch_width
-        pt, ph, pw = (patch_size, patch_size, patch_size) if type(patch_size) is int else patch_size
+        pt, ph, pw = (
+            (patch_size, patch_size, patch_size)
+            if type(patch_size) is int
+            else patch_size
+        )
 
         # configure the strides for conv3d
         if strides is None:
