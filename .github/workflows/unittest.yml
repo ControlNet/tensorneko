@@ -1,14 +1,17 @@
 name: Unittest
 on:
   push:
-    branches-ignore:
-      - "master"
+    branches:
+      - "**"
   pull_request:
   workflow_call:
+  schedule:
+    - cron: "0 6 * * 1"
 
 jobs:
   matrices:
     name: Load Matrices
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     runs-on: ubuntu-24.04
     outputs:
       torch_lightning: ${{ steps.matrices.outputs.torch_lightning }}
@@ -23,6 +26,7 @@ jobs:
 
   tensorneko-util-import-test:
     name: Import Test / tensorneko-util
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     runs-on: ubuntu-22.04
 
     strategy: &import_python_strategy
@@ -61,6 +65,7 @@ jobs:
 
   tensorneko-tool-import-test:
     name: Import Test / tensorneko-tool
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     runs-on: ubuntu-22.04
 
     strategy: *import_python_strategy
@@ -97,6 +102,7 @@ jobs:
 
   tensorneko-import-test:
     name: Import Test / tensorneko
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     runs-on: ubuntu-24.04
 
     strategy:
@@ -150,6 +156,7 @@ jobs:
 
   build-tensorneko-lib:
     name: Build Tensorneko Lib
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     runs-on: ubuntu-22.04
 
     steps:
@@ -173,6 +180,7 @@ jobs:
 
   unittest:
     name: Unittest
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     needs: [matrices, tensorneko-util-import-test, tensorneko-import-test]
     uses: ./.github/workflows/unittest-run.yml
     with:
@@ -181,6 +189,7 @@ jobs:
   coverage:
     # Run coverage and report to coveralls
     name: Coverage
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     runs-on: ubuntu-24.04
     needs: [unittest]
 
@@ -219,6 +228,7 @@ jobs:
 
   coveralls_finish:
     name: Coveralls Finish
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     needs: [coverage]
     runs-on: ubuntu-24.04
     container: python:3-slim
@@ -233,6 +243,7 @@ jobs:
 
   build-web:
     name: Build Web
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     runs-on: ubuntu-24.04
 
     steps:
@@ -261,6 +272,7 @@ jobs:
 
   simulate-training-classifier:
     name: Simulate Training / Classifier
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     needs: [matrices, unittest, build-web]
     runs-on: ubuntu-24.04
 
@@ -312,6 +324,7 @@ jobs:
 
   simulate-training-gan:
     name: Simulate Training / GAN
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref != 'refs/heads/master') }}
     needs: [matrices, unittest, build-web]
     runs-on: ubuntu-24.04
 
@@ -360,3 +373,59 @@ jobs:
 
       - name: Run Simulation
         run: python test/simulate/simulate_train_mnist_gan.py
+
+  codeql:
+    name: Analyze
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master')) }}
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["python"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  dependency-audit:
+    name: pip-audit
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'pull_request' || (github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master')) }}
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        requirements:
+          - requirements.txt
+          - requirements_util.txt
+          - requirements_tool.txt
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run pip-audit
+        uses: pypa/gh-action-pip-audit@v1.1.0
+        with:
+          inputs: ${{ matrix.requirements }}
