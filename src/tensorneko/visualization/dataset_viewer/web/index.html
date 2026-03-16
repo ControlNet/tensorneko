@@ -5,30 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TensorNeko Dataset Viewer</title>
     <style>
+
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
         /* ── Reset & Base ───────────────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
-            --bg: #f0f0f0;
-            --surface: #ffffff;
-            --surface-alt: #fafafa;
-            --border: #e2e2e2;
-            --border-focus: #3b82f6;
-            --text: #1a1a1a;
-            --text-dim: #6b7280;
-            --text-faint: #6b7280;
-            --accent: #2563eb;
-            --accent-light: #dbeafe;
-            --accent-dark: #1d4ed8;
-            --error: #dc2626;
+            /* Light Mode Variables (Premium & Clean) */
+            --bg: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.8);
+            --surface-alt: rgba(241, 245, 249, 0.9);
+            --border: #e2e8f0;
+            --border-focus: #6366f1;
+            --text: #0f172a;
+            --text-dim: #475569;
+            --text-faint: #94a3b8;
+            --accent: #6366f1;
+            --accent-light: #eef2ff;
+            --accent-dark: #4338ca;
+            --error: #ef4444;
             --error-bg: #fef2f2;
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
-            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
-            --shadow-lg: 0 4px 16px rgba(0,0,0,0.10);
-            --radius: 6px;
-            --radius-lg: 10px;
-            --mono: "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
-            --sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif;
+            
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+            
+            --radius: 12px;
+            --radius-lg: 16px;
+            --mono: 'JetBrains Mono', Consolas, monospace;
+            --sans: 'Outfit', sans-serif;
+            --blur: blur(12px);
+            --header-bg: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Dark Mode Variables (Vibrant Glassmorphism) */
+                --bg: #020617;
+                --surface: rgba(30, 41, 59, 0.5);
+                --surface-alt: rgba(51, 65, 85, 0.6);
+                --border: rgba(255, 255, 255, 0.08);
+                --border-focus: #818cf8;
+                --text: #f8fafc;
+                --text-dim: #cbd5e1;
+                --text-faint: #64748b;
+                --accent: #818cf8;
+                --accent-light: rgba(129, 140, 248, 0.15);
+                --accent-dark: #c7d2fe;
+                --error: #f87171;
+                --error-bg: rgba(127, 29, 29, 0.4);
+                
+                --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.5);
+                --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.5);
+                --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.5);
+                --shadow-glow: 0 0 24px rgba(129, 140, 248, 0.25);
+                --blur: blur(20px);
+            }
         }
 
         html, body {
@@ -38,50 +72,70 @@
             line-height: 1.5;
             color: var(--text);
             background: var(--bg);
+            background-image: 
+                radial-gradient(circle at 10% 40%, rgba(99, 102, 241, 0.05), transparent 25%),
+                radial-gradient(circle at 90% 20%, rgba(168, 85, 247, 0.05), transparent 30%);
+            background-size: cover;
+            background-position: center;
             overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* ── Layout ─────────────────────────────────────────────── */
         .app {
             display: flex;
             height: 100vh;
-            height: 100dvh; /* progressive enhancement for mobile */
+            height: 100dvh;
             width: 100vw;
         }
 
         /* ── Left Panel ─────────────────────────────────────────── */
         .panel-left {
-            width: 320px;
-            min-width: 320px;
+            width: 360px;
+            min-width: 360px;
             background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
             border-right: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            box-shadow: var(--shadow-md);
-            z-index: 2;
+            box-shadow: 1px 0 10px rgba(0,0,0,0.05);
+            z-index: 5;
         }
 
         .panel-header {
-            padding: 20px 16px 12px;
+            padding: 28px 24px 20px;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .panel-header h1 {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 700;
             letter-spacing: -0.01em;
             color: var(--text);
             margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .panel-header h1::before {
+            content: '';
+            width: 8px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 4px;
         }
 
         .panel-header .dataset-info {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-dim);
         }
 
         .panel-header .dataset-info span {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--accent);
         }
 
@@ -90,69 +144,64 @@
             flex: 1;
             overflow-y: auto;
             overflow-x: hidden;
+            padding: 12px 0;
             scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
         }
 
-        .sample-list::-webkit-scrollbar { width: 6px; }
-        .sample-list::-webkit-scrollbar-track { background: transparent; }
-        .sample-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-        .sample-list::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+        .sample-list::-webkit-scrollbar { width: 4px; }
+        .sample-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
         .sample-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 16px;
+            gap: 14px;
+            padding: 12px 20px;
+            margin: 4px 12px;
+            border-radius: var(--radius);
             cursor: pointer;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.12s ease;
+            border: 1px solid transparent;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
         }
 
         .sample-item:hover {
             background: var(--surface-alt);
+            transform: translateX(4px);
         }
 
         .sample-item.active {
             background: var(--accent-light);
-            border-left: 3px solid var(--accent);
-            padding-left: 13px;
-        }
-
-        .sample-item.active::after {
-            content: "";
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-glow);
+            transform: translateX(4px);
         }
 
         .sample-thumb {
-            width: 48px;
-            height: 48px;
-            border-radius: 4px;
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
             object-fit: cover;
-            background: var(--surface-alt);
+            background: var(--bg);
             border: 1px solid var(--border);
             flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .sample-item.active .sample-thumb {
+            border-color: var(--accent);
         }
 
         .sample-thumb-placeholder {
-            width: 48px;
-            height: 48px;
-            border-radius: 4px;
-            background: var(--surface-alt);
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            background: var(--bg);
             border: 1px solid var(--border);
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 22px;
             color: var(--text-faint);
         }
 
@@ -162,83 +211,440 @@
         }
 
         .sample-meta .idx {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--text);
+            margin-bottom: 1px;
         }
 
-         .sample-meta .preview {
-             font-size: 12px;
-             color: var(--text-dim);
-             white-space: nowrap;
-             overflow: hidden;
-             text-overflow: ellipsis;
-             max-width: 200px;
-         }
+        .sample-meta .preview {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: var(--mono);
+        }
 
-        /* ── Pagination ─────────────────────────────────────────── */
+        /* ── Pagination & Navigation ───────────────────────────── */
         .pagination {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 12px 16px;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px 24px 28px;
             border-top: 1px solid var(--border);
             background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
             flex-shrink: 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .page-info {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            letter-spacing: 0.02em;
+        }
+
+        .page-info span {
+            color: var(--text);
         }
 
         .pagination button {
+            flex: 1;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 6px 14px;
-            font-size: 12px;
+            gap: 8px;
+            padding: 11px 16px;
+            font-size: 13px;
             font-weight: 600;
             font-family: var(--sans);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface);
+            border-radius: 12px;
+            background: var(--bg);
             color: var(--text);
             cursor: pointer;
-            transition: all 0.12s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
         }
 
         .pagination button:hover:not(:disabled) {
             border-color: var(--accent);
+            background: var(--surface);
             color: var(--accent);
-            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+        }
+
+        .pagination button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
         }
 
         .pagination button:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+            background: var(--surface-alt);
         }
 
-        .pagination .page-info {
-            font-size: 12px;
-            color: var(--text-dim);
+        /* ── Jump Navigation ──────────────────────────────── */
+        .jump-nav {
+            display: flex;
+            align-items: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .jump-nav:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .jump-nav input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-family: var(--mono);
             font-weight: 500;
-            min-width: 80px;
-            text-align: center;
+            color: var(--text);
+            outline: none;
+        }
+
+        .jump-nav input::placeholder {
+            color: var(--text-faint);
+            font-family: var(--sans);
+        }
+
+        .jump-nav button {
+            flex: 0 0 auto;
+            width: 44px;
+            height: 34px;
+            padding: 0;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .jump-nav button:hover {
+            background: var(--accent-dark);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
         /* ── Right Panel ────────────────────────────────────────── */
         .panel-right {
             flex: 1;
             overflow-y: auto;
-            padding: 24px 32px;
-            background: var(--bg);
-            scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
+            padding: 48px 64px;
+            background: transparent;
         }
 
-        .panel-right::-webkit-scrollbar { width: 8px; }
-        .panel-right::-webkit-scrollbar-track { background: transparent; }
-        .panel-right::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .panel-right::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+        /* ── Detail Header ─────────────────────────────────────── */
+        .detail-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid var(--border);
+        }
 
-        /* ── Empty / Loading / Error States ──────────────────────── */
+        .detail-nav h2 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .detail-nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .detail-nav-buttons button {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--sans);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-nav-buttons button:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: var(--bg);
+            color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+        }
+
+        .detail-nav-buttons button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .detail-nav-buttons button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ── Field Cards ────────────────────────────────────────── */
+        .field-card {
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .field-card:hover {
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .field-card-header {
+            padding: 20px 24px;
+            background: rgba(0,0,0,0.01);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .field-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            font-family: var(--mono);
+        }
+
+        .field-type-badge {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .field-card-body {
+            padding: 32px;
+        }
+
+        .field-card-body.collapsed {
+            display: none;
+        }
+
+        .chevron {
+            margin-left: auto;
+            color: var(--text-faint);
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        /* ── Renderers ──────────────────────────────────────────── */
+        .field-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            transition: transform 0.3s ease;
+        }
+        
+        .field-image img:hover {
+            transform: scale(1.01);
+        }
+
+        .field-scalar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .scalar-hero {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .scalar-hero {
+                background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+                -webkit-background-clip: text;
+                background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+        }
+
+        .scalar-value {
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--accent);
+            font-family: var(--mono);
+            letter-spacing: -0.02em;
+        }
+
+        .scalar-label-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .scalar-label-pill .label-tag {
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            background: var(--accent-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+        }
+
+        .field-mapped-label {
+            margin-top: 4px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-dim);
+        }
+
+        .tensor-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .tensor-stat {
+            background: var(--bg);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        
+        .tensor-stat:hover {
+            border-color: var(--accent);
+            background: var(--surface-alt);
+        }
+
+        .tensor-stat .label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-faint);
+            margin-bottom: 4px;
+        }
+
+        .tensor-stat .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            font-family: var(--mono);
+        }
+
+        /* Code & Pre */
+        pre, .tensor-raw-data, .field-unknown code {
+            display: block;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid #1e293b;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+            overflow: auto;
+            max-height: 500px;
+        }
+
+        .tensor-data-toggle {
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .tensor-data-toggle:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ── Animations ─────────────────────────────────────────── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .field-card { animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+        .field-card:nth-child(n+1) { animation-delay: 0.05s; }
+        .field-card:nth-child(n+2) { animation-delay: 0.1s; }
+        .field-card:nth-child(n+3) { animation-delay: 0.15s; }
+
+        /* Status & Empty */
         .state-message {
             display: flex;
             flex-direction: column;
@@ -246,376 +652,67 @@
             justify-content: center;
             height: 100%;
             text-align: center;
-            color: var(--text-dim);
+            padding: 40px;
         }
 
-        .state-message .icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
+        .state-message .icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
+        .state-message .title { font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .state-message .subtitle { font-size: 15px; color: var(--text-dim); }
+
+        .loading-pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
-        .state-message .title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--text);
-        }
-
-        .state-message .subtitle {
-            font-size: 13px;
-            color: var(--text-faint);
-        }
-
-        .state-message.error .title {
-            color: var(--error);
-        }
-
-        .loading-list {
-            padding: 20px 16px;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 13px;
-        }
-
-        /* ── Detail View ────────────────────────────────────────── */
-        .detail-header {
-            margin-bottom: 20px;
-        }
-
-        .detail-header h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.01em;
-        }
-
-        .field-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            margin-bottom: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-            transition: box-shadow 0.15s ease;
-        }
-
-        .field-card:hover {
-            box-shadow: var(--shadow-md);
-        }
-
-        .field-card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            background: var(--surface-alt);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .field-name {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .field-type-badge {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 2px 8px;
-            border-radius: 20px;
-            background: var(--accent-light);
-            color: var(--accent-dark);
-        }
-
-        .field-card-body {
-            padding: 16px;
-        }
-
-        .field-card-header {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .field-card-header .chevron {
-            margin-left: auto;
-            font-size: 12px;
-            color: var(--text-dim);
-            transition: transform 0.15s ease;
-        }
-
-        .field-card-header[aria-expanded="false"] .chevron {
-            transform: rotate(-90deg);
-        }
-
-        .field-card-body.collapsed {
-            display: none;
-        }
-
-        .collapse-toggle-btn {
-            font-size: 12px;
-            font-weight: 600;
-            font-family: var(--sans);
-            color: var(--accent);
-            background: none;
-            border: 1px solid var(--accent);
-            border-radius: var(--radius);
-            padding: 4px 10px;
-            cursor: pointer;
-        }
-
-        .collapse-toggle-btn:hover {
-            background: var(--accent-light);
-        }
-
-        /* ── Field Type Renderers ─────────────────────────────────── */
-
-        /* Image */
-        .field-image img {
-            max-width: 100%;
-            height: auto;
-            border-radius: var(--radius);
-            display: block;
-        }
-
-        /* Text */
-        .field-text p {
-            font-size: 14px;
-            line-height: 1.6;
-            color: var(--text);
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        /* Scalar */
-        .field-scalar .scalar-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--accent-dark);
-            font-family: var(--mono);
-        }
-
-        .field-mapped-label {
-            margin-top: 8px;
-            font-size: 12px;
-            color: var(--text-dim);
-            font-weight: 600;
-        }
-
-        /* Tensor */
-        .field-tensor .tensor-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .tensor-stat {
-            padding: 8px 12px;
-            background: var(--surface-alt);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-        }
-
-        .tensor-stat .label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-faint);
-            margin-bottom: 2px;
-        }
-
-        .tensor-stat .value {
-            font-size: 13px;
-            font-weight: 600;
-            font-family: var(--mono);
-            color: var(--text);
-        }
-
-        .tensor-data-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: var(--sans);
-            color: var(--accent);
-            background: none;
-            border: 1px solid var(--accent);
-            border-radius: var(--radius);
-            padding: 4px 10px;
-            cursor: pointer;
-            transition: all 0.12s ease;
-        }
-
-        .tensor-data-toggle:hover {
-            background: var(--accent-light);
-        }
-
-         .tensor-raw-data {
-             margin-top: 8px;
-             padding: 12px;
-             background: #1e1e1e;
-             color: #d4d4d4;
-             font-family: var(--mono);
-             font-size: 12px;
-             line-height: 1.5;
-             border-radius: var(--radius);
-             overflow-x: auto;
-             max-height: 300px;
-             overflow-y: auto;
-             white-space: pre;
-             display: none;
-         }
-
-        .tensor-raw-data.visible {
-            display: block;
-        }
-
-         /* JSON */
-         .field-json pre {
-             padding: 12px;
-             background: #1e1e1e;
-             color: #d4d4d4;
-             font-family: var(--mono);
-             font-size: 12px;
-             line-height: 1.5;
-             border-radius: var(--radius);
-             overflow-x: auto;
-             max-height: 400px;
-             overflow-y: auto;
-             white-space: pre;
-         }
-
-        /* Unknown */
-        .field-unknown code {
-            display: block;
-            padding: 12px;
-            background: var(--surface-alt);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            font-family: var(--mono);
-            font-size: 13px;
-            color: var(--text);
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        /* ── Image Zoom Modal ──────────────────────────────── */
+        /* Image Zoom */
         .zoom-overlay {
             position: fixed;
             inset: 0;
-            z-index: 100;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            animation: fadeIn 0.2s ease;
         }
-
-        .zoom-overlay .zoom-close {
+        
+        .zoom-close {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            top: 30px;
+            right: 30px;
+            background: rgba(255,255,255,0.1);
             border: none;
-            background: rgba(255, 255, 255, 0.15);
-            color: #fff;
-            font-size: 20px;
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 28px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 101;
+            transition: background 0.2s;
         }
-
-        .zoom-overlay .zoom-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .zoom-overlay .zoom-toggle {
+        .zoom-close:hover { background: rgba(255,255,255,0.2); }
+        
+        .zoom-toggle {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 6px 16px;
-            border-radius: var(--radius);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: var(--sans);
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
             cursor: pointer;
-            z-index: 101;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
         }
 
-        .zoom-overlay .zoom-toggle:hover {
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .zoom-overlay .zoom-img-fit {
-            max-width: 90vw;
-            max-height: 90vh;
-            object-fit: contain;
-        }
-
-        .zoom-overlay .zoom-img-full {
-            max-width: none;
-            max-height: none;
-            cursor: grab;
-        }
-
-        .zoom-overlay .zoom-scroll-container {
-            max-width: 90vw;
-            max-height: 90vh;
-            overflow: auto;
-        }
-
-        /* ── Keyboard nav focus ring ────────────────────────────── */
-        .sample-item:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: -2px;
-        }
-
-        :focus-visible {
-            outline: 2px solid var(--border-focus);
-            outline-offset: 2px;
-        }
-
-        :focus:not(:focus-visible) {
-            outline: none;
-        }
-
-        /* ── Animation ──────────────────────────────────────────── */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .field-card {
-            animation: fadeIn 0.2s ease both;
-        }
-
-        .field-card:nth-child(2) { animation-delay: 0.04s; }
-        .field-card:nth-child(3) { animation-delay: 0.08s; }
-        .field-card:nth-child(4) { animation-delay: 0.12s; }
-        .field-card:nth-child(5) { animation-delay: 0.16s; }
-        .field-card:nth-child(6) { animation-delay: 0.20s; }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .loading-pulse {
-            animation: pulse 1.2s ease-in-out infinite;
-        }
+        .zoom-img-fit { max-width: 90%; max-height: 90%; border-radius: 8px; }
+        .zoom-img-full { max-width: none; cursor: move; }
 
         .sr-only {
             position: absolute;
@@ -629,129 +726,18 @@
             border: 0;
         }
 
-        /* ── Jump Navigation ──────────────────────────────── */
-        .jump-nav {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            margin-left: 8px;
+        /* Hide number input arrows */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
         }
 
-        .jump-nav input {
-            width: 70px;
-            padding: 5px 8px;
-            font-size: 12px;
-            font-family: var(--sans);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface);
-            color: var(--text);
-        }
-
-        .jump-nav button {
-            padding: 5px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: var(--sans);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface);
-            color: var(--text);
-            cursor: pointer;
-        }
-
-        /* ── Detail Navigation ─────────────────────────────── */
-        .detail-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .detail-nav h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: -0.01em;
-        }
-
-        .detail-nav-buttons {
-            display: flex;
-            gap: 6px;
-        }
-
-        .detail-nav-buttons button {
-            padding: 4px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: var(--sans);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface);
-            color: var(--text);
-            cursor: pointer;
-            transition: all 0.12s ease;
-        }
-
-        .detail-nav-buttons button:hover:not(:disabled) {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--accent-light);
-        }
-
-        .detail-nav-buttons button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
-        /* ── Responsive ────────────────────────────────────── */
-        @media (max-width: 768px) {
-            .app {
-                flex-direction: column;
-            }
-            .panel-left {
-                width: 100%;
-                min-width: unset;
-                max-height: 40vh;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                box-shadow: none;
-            }
-            .panel-right {
-                padding: 16px;
-            }
-        }
-
-        /* ── Reduced Motion ────────────────────────────────── */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-
-        /* ── Dark Mode ────────────────────────────────────── */
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #1a1a1a;
-                --surface: #2d2d2d;
-                --surface-alt: #353535;
-                --border: #404040;
-                --border-focus: #60a5fa;
-                --text: #e5e5e5;
-                --text-dim: #a0a0a0;
-                --text-faint: #808080;
-                --accent: #60a5fa;
-                --accent-light: #1e3a5f;
-                --accent-dark: #93c5fd;
-                --error: #f87171;
-                --error-bg: #3b1515;
-                --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
-                --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
-                --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
-            }
-        }
     </style>
 </head>
 <body>
@@ -766,12 +752,14 @@
                 <div class="loading-list loading-pulse">Loading samples&hellip;</div>
             </div>
             <div class="pagination" id="pagination" style="display:none;">
-                <button id="btn-prev" disabled>&#9664; Prev</button>
-                <span class="page-info" id="page-info">Page 1/1</span>
-                <button id="btn-next" disabled>Next &#9654;</button>
+                <div class="pagination-controls">
+                    <button id="btn-prev" disabled>&#9664; Prev</button>
+                    <span class="page-info" id="page-info">Page <span>1</span> / <span>1</span></span>
+                    <button id="btn-next" disabled>Next &#9654;</button>
+                </div>
                 <div class="jump-nav">
-                    <input type="number" id="jump-input" min="0" placeholder="Go to #…">
-                    <button id="btn-jump">Go</button>
+                    <input type="number" id="jump-input" min="0" placeholder="Go to sample index…">
+                    <button id="btn-jump">Jump</button>
                 </div>
             </div>
         </div>
@@ -1242,7 +1230,13 @@
                 return;
             }
             $pagination.style.display = "flex";
-            $pageInfo.textContent = "Page " + (state.currentPage + 1) + "/" + state.totalPages;
+            const $spans = $pageInfo.querySelectorAll("span");
+            if ($spans.length >= 2) {
+                $spans[0].textContent = state.currentPage + 1;
+                $spans[1].textContent = state.totalPages;
+            } else {
+                $pageInfo.textContent = "Page " + (state.currentPage + 1) + " / " + state.totalPages;
+            }
             $btnPrev.disabled = state.currentPage <= 0;
             $btnNext.disabled = state.currentPage >= state.totalPages - 1;
         }
@@ -1394,36 +1388,11 @@
               nextBtn.disabled = (data.idx >= state.length - 1);
               nextBtn.addEventListener("click", function() { navigateToSample(data.idx + 1); });
 
-              const collapseBtn = document.createElement("button");
-              collapseBtn.className = "collapse-toggle-btn";
-              collapseBtn.textContent = "Collapse All";
-
              navBtns.appendChild(prevBtn);
              navBtns.appendChild(nextBtn);
-             navBtns.appendChild(collapseBtn);
              nav.appendChild(h2);
              nav.appendChild(navBtns);
              frag.appendChild(nav);
-
-              /* Add click handler for collapse/expand all button */
-              (function(btn, detail) {
-                  btn.addEventListener("click", function() {
-                      const allExpanded = btn.textContent === "Collapse All";
-                      const headers = detail.querySelectorAll(".field-card-header");
-                      const bodies = detail.querySelectorAll(".field-card-body");
-                      for (let i = 0; i < headers.length; i++) {
-                          headers[i].setAttribute("aria-expanded", allExpanded ? "false" : "true");
-                          if (allExpanded) {
-                              bodies[i].classList.add("collapsed");
-                          } else {
-                              bodies[i].classList.remove("collapsed");
-                          }
-                          const chev = headers[i].querySelector(".chevron");
-                          if (chev) chev.textContent = allExpanded ? "\u25B8" : "\u25BE"; /* ▸ or ▾ */
-                      }
-                      btn.textContent = allExpanded ? "Expand All" : "Collapse All";
-                  });
-              })(collapseBtn, frag);
 
               const fields = data.fields || {};
              const keys = Object.keys(fields);
@@ -1473,40 +1442,35 @@
               const bodyDiv = document.createElement("div");
               bodyDiv.className = "field-card-body";
 
-              /* Generate unique ID for body */
               const bodyId = "field-body-" + sampleIdx + "-" + fieldName.replace(/[^a-zA-Z0-9]/g, "_");
               bodyDiv.id = bodyId;
 
-              /* Add ARIA attributes to header */
               header.setAttribute("aria-expanded", "true");
               header.setAttribute("aria-controls", bodyId);
               header.setAttribute("role", "button");
               header.setAttribute("tabindex", "0");
 
-              /* Add chevron span */
               const chevronSpan = document.createElement("span");
               chevronSpan.className = "chevron";
               chevronSpan.textContent = "\u25BE"; /* ▾ */
               header.appendChild(chevronSpan);
 
-             card.appendChild(header);
+              card.appendChild(header);
 
-             switch (type) {
-                 case "image":
-                     const imgWrap = document.createElement("div");
-                     imgWrap.className = "field-image";
-                     const img = document.createElement("img");
-                     img.src = "/media/" + encodeURIComponent(String(sampleIdx)) + "/" + encodeURIComponent(fieldName);
-                     img.alt = fieldName;
-                     img.style.cursor = "zoom-in";
-                     (function(imgSrc) {
-                         img.addEventListener("click", function() {
-                             openZoomModal(imgSrc);
-                         });
-                     })(img.src);
-                     imgWrap.appendChild(img);
-                     bodyDiv.appendChild(imgWrap);
-                     break;
+              switch (type) {
+                  case "image":
+                      const imgWrap = document.createElement("div");
+                      imgWrap.className = "field-image";
+                      const img = document.createElement("img");
+                      img.src = "/media/" + encodeURIComponent(String(sampleIdx)) + "/" + encodeURIComponent(fieldName);
+                      img.alt = fieldName;
+                      img.style.cursor = "zoom-in";
+                      (function(imgSrc) {
+                          img.addEventListener("click", function() { openZoomModal(imgSrc); });
+                      })(img.src);
+                      imgWrap.appendChild(img);
+                      bodyDiv.appendChild(imgWrap);
+                      break;
 
                   case "text":
                       const textWrap = document.createElement("div");
@@ -1517,24 +1481,37 @@
                       bodyDiv.appendChild(textWrap);
                       break;
 
-                 case "scalar":
-                     const scalarWrap = document.createElement("div");
-                     scalarWrap.className = "field-scalar";
-                     const scalarSpan = document.createElement("span");
-                     scalarSpan.className = "scalar-value";
-                     scalarSpan.textContent = formatNumber(field.value);
-                     scalarWrap.appendChild(scalarSpan);
+                  case "scalar":
+                      const scalarWrap = document.createElement("div");
+                      scalarWrap.className = "field-scalar";
+                      const scalarLabel = formatMappedLabel(field);
+                      if (scalarLabel !== "") {
+                          // Value (ID) is now the primary "Hero"
+                          const hero = document.createElement("div");
+                          hero.className = "scalar-hero";
+                          hero.textContent = formatNumber(field.value);
+                          scalarWrap.appendChild(hero);
 
-                     const scalarLabel = formatMappedLabel(field);
-                     if (scalarLabel !== "") {
-                         const scalarLabelDiv = document.createElement("div");
-                         scalarLabelDiv.className = "field-mapped-label";
-                         scalarLabelDiv.textContent = "Label: " + scalarLabel;
-                         scalarWrap.appendChild(scalarLabelDiv);
-                     }
-
-                     bodyDiv.appendChild(scalarWrap);
-                     break;
+                          // Text Label is now the auxiliary "Pill"
+                          const pill = document.createElement("div");
+                          pill.className = "scalar-label-pill";
+                          const tag = document.createElement("span");
+                          tag.className = "label-tag";
+                          tag.textContent = "LABEL";
+                          pill.appendChild(tag);
+                          const text = document.createElement("span");
+                          text.textContent = field.label;
+                          pill.appendChild(text);
+                          scalarWrap.appendChild(pill);
+                      } else {
+                          // Standard style: value only
+                          const scalarSpan = document.createElement("span");
+                          scalarSpan.className = "scalar-value";
+                          scalarSpan.textContent = formatNumber(field.value);
+                          scalarWrap.appendChild(scalarSpan);
+                      }
+                      bodyDiv.appendChild(scalarWrap);
+                      break;
 
                   case "tensor":
                       bodyDiv.appendChild(renderTensorBody(field, sampleIdx));
@@ -1545,31 +1522,23 @@
                       const isLargeJson = jsonStr.length > 5000;
                       const jsonWrap = document.createElement("div");
                       jsonWrap.className = "field-json";
-                      
                       if (isLargeJson) {
                           const jsonToggleBtn = document.createElement("button");
-                          jsonToggleBtn.className = "collapse-toggle-btn";
+                          jsonToggleBtn.className = "tensor-data-toggle";
                           jsonToggleBtn.textContent = "Show JSON";
-                          jsonToggleBtn.setAttribute("aria-expanded", "false");
-                          
                           const jsonUid = "json-data-" + sampleIdx + "-" + fieldName.replace(/[^a-zA-Z0-9]/g, "_");
                           const jsonPreDiv = document.createElement("div");
+                          jsonPreDiv.className = "tensor-raw-data";
                           jsonPreDiv.id = jsonUid;
-                          jsonPreDiv.setAttribute("aria-controls", jsonUid);
-                          
                           jsonToggleBtn.addEventListener("click", function() {
-                              let showing = jsonPreDiv.classList.contains("visible");
-                              if (!showing && jsonPreDiv.textContent === "") {
+                              if (jsonPreDiv.textContent === "") {
                                   const pre = document.createElement("pre");
                                   pre.textContent = jsonStr;
                                   jsonPreDiv.appendChild(pre);
                               }
-                              jsonPreDiv.classList.toggle("visible");
-                              showing = jsonPreDiv.classList.contains("visible");
+                              let showing = jsonPreDiv.classList.toggle("visible");
                               jsonToggleBtn.textContent = showing ? "Hide JSON" : "Show JSON";
-                              jsonToggleBtn.setAttribute("aria-expanded", showing ? "true" : "false");
                           });
-                          
                           jsonWrap.appendChild(jsonToggleBtn);
                           jsonWrap.appendChild(jsonPreDiv);
                       } else {
@@ -1625,10 +1594,17 @@
 
               const tensorLabel = formatMappedLabel(field);
               if (tensorLabel !== "") {
-                  const tensorLabelDiv = document.createElement("div");
-                  tensorLabelDiv.className = "field-mapped-label";
-                  tensorLabelDiv.textContent = "Label: " + tensorLabel;
-                  tensorDiv.appendChild(tensorLabelDiv);
+                  const pill = document.createElement("div");
+                  pill.className = "scalar-label-pill";
+                  pill.style.marginBottom = "24px";
+                  const tag = document.createElement("span");
+                  tag.className = "label-tag";
+                  tag.textContent = "CLASS";
+                  pill.appendChild(tag);
+                  const text = document.createElement("span");
+                  text.textContent = tensorLabel;
+                  pill.appendChild(text);
+                  tensorDiv.appendChild(pill);
               }
 
               const statsGrid = document.createElement("div");
